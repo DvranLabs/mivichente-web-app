@@ -1,6 +1,6 @@
 import React from "react";
 import styled from "@emotion/styled";
-import { GooglePlayIcon, SmartphoneIcon } from "./Icons";
+import { SmartphoneIcon, GlobeIcon } from "./Icons";
 
 const AppDownloadSection = styled.section`
   background: linear-gradient(135deg, #16a34a 0%, #15803d 100%);
@@ -72,7 +72,7 @@ const ButtonsWrapper = styled.div`
   }
 `;
 
-const PlayStoreButton = styled.a`
+const WebAppButton = styled.a`
   display: flex;
   align-items: center;
   gap: 0.75rem;
@@ -176,7 +176,7 @@ const AppTagline = styled.p`
   line-height: 1.4;
 `;
 
-const StyledGooglePlayIcon = styled(GooglePlayIcon)`
+const StyledGlobeIcon = styled(GlobeIcon)`
   height: 1.5rem;
   width: 1.5rem;
 `;
@@ -199,28 +199,28 @@ const AppDownload: React.FC = () => {
       <Container>
         <ContentWrapper>
           <TextContent>
-            <Title>¡Descarga Vichente App!</Title>
+            <Title>¡Entra a Vichente App!</Title>
             <Subtitle>
-              Lleva todo Durango en tu bolsillo. Encuentra negocios, haz pedidos
-              y conecta con tu ciudad desde donde estés.
+              Tu app web está lista. Encuentra negocios, haz pedidos
+              y conecta con tu ciudad desde cualquier dispositivo.
             </Subtitle>
             <ButtonsWrapper>
-              <PlayStoreButton
-                href="https://play.google.com/store/apps"
+              <WebAppButton
+                href="https://app.vichente.com"
                 target="_blank"
                 rel="noopener noreferrer"
               >
-                <StyledGooglePlayIcon />
+                <StyledGlobeIcon />
                 <ButtonText>
-                  <ButtonSubtext>Disponible en</ButtonSubtext>
-                  <ButtonMaintext>Google Play</ButtonMaintext>
+                  <ButtonSubtext>Entrar ahora</ButtonSubtext>
+                  <ButtonMaintext>Abrir App Web</ButtonMaintext>
                 </ButtonText>
-              </PlayStoreButton>
+              </WebAppButton>
               <ComingSoonButton>
                 <StyledSmartphoneIconApp />
                 <ButtonText>
-                  <ButtonSubtext>Próximamente en</ButtonSubtext>
-                  <ButtonMaintext>App Store</ButtonMaintext>
+                  <ButtonSubtext>Próximamente</ButtonSubtext>
+                  <ButtonMaintext>Apps Móviles</ButtonMaintext>
                 </ButtonText>
               </ComingSoonButton>
             </ButtonsWrapper>

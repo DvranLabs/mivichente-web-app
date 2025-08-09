@@ -106,8 +106,8 @@ const Hero: React.FC = () => {
           comercio de tu ciudad con Vichente App.
         </Subheadline>
         <CtaWrapper>
-          <CtaButton href="#how-it-works">Descubre cómo funciona</CtaButton>
-          <SecondaryButton href="#download">Descarga la app</SecondaryButton>
+          <CtaButton href="https://app.vichente.com" target="_blank" rel="noopener noreferrer">Entrar</CtaButton>
+          <SecondaryButton href="#how-it-works">Descubre cómo funciona</SecondaryButton>
         </CtaWrapper>
       </HeroContainer>
     </HeroSection>

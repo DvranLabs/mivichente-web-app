@@ -167,3 +167,20 @@ export const CloseIcon: React.FC<IconProps> = ({ className }) => (
     />
   </svg>
 );
+
+export const GlobeIcon: React.FC<IconProps> = ({ className }) => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    className={className}
+    fill="none"
+    viewBox="0 0 24 24"
+    stroke="currentColor"
+    strokeWidth={2}
+  >
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      d="M12 21a9 9 0 100-18 9 9 0 000 18zM2.458 12H21.542M16.5 7.5A13.5 13.5 0 0112 21c-1.837 0-3.53-.652-4.5-1.5A13.5 13.5 0 0112 3c1.837 0 3.53.652 4.5 1.5zM16.5 16.5A13.5 13.5 0 0112 3c-1.837 0-3.53.652-4.5 1.5A13.5 13.5 0 0112 21c1.837 0 3.53-.652 4.5-1.5z"
+    />
+  </svg>
+);

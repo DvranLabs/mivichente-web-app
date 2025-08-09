@@ -10,7 +10,7 @@ export default function PrivacyPolicyPage() {
       <div className="prose prose-lg max-w-4xl mx-auto">
         <h1>Política de Privacidad</h1>
         <p>
-          <strong>Fecha de efectividad:</strong> [Fecha de Efectividad]
+          <strong>Fecha de efectividad:</strong> 16 de julio de 2025
         </p>
 
         <p>
@@ -33,15 +33,6 @@ export default function PrivacyPolicyPage() {
           cierta información, que incluye:
         </p>
         <ul>
-          <li>
-            <strong>Datos de Geolocalización:</strong> Podemos solicitar acceso o
-            permiso para rastrear información basada en la ubicación de tu
-            dispositivo móvil, ya sea de forma continua o mientras estás
-            utilizando la Aplicación, para proporcionar servicios basados en la
-            ubicación, como mostrarte negocios cercanos. Si deseas cambiar
-            nuestros permisos de acceso, puedes hacerlo en la configuración de
-            tu dispositivo.
-          </li>
           <li>
             <strong>Datos de Uso:</strong> Recopilamos información sobre cómo
             interactúas con nuestra Aplicación, como las funciones que usas y
@@ -129,9 +120,9 @@ export default function PrivacyPolicyPage() {
           Si tienes preguntas o comentarios sobre esta Política de Privacidad,
           por favor contáctanos en:
           <br />
-          [Tu Email de Contacto]
+          vichenteapp@gmail.com
           <br />
-          [Tu Nombre o Nombre de la Empresa]
+          dvran-company
         </p>
       </div>
     </main>

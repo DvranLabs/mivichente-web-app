@@ -10,19 +10,19 @@ export default function TermsAndConditionsPage() {
       <div className="prose prose-lg max-w-4xl mx-auto">
         <h1>Términos y Condiciones</h1>
         <p>
-          <strong>Fecha de efectividad:</strong> [Fecha de Efectividad]
+          <strong>Fecha de efectividad:</strong> 16 de julio de 2025
         </p>
 
         <p>
           Estos Términos y Condiciones (&quot;Términos&quot;) rigen tu acceso y uso de la
-          aplicación móvil [Nombre de la App] (la &quot;Aplicación&quot;). Al descargar,
+          aplicación móvil Vichente App (la &quot;Aplicación&quot;). Al descargar,
           acceder o utilizar la Aplicación, aceptas estar sujeto a estos
           Términos.
         </p>
 
         <h2>1. Uso de la Aplicación</h2>
         <p>
-          [Nombre de la App] te proporciona un directorio de negocios que
+          Vichente App te proporciona un directorio de negocios que
           incluye información como números de teléfono y ubicaciones a través
           de Google Maps. Aceptas utilizar la Aplicación solo para fines lícitos
           y de acuerdo con estos Términos.
@@ -31,8 +31,7 @@ export default function TermsAndConditionsPage() {
         <h2>2. Derechos de Propiedad Intelectual</h2>
         <p>
           La Aplicación y su contenido original, características y
-          funcionalidad son y seguirán siendo propiedad exclusiva de [Tu Nombre
-          o Nombre de la Empresa] y sus licenciantes.
+          funcionalidad son y seguirán siendo propiedad exclusiva de dvran-company y sus licenciantes.
         </p>
 
         <h2>3. Contenido de Terceros</h2>
@@ -63,13 +62,13 @@ export default function TermsAndConditionsPage() {
         <p>
           Podemos suspender o terminar tu acceso a la Aplicación de inmediato,
           sin previo aviso ni responsabilidad, por cualquier motivo, incluido,
-          entre otros, si incumples estos Térmenos.
+          entre otros, si incumples estos Términos.
         </p>
 
         <h2>5. Limitación de Responsabilidad</h2>
         <p>
           En la máxima medida permitida por la ley aplicable, en ningún caso
-          [Tu Nombre o Nombre de la Empresa] o sus directores, empleados o
+          dvran-company o sus directores, empleados o
           afiliados serán responsables de ningún daño indirecto, incidental,
           especial, consecuente o punitivo que resulte de tu acceso o uso de la
           Aplicación.
@@ -88,9 +87,9 @@ export default function TermsAndConditionsPage() {
           Si tienes alguna pregunta sobre estos Términos, por favor contáctanos
           en:
           <br />
-          [Tu Email de Contacto]
+          vichenteapp@gmail.com
           <br />
-          [Tu Nombre o Nombre de la Empresa]
+          dvran-company
         </p>
       </div>
     </main>

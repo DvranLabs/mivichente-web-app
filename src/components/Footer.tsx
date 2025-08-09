@@ -1,7 +1,7 @@
 import React from "react";
 import styled from "@emotion/styled";
 import Link from "next/link";
-import { RocketIcon } from "./Icons";
+import Image from "next/image";
 
 const StyledFooter = styled.footer`
   background-color: #1f2937;
@@ -84,10 +84,8 @@ const MadeInText = styled.p`
   margin-top: 0.25rem;
 `;
 
-const StyledRocketIcon = styled(RocketIcon)`
-  height: 1.75rem;
-  width: 1.75rem;
-  color: #22c55e;
+const LogoImage = styled(Image)`
+  border-radius: 0.25rem;
 `;
 
 const Footer: React.FC = () => {
@@ -96,7 +94,12 @@ const Footer: React.FC = () => {
       <Container>
         <FooterContainer>
           <LogoContainer>
-            <StyledRocketIcon />
+            <LogoImage
+              src="/logo-vichenteapp-48.png"
+              alt="Vichente App Logo"
+              width={28}
+              height={28}
+            />
             <LogoText>Vichente App</LogoText>
           </LogoContainer>
           <FooterLinks>
