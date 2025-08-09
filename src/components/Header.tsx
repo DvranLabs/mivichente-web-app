@@ -85,25 +85,6 @@ const CtaButton = styled(Link)`
   }
 `;
 
-const MobileCtaButton = styled(Link)`
-  background-color: #16a34a;
-  color: white;
-  font-weight: 600;
-  padding: 0.5rem 1rem;
-  border-radius: 0.5rem;
-  transition: background-color 0.2s ease-in-out;
-  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
-  text-decoration: none;
-  font-size: 0.875rem;
-
-  &:hover {
-    background-color: #15803d;
-  }
-
-  @media (min-width: 768px) {
-    display: none;
-  }
-`;
 
 const Header: React.FC = () => {
   return (
