@@ -101,10 +101,10 @@ const Header: React.FC = () => {
         </LogoLink>
 
         <Nav>
-          <NavLink href="https://app.vichente.com" target="_blank" rel="noopener noreferrer">
+          <NavLink href="https://app.vichente.com/business-registration" target="_blank" rel="noopener noreferrer">
             Para Negocios
           </NavLink>
-          <CtaButton href="https://app.vichente.com" target="_blank" rel="noopener noreferrer">
+          <CtaButton href="https://app.vichente.com/business-registration" target="_blank" rel="noopener noreferrer">
             Registra tu Negocio
           </CtaButton>
         </Nav>

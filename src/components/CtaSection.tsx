@@ -73,7 +73,7 @@ const CtaSection: React.FC = () => {
             registro es rápido, fácil y completamente gratis.
           </Subtitle>
           <ButtonWrapper>
-            <Button href="https://app.vichente.com" target="_blank" rel="noopener noreferrer">¡Registrar mi negocio ahora!</Button>
+            <Button href="https://app.vichente.com/business-registration" target="_blank" rel="noopener noreferrer">¡Registrar mi negocio ahora!</Button>
           </ButtonWrapper>
         </CtaContainer>
       </Container>
