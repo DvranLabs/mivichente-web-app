@@ -27,9 +27,31 @@ export default function PrivacyPolicyPage() {
           del contenido y los materiales que utilices, e incluye:
         </p>
 
+        <h3>Información que Nos Proporcionas</h3>
+        <p>
+          Recopilamos información que nos proporcionas directamente cuando creas una
+          cuenta, te comunicas con nosotros o utilizas ciertas funciones de la
+          Aplicación. Esta información puede incluir:
+        </p>
+        <ul>
+          <li>
+            <strong>Nombre Completo:</strong> Para personalizar tu experiencia y
+            facilitar la interacción dentro de la comunidad.
+          </li>
+          <li>
+            <strong>Número de Teléfono:</strong> Utilizado para la verificación de la
+            cuenta y para permitir la comunicación relacionada con los servicios,
+            como el viaje compartido o las transacciones en el marketplace.
+          </li>
+          <li>
+            <strong>Dirección:</strong> Para ofrecer servicios basados en la ubicación y
+            facilitar las entregas o los puntos de encuentro.
+          </li>
+        </ul>
+
         <h3>Información Recopilada Automáticamente</h3>
         <p>
-          Cuando accedes a la Aplicación, podemos recopilar automáticamente
+          Cuando accedes a la Aplicación, podemos recopilar automatically
           cierta información, que incluye:
         </p>
         <ul>
@@ -43,6 +65,11 @@ export default function PrivacyPolicyPage() {
             dispositivo móvil, como el modelo de hardware, el sistema operativo
             y la versión.
           </li>
+          <li>
+            <strong>Tokens de Notificación Push (FCM Tokens):</strong> Para enviarte
+            notificaciones push con actualizaciones, alertas y otra
+            información relevante sobre nuestros servicios.
+          </li>
         </ul>
 
         <h2>2. Uso de Tu Información</h2>
@@ -53,6 +80,16 @@ export default function PrivacyPolicyPage() {
           Aplicación para:
         </p>
         <ul>
+          <li>Crear y gestionar tu cuenta.</li>
+          <li>Personalizar tu experiencia en la Aplicación.</li>
+          <li>
+            Facilitar los servicios que ofrecemos, como el viaje compartido y las
+            transacciones en el marketplace.
+          </li>
+          <li>
+            Enviarte notificaciones push con actualizaciones, alertas y otra
+            información relevante.
+          </li>
           <li>
             Proporcionar y mejorar la funcionalidad de nuestro directorio de
             negocios.
