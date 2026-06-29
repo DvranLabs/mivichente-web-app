@@ -1,0 +1,10 @@
+[{
+  "relation": ["delegate_permission/common.handle_all_urls"],
+  "target": {
+    "namespace": "android_app",
+    "package_name": "com.dvrancorp.vichente",
+    "sha256_cert_fingerprints": [
+      "1A:A0:B6:BF:64:E3:6D:D2:76:32:0D:6D:1E:D7:B2:35:6E:D9:EF:46:A0:B2:46:94:3F:F5:94:57:8E:DE:80:F2"
+    ]
+  }
+}]
