@@ -4,7 +4,16 @@
     "details": [
       {
         "appID": "Z6642B63VB.com.dvrancorp.vichenteApp",
-        "paths": ["/negocio/*"]
+        "components": [
+          { "/": "/", "exclude": true, "comment": "landing home, no abrir app" },
+          { "/": "/support", "exclude": true, "comment": "pagina de soporte web" },
+          { "/": "/.well-known/*", "exclude": true },
+          { "/": "/_next/*", "exclude": true, "comment": "assets de Next" },
+          { "/": "/api/*", "exclude": true },
+          { "/": "/*.*", "exclude": true, "comment": "archivos (favicon, robots, imagenes); los slugs no llevan punto" },
+          { "/": "/negocio/*", "comment": "detalle por id" },
+          { "/": "/*", "comment": "slug de negocio en root (ej. /nutri-sofitnes)" }
+        ]
       }
     ]
   }

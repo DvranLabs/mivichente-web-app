@@ -61,14 +61,27 @@ const DotGrid = () => (
 
 const Skyline = () => (
   // eslint-disable-next-line @next/next/no-img-element
-  <img src="/skyline.png" alt="" style={{ display: "block", width: "100%", objectFit: "cover" }} />
+  <img
+    src="/skyline.png"
+    alt=""
+    style={{
+      display: "block",
+      position: "fixed",
+      bottom: 0,
+      left: 0,
+      width: "100%",
+      objectFit: "cover",
+      zIndex: 0,
+      pointerEvents: "none",
+    }}
+  />
 );
 
 export default function BusinessLandingCard({ business, webAppUrl, playStoreUrl, telUrl }: BusinessLandingCardProps) {
   return (
     <div
       style={{
-        minHeight: "100vh",
+        position: "relative",
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
@@ -76,7 +89,18 @@ export default function BusinessLandingCard({ business, webAppUrl, playStoreUrl,
         fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, sans-serif",
       }}
     >
-      <div style={{ display: "flex", flexDirection: "column", alignItems: "center", width: "100%", padding: "48px 20px 32px" }}>
+      <Skyline />
+      <div
+        style={{
+          position: "relative",
+          zIndex: 1,
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          width: "100%",
+          padding: "48px 20px 32px",
+        }}
+      >
         <div
           style={{
             background: "#fff",
@@ -252,16 +276,12 @@ export default function BusinessLandingCard({ business, webAppUrl, playStoreUrl,
           <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src="/vichente-isotipo.png" alt="Vichente" style={{ width: "30px", height: "30px", objectFit: "contain" }} />
-            <span style={{ fontWeight: 800, fontSize: "18px", color: NAVY }}>Vichente App</span>
+            <span style={{ fontWeight: 800, fontSize: "18px", color: "#fff", textShadow: "0 1px 4px rgba(0,0,0,0.5)" }}>Vichente App</span>
           </div>
-          <p style={{ fontSize: "13px", color: "#9ca3af", lineHeight: 1.4, margin: 0 }}>
+          <p style={{ fontSize: "13px", color: "rgba(255,255,255,0.9)", lineHeight: 1.4, margin: 0, textShadow: "0 1px 4px rgba(0,0,0,0.5)" }}>
             Directorio de negocios de Nombre de Dios, Vicente Guerrero y Villa Unión
           </p>
         </div>
-      </div>
-
-      <div style={{ marginTop: "auto", width: "100%" }}>
-        <Skyline />
       </div>
     </div>
   );
