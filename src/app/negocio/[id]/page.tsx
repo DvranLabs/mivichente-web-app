@@ -50,8 +50,12 @@ export default async function NegocioPage({ params }: { params: Promise<{ id: st
   const business = await getBusiness(id);
   if (!business) notFound();
 
-  const deepLink = `https://vichente.com/negocio/${id}`;
+  // Quien llega a esta página NO tiene la app nativa instalada: en Android con la app,
+  // los App Links interceptan vichente.com/negocio/:id y abren la app antes de renderizar.
+  // Por eso el CTA principal empuja a la web app (app.vichente.com), que funciona en iPhone/web.
+  const webAppUrl = `https://app.vichente.com/#/negocio/${id}`;
   const playStoreUrl = "https://play.google.com/store/apps/details?id=com.dvrancorp.vichente";
+  const telUrl = business.phone ? `tel:${business.phone}` : null;
 
   return (
     <div style={{ minHeight: "100vh", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "24px", background: "#f9fafb" }}>
@@ -82,10 +86,10 @@ export default async function NegocioPage({ params }: { params: Promise<{ id: st
 
         <div style={{ marginTop: "28px", display: "flex", flexDirection: "column", gap: "12px" }}>
           <a
-            href={deepLink}
+            href={webAppUrl}
             style={{
               display: "block",
-              background: "#1d4ed8",
+              background: "#F07A2C",
               color: "#fff",
               borderRadius: "10px",
               padding: "14px",
@@ -94,24 +98,56 @@ export default async function NegocioPage({ params }: { params: Promise<{ id: st
               textDecoration: "none",
             }}
           >
-            Abrir en Vichente App
+            Ver negocio en Vichente
           </a>
+          {telUrl && (
+            <a
+              href={telUrl}
+              style={{
+                display: "block",
+                background: "#fff",
+                color: "#F07A2C",
+                border: "1.5px solid #F07A2C",
+                borderRadius: "10px",
+                padding: "14px",
+                fontWeight: 600,
+                fontSize: "15px",
+                textDecoration: "none",
+              }}
+            >
+              Llamar {business.phone}
+            </a>
+          )}
           <a
             href={playStoreUrl}
             style={{
               display: "block",
               background: "#f3f4f6",
-              color: "#1f2937",
+              color: "#6b7280",
               borderRadius: "10px",
-              padding: "14px",
+              padding: "12px",
               fontWeight: 500,
-              fontSize: "14px",
+              fontSize: "13px",
               textDecoration: "none",
             }}
           >
-            Descargar Vichente App
+            ¿Android? Descarga la app
           </a>
         </div>
+
+        <a
+          href="https://app.vichente.com"
+          style={{
+            display: "inline-block",
+            marginTop: "20px",
+            color: "#F07A2C",
+            fontSize: "14px",
+            fontWeight: 600,
+            textDecoration: "none",
+          }}
+        >
+          Explorar más negocios →
+        </a>
       </div>
 
       <p style={{ marginTop: "24px", fontSize: "13px", color: "#9ca3af" }}>
