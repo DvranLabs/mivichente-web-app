@@ -15,8 +15,11 @@ interface Business {
 }
 
 async function getBusiness(id: string): Promise<Business | null> {
+  // categories!businesses_category_id_fkey desambigua: existen dos relaciones
+  // businesses↔categories (la FK directa category_id y la many-to-many
+  // business_categories). Sin el hint, PostgREST responde 300 y esto devuelve null.
   const res = await fetch(
-    `${SUPABASE_URL}/rest/v1/businesses?id=eq.${id}&select=id,name,phone,address,description,photo_url,is_verified,categories(name)&limit=1`,
+    `${SUPABASE_URL}/rest/v1/businesses?id=eq.${id}&select=id,name,phone,address,description,photo_url,is_verified,categories!businesses_category_id_fkey(name)&limit=1`,
     {
       headers: {
         apikey: SUPABASE_ANON_KEY,
