@@ -3,8 +3,8 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: "Vichente App | Descubre negocios de la región",
-  description: "Descubre y conecta con los mejores negocios locales en Vicente Guerrero. Encuentra servicios, productos y comercios cerca de ti.",
-  keywords: ["Vicente Guerrero", "negocios locales", "servicios", "productos", "comercios", "directorio", "app"],
+  description: "Descubre y conecta con los mejores negocios locales de Nombre de Dios, Vicente Guerrero y Villa Unión. Encuentra servicios, productos y comercios cerca de ti.",
+  keywords: ["Nombre de Dios", "Vicente Guerrero", "Villa Unión", "negocios locales", "servicios", "productos", "comercios", "directorio", "app"],
   authors: [{ name: "Vichente Team" }],
   creator: "Vichente Team",
   publisher: "Vichente App",
@@ -12,7 +12,7 @@ export const metadata: Metadata = {
   metadataBase: new URL("https://landing.vichente.com"),
   openGraph: {
     title: "Vichente App | Descubre negocios de la región",
-    description: "Descubre y conecta con los mejores negocios locales en Vicente Guerrero. Encuentra servicios, productos y comercios cerca de ti.",
+    description: "Descubre y conecta con los mejores negocios locales de Nombre de Dios, Vicente Guerrero y Villa Unión. Encuentra servicios, productos y comercios cerca de ti.",
     url: "https://landing.vichente.com",
     siteName: "Vichente App",
     images: [
@@ -29,7 +29,7 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title: "Vichente App | Descubre negocios de la región",
-    description: "Descubre y conecta con los mejores negocios locales en Vicente Guerrero. Encuentra servicios, productos y comercios cerca de ti.",
+    description: "Descubre y conecta con los mejores negocios locales de Nombre de Dios, Vicente Guerrero y Villa Unión. Encuentra servicios, productos y comercios cerca de ti.",
     images: ["/logo-grande.png"],
   },
   icons: {
