@@ -1,13 +1,23 @@
 "use client";
 
-import { useActionState, useState } from "react";
+import { useActionState, useEffect, useState } from "react";
 import s from "./landing.module.css";
-import { registrarNegocio, type RegistroState } from "../../app/actions/registro";
+import { registrarNegocio, type CampoError, type RegistroState } from "../../app/actions/registro";
 import { GIROS, MUNICIPIOS, type Giro } from "./data";
 import { useNegocioSeleccionado } from "./NegocioSeleccionado";
 import OfferingsInput from "./OfferingsInput";
 
 const inicial: RegistroState = { status: "idle" };
+
+// 6181234567 -> "618 123 4567". Se formatea mientras escribe y se corta en 10
+// dígitos, así el teléfono no puede quedar mal: la validación deja de existir
+// para el dueño en vez de rebotarlo después de darle a enviar.
+function formatearTelefono(valor: string): string {
+  const d = valor.replace(/\D/g, "").slice(0, 10);
+  if (d.length <= 3) return d;
+  if (d.length <= 6) return `${d.slice(0, 3)} ${d.slice(3)}`;
+  return `${d.slice(0, 3)} ${d.slice(3, 6)} ${d.slice(6)}`;
+}
 
 export default function RegistroForm() {
   const [state, formAction, pending] = useActionState(registrarNegocio, inicial);
@@ -16,6 +26,19 @@ export default function RegistroForm() {
   // Al negocio que ya existe no le preguntamos su giro: se deduce de la categoría
   // que ya tiene en la base. Igual puede corregirlo si le pusimos mal la categoría.
   const [giro, setGiro] = useState<Giro | null>(negocio?.giro ?? null);
+  const [telefono, setTelefono] = useState("");
+
+  const error = state.status === "error" ? state : null;
+  const errorEn = (campo: CampoError) => (error?.campo === campo ? error.message : null);
+
+  // El botón está hasta abajo: si el mensaje sale arriba y la página no se mueve,
+  // el dueño ve que "no pasó nada" y le vuelve a dar. Lo llevamos al campo.
+  useEffect(() => {
+    if (!error || error.campo === "general") return;
+    const el = document.getElementById(error.campo);
+    el?.scrollIntoView({ behavior: "smooth", block: "center" });
+    (el as HTMLInputElement | null)?.focus?.({ preventScroll: true });
+  }, [error]);
 
   if (state.status === "ok") {
     return (
@@ -61,13 +84,7 @@ export default function RegistroForm() {
           Vichente App. Tú no tienes que hacer nada más.
         </p>
 
-        <form action={formAction} className={s.form} key={negocio?.id ?? "nuevo"}>
-          {state.status === "error" && (
-            <p className={s.formError} role="alert">
-              {state.message}
-            </p>
-          )}
-
+        <form action={formAction} className={s.form} key={negocio?.id ?? "nuevo"} noValidate>
           {esCompletar ? (
             <input type="hidden" name="business_id" value={negocio.id} />
           ) : (
@@ -80,15 +97,16 @@ export default function RegistroForm() {
                 id="business_name"
                 name="business_name"
                 type="text"
-                required
                 maxLength={120}
                 autoComplete="organization"
                 placeholder="Taquería Los Amigos"
+                aria-invalid={errorEn("business_name") ? true : undefined}
               />
+              <CampoInvalido mensaje={errorEn("business_name")} />
             </div>
           )}
 
-          <fieldset className={s.field}>
+          <fieldset className={s.field} id="giro">
             <legend className={s.label}>¿Qué tipo de negocio tienes?</legend>
             <div className={s.giros}>
               {(Object.keys(GIROS) as Giro[]).map((g) => (
@@ -97,7 +115,6 @@ export default function RegistroForm() {
                     type="radio"
                     name="giro"
                     value={g}
-                    required
                     checked={giro === g}
                     onChange={() => setGiro(g)}
                   />
@@ -105,11 +122,18 @@ export default function RegistroForm() {
                 </label>
               ))}
             </div>
+            <CampoInvalido mensaje={errorEn("giro")} />
           </fieldset>
 
           {/* El campo de offerings solo tiene sentido con el giro ya elegido: sus
               ejemplos y sugerencias son lo que le enseña al dueño qué escribir. */}
-          {giro && <OfferingsInput giro={giro} inicial={negocio?.offerings ?? []} />}
+          {giro && (
+            <OfferingsInput
+              giro={giro}
+              inicial={negocio?.offerings ?? []}
+              error={errorEn("offerings")}
+            />
+          )}
 
           <div className={s.field}>
             <label className={s.label} htmlFor="phone">
@@ -120,11 +144,14 @@ export default function RegistroForm() {
               id="phone"
               name="phone"
               type="tel"
-              inputMode="tel"
-              required
+              inputMode="numeric"
               autoComplete="tel"
               placeholder="618 123 4567"
+              value={telefono}
+              onChange={(e) => setTelefono(formatearTelefono(e.target.value))}
+              aria-invalid={errorEn("phone") ? true : undefined}
             />
+            <CampoInvalido mensaje={errorEn("phone")} />
             <p className={s.hint}>Por ahí te hablamos, y es el que verán tus clientes.</p>
           </div>
 
@@ -137,24 +164,26 @@ export default function RegistroForm() {
               id="contact_name"
               name="contact_name"
               type="text"
-              required
               maxLength={120}
               autoComplete="name"
               placeholder="Tu nombre"
+              aria-invalid={errorEn("contact_name") ? true : undefined}
             />
+            <CampoInvalido mensaje={errorEn("contact_name")} />
           </div>
 
           {!esCompletar && (
-            <fieldset className={s.field}>
+            <fieldset className={s.field} id="municipio">
               <legend className={s.label}>Municipio</legend>
               <div className={s.radios}>
                 {MUNICIPIOS.map((m) => (
                   <label key={m} className={s.radio}>
-                    <input type="radio" name="municipio" value={m} required />
+                    <input type="radio" name="municipio" value={m} />
                     <span>{m}</span>
                   </label>
                 ))}
               </div>
+              <CampoInvalido mensaje={errorEn("municipio")} />
             </fieldset>
           )}
 
@@ -180,6 +209,14 @@ export default function RegistroForm() {
             <input id="website" name="website" type="text" tabIndex={-1} autoComplete="off" />
           </div>
 
+          {/* El error general (falló el guardado, el negocio ya no existe) sí va
+              junto al botón: no hay campo al que mandar al dueño. */}
+          {errorEn("general") && (
+            <p className={s.formError} role="alert">
+              {errorEn("general")}
+            </p>
+          )}
+
           <button className={s.btnOrange} type="submit" disabled={pending}>
             {pending ? "Enviando…" : esCompletar ? "Enviar mis datos" : "Registrar mi negocio"}
           </button>
@@ -194,6 +231,16 @@ export default function RegistroForm() {
         </form>
       </div>
     </section>
+  );
+}
+
+// El mensaje vive pegado al campo que lo causó, no en un banner arriba del form.
+function CampoInvalido({ mensaje }: { mensaje: string | null }) {
+  if (!mensaje) return null;
+  return (
+    <p className={s.campoError} role="alert">
+      {mensaje}
+    </p>
   );
 }
 

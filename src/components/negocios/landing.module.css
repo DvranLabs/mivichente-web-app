@@ -889,6 +889,20 @@
   overflow: hidden;
 }
 
+/* Error pegado a su campo. El input además se marca en rojo vía aria-invalid,
+   para que el campo culpable se vea aunque el mensaje quede fuera de pantalla. */
+.campoError {
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: #9b1c1c;
+}
+
+.input[aria-invalid="true"],
+.textarea[aria-invalid="true"] {
+  border-color: #9b1c1c;
+  background: #fdf5f5;
+}
+
 .formError {
   background: #fdecec;
   border: 1px solid #f3b9b9;

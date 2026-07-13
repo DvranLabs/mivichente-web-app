@@ -16,10 +16,22 @@ const SUPABASE_ANON_KEY = process.env.SUPABASE_ANON_KEY!;
 const MAX_OFFERINGS = 30;
 const MAX_OFFERING_LEN = 80;
 
+/** El campo culpable viaja con el error para que el form pueda enfocarlo: un
+ *  mensaje suelto arriba del form, con el botón hasta abajo, se lee como si el
+ *  botón no hubiera hecho nada. */
+export type CampoError =
+  | "business_name"
+  | "giro"
+  | "offerings"
+  | "phone"
+  | "contact_name"
+  | "municipio"
+  | "general";
+
 export type RegistroState =
   | { status: "idle" }
   | { status: "ok" }
-  | { status: "error"; message: string };
+  | { status: "error"; message: string; campo: CampoError };
 
 function clean(value: FormDataEntryValue | null): string {
   return typeof value === "string" ? value.trim() : "";
@@ -75,7 +87,9 @@ export async function registrarNegocio(
   if (clean(formData.get("website"))) return { status: "ok" };
 
   const offerings = limpiarOfferings(formData.getAll("offerings"));
-  const phone = clean(formData.get("phone"));
+  // El form lo muestra como "618 123 4567" para que se lea, pero se guarda en
+  // dígitos pelones: así sale directo a un tel: o un wa.me sin romperse.
+  const phone = clean(formData.get("phone")).replace(/\D/g, "");
   const contactName = clean(formData.get("contact_name"));
   const description = clean(formData.get("description"));
   const businessId = clean(formData.get("business_id"));
@@ -83,19 +97,24 @@ export async function registrarNegocio(
   const giro: Giro | null = giroCrudo in GIROS ? (giroCrudo as Giro) : null;
 
   if (!giro) {
-    return { status: "error", message: "Dinos qué tipo de negocio tienes." };
+    return { status: "error", message: "Dinos qué tipo de negocio tienes.", campo: "giro" };
   }
   if (offerings.length === 0) {
     return {
       status: "error",
-      message: "Agrega al menos una cosa que vendas u ofrezcas. Es lo que te hace aparecer.",
+      message: "Escribe al menos una cosa: es lo que te hace aparecer en las búsquedas.",
+      campo: "offerings",
     };
   }
   if (!contactName) {
-    return { status: "error", message: "Dinos con quién hablamos." };
+    return { status: "error", message: "Dinos con quién hablamos.", campo: "contact_name" };
   }
   if (!isPhone(phone)) {
-    return { status: "error", message: "El teléfono debe traer 10 dígitos." };
+    return {
+      status: "error",
+      message: "El teléfono va con 10 dígitos, con lada. Ejemplo: 618 123 4567.",
+      campo: "phone",
+    };
   }
 
   let businessName: string;
@@ -107,6 +126,7 @@ export async function registrarNegocio(
       return {
         status: "error",
         message: "No encontramos ese negocio. Vuelve a buscarlo, por favor.",
+        campo: "general",
       };
     }
     businessName = existente.name;
@@ -116,10 +136,14 @@ export async function registrarNegocio(
     municipio = clean(formData.get("municipio"));
 
     if (!businessName) {
-      return { status: "error", message: "Falta el nombre del negocio." };
+      return {
+        status: "error",
+        message: "Falta el nombre del negocio.",
+        campo: "business_name",
+      };
     }
     if (!MUNICIPIOS.includes(municipio as (typeof MUNICIPIOS)[number])) {
-      return { status: "error", message: "Elige un municipio de la lista." };
+      return { status: "error", message: "Elige tu municipio.", campo: "municipio" };
     }
   }
 
@@ -149,6 +173,7 @@ export async function registrarNegocio(
     return {
       status: "error",
       message: "No pudimos guardar tus datos. Inténtalo otra vez en un momento.",
+      campo: "general",
     };
   }
 

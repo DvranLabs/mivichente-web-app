@@ -10,9 +10,11 @@ import { GIROS, type Giro } from "./data";
 export default function OfferingsInput({
   giro,
   inicial = [],
+  error = null,
 }: {
   giro: Giro;
   inicial?: string[];
+  error?: string | null;
 }) {
   const [items, setItems] = useState<string[]>(inicial);
   const [borrador, setBorrador] = useState("");
@@ -33,7 +35,7 @@ export default function OfferingsInput({
 
   return (
     <div className={s.field}>
-      <label className={s.label} htmlFor="offering-draft">
+      <label className={s.label} htmlFor="offerings">
         {cfg.pregunta}
       </label>
       <p className={s.hint}>{cfg.hint}</p>
@@ -41,7 +43,12 @@ export default function OfferingsInput({
       <div className={s.offeringsInput}>
         <input
           className={s.input}
-          id="offering-draft"
+          /* name="offerings" a propósito: si el dueño escribe "boneless" y le da
+             directo a enviar sin tocar "Agregar", su texto viaja igual. Antes se
+             perdía y el server le contestaba "escribe al menos una cosa" mientras
+             él la estaba viendo escrita en pantalla. El server deduplica. */
+          name="offerings"
+          id="offerings"
           type="text"
           value={borrador}
           maxLength={80}
@@ -52,12 +59,14 @@ export default function OfferingsInput({
             if (e.target.value.includes(",")) agregar(e.target.value.replace(",", ""));
             else setBorrador(e.target.value);
           }}
+          onBlur={() => agregar(borrador)}
           onKeyDown={(e) => {
             if (e.key === "Enter") {
               e.preventDefault();
               agregar(borrador);
             }
           }}
+          aria-invalid={error ? true : undefined}
         />
         <button
           type="button"
@@ -68,6 +77,12 @@ export default function OfferingsInput({
           Agregar
         </button>
       </div>
+
+      {error && (
+        <p className={s.campoError} role="alert">
+          {error}
+        </p>
+      )}
 
       {items.length > 0 && (
         <ul className={s.offeringsLista}>
