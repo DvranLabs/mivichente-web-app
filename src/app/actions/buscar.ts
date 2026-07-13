@@ -32,10 +32,14 @@ export async function buscarNegocio(termino: string): Promise<NegocioEncontrado[
   const seguro = q.replace(/[%,()*]/g, " ").trim();
   if (!seguro) return [];
 
+  // El hint !businesses_category_id_fkey NO es opcional: hay dos relaciones
+  // businesses↔categories (la FK directa category_id y la many-to-many
+  // business_categories). Sin desambiguar, PostgREST responde 300 y la búsqueda
+  // devuelve vacío en silencio — parece "no existe tu negocio" cuando sí existe.
   const url =
     `${SUPABASE_URL}/rest/v1/businesses` +
     `?name=ilike.*${encodeURIComponent(seguro)}*` +
-    `&select=id,slug,name,municipio,photo_url,offerings,categories(name)&limit=5`;
+    `&select=id,slug,name,municipio,photo_url,offerings,categories!businesses_category_id_fkey(name)&limit=5`;
 
   const res = await fetch(url, {
     headers: {
@@ -45,7 +49,10 @@ export async function buscarNegocio(termino: string): Promise<NegocioEncontrado[
     next: { revalidate: 300 },
   });
 
-  if (!res.ok) return [];
+  if (!res.ok) {
+    console.error("buscarNegocio falló", res.status, await res.text());
+    return [];
+  }
 
   const filas: FilaNegocio[] = await res.json();
   return filas.map(({ categories, ...n }) => ({
