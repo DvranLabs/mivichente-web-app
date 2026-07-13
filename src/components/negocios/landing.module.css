@@ -1,0 +1,1010 @@
+/* Landing de captación de negocios. Mobile-first: cada sección trae su propio
+   fondo y el foreground cambia con él. Sin webfont a propósito — el hero es el
+   LCP y es puro texto. */
+
+.page {
+  --navy: #14213d;
+  --orange: #f07a2c;
+  /* El naranja de marca sobre blanco da 2.8:1 y reprueba AA. Este tono más
+     oscuro (4.6:1) es el que se usa para texto sobre fondos claros; el de marca
+     se reserva para fondos y superficies. */
+  --orange-text: #c2560f;
+  --cream: #f6f1ea;
+
+  /* Texto secundario por superficie. Colores explícitos y no opacity: bajar la
+     opacidad sobre un fondo saturado hunde el contraste justo donde ya está
+     apretado, y este señor lee el celular en la calle a pleno sol. */
+  --muted-on-navy: #b9c2d4;
+  --muted-on-light: #55607a;
+  --muted-on-orange: #4a2f14;
+
+  --s1: 0.5rem;
+  --s2: 1rem;
+  --s3: 1.5rem;
+  --s4: 2.5rem;
+
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  line-height: 1.35;
+  -webkit-font-smoothing: antialiased;
+}
+
+.page a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.page ul {
+  list-style: none;
+}
+
+.section {
+  padding: 4.5rem 1.25rem;
+}
+
+/* Rompe la meseta: no todas las secciones necesitan el mismo aire. */
+.sectionCompacta {
+  padding: 2.75rem 1.25rem;
+}
+
+.inner {
+  max-width: 44rem;
+  margin: 0 auto;
+}
+
+.onNavy {
+  background: var(--navy);
+  color: #fff;
+}
+
+/* Texto navy, no blanco: blanco sobre #F07A2C queda en ~2.8:1 y reprueba WCAG AA.
+   Navy sobre el mismo naranja da ~5.7:1. */
+.onOrange {
+  background: var(--orange);
+  color: var(--navy);
+}
+
+.onOrange .accent {
+  color: #fff;
+}
+
+.onCream {
+  background: var(--cream);
+  color: var(--navy);
+}
+
+.onWhite {
+  background: #fff;
+  color: var(--navy);
+}
+
+.eyebrow {
+  font-size: 0.8125rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted-on-navy);
+  margin-bottom: 1.25rem;
+}
+
+/* El hero manda: a 360px el h1 sale ~36px y los h2 ~22px. Antes ambos rondaban
+   los 30px y la página era una meseta de titulares gritando igual. */
+.h1 {
+  font-size: clamp(2.25rem, 10vw, 3.75rem);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 1.05;
+  margin: 0;
+}
+
+.h2 {
+  font-size: clamp(1.5rem, 6vw, 2.25rem);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1.15;
+  margin: 0;
+}
+
+.lead {
+  font-size: clamp(1.0625rem, 4.5vw, 1.25rem);
+  line-height: 1.5;
+  margin-top: var(--s3);
+}
+
+.onNavy .lead,
+.onNavy .heroFoot {
+  color: var(--muted-on-navy);
+}
+
+.onCream .lead,
+.onWhite .lead {
+  color: var(--muted-on-light);
+}
+
+.onOrange .lead {
+  color: var(--muted-on-orange);
+}
+
+.accent {
+  color: var(--orange-text);
+}
+
+.onNavy .accent {
+  color: var(--orange);
+}
+
+/* Énfasis dentro del cuerpo de texto.
+   El texto corrido va en el gris apagado de su superficie; la frase que carga el
+   peso sube a color pleno y a 700. Sin esto, un párrafo entero en un solo tono
+   obliga a leerlo completo para saber qué importa — y nadie lo lee completo. */
+.lead strong,
+.punch strong,
+.demoCaption strong,
+.datoTexto strong,
+.compareSub strong,
+.avisoContacto strong,
+.successBody strong {
+  font-weight: 700;
+  color: var(--navy);
+}
+
+.onNavy .lead strong,
+.onNavy .punch strong,
+.onNavy .compareSub strong {
+  color: #fff;
+}
+
+/* Los términos que la gente teclea de verdad. Se ven como lo que son —una
+   consulta escrita en un buscador—, no como una palabra más del párrafo. */
+.termino {
+  font-style: normal;
+  font-weight: 700;
+  color: #fff;
+  background: rgba(255, 255, 255, 0.12);
+  border-radius: 0.375rem;
+  padding: 0.08em 0.4em;
+  white-space: nowrap;
+}
+
+/* Hero */
+
+.hero {
+  min-height: 100svh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding-bottom: 3rem;
+}
+
+.heroLogo {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 700;
+  font-size: 1.25rem;
+  letter-spacing: -0.01em;
+  margin-bottom: auto;
+  padding-top: 1rem;
+}
+
+.heroFoot {
+  margin-top: var(--s2);
+  font-size: 0.875rem;
+}
+
+/* Botones: la acción principal es SIEMPRE el naranja, en todas las secciones.
+   Antes el hero empujaba en naranja y el submit en navy — dos colores para la
+   misma acción enseñan al ojo a no confiar en ninguno. */
+
+.btnOrange {
+  display: inline-block;
+  width: 100%;
+  text-align: center;
+  padding: 1.125rem 1.5rem;
+  border-radius: 999px;
+  font-size: 1.0625rem;
+  font-weight: 700;
+  border: none;
+  cursor: pointer;
+  background: var(--orange);
+  transition: transform 0.15s ease, opacity 0.15s ease;
+}
+
+/* El color va con esta especificidad a propósito: `.page a { color: inherit }`
+   le gana a `.btnOrange` a secas, y los botones que son <a> heredaban el blanco
+   de su sección — quedaban en blanco sobre naranja (2.9:1). */
+.page .btnOrange {
+  color: var(--navy);
+}
+
+/* Único caso donde el naranja no puede ir: encima de una sección naranja. */
+.page .onOrange .btnOrange {
+  background: var(--navy);
+  color: #fff;
+}
+
+.btnOrange:active {
+  transform: scale(0.98);
+}
+
+.btnOrange:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.ctaBlock {
+  margin-top: var(--s4);
+}
+
+@media (min-width: 30rem) {
+  .btnOrange {
+    width: auto;
+    min-width: 18rem;
+  }
+}
+
+/* Problema: cómo se busca hoy en los grupos del municipio.
+   Se alternan izquierda/derecha para que se lea como el hilo de un grupo y no
+   como una lista de bullets. */
+
+.posts {
+  display: grid;
+  gap: 0.625rem;
+  margin-top: var(--s3);
+}
+
+.post {
+  max-width: 88%;
+  justify-self: start;
+  background: #f1f3f7;
+  border-radius: 1.125rem 1.125rem 1.125rem 0.25rem;
+  padding: 0.875rem 1.125rem;
+  font-size: 1rem;
+  line-height: 1.45;
+  color: var(--navy);
+}
+
+.post:nth-child(even) {
+  justify-self: end;
+  background: #e9edf4;
+  border-radius: 1.125rem 1.125rem 0.25rem 1.125rem;
+}
+
+/* Peso base 400, no 700: si el párrafo entero va en negrita, el <strong> no tiene
+   contra qué destacar y el énfasis se pierde. */
+.punch {
+  font-size: clamp(1.125rem, 4.8vw, 1.5rem);
+  font-weight: 400;
+  margin-top: var(--s4);
+  line-height: 1.35;
+}
+
+.punchAccent {
+  font-size: clamp(1.375rem, 6vw, 2rem);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  margin-top: var(--s2);
+}
+
+/* Demo: mockup de teléfono */
+
+.phoneWrap {
+  margin: 2.5rem auto 0;
+  max-width: 20rem;
+}
+
+.phone {
+  background: #0b1526;
+  border-radius: 2.25rem;
+  padding: 0.625rem;
+  box-shadow: 0 24px 60px rgba(11, 21, 38, 0.35);
+}
+
+.phoneScreen {
+  background: #fff;
+  border-radius: 1.75rem;
+  overflow: hidden;
+  height: 17rem;
+  display: flex;
+  flex-direction: column;
+  color: var(--navy);
+}
+
+.searchBar {
+  margin: 0.875rem 0.875rem 0.875rem;
+  background: #f1f3f7;
+  border-radius: 999px;
+  padding: 0.75rem 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.9375rem;
+  color: var(--navy);
+}
+
+.caret {
+  display: inline-block;
+  width: 2px;
+  height: 1.05em;
+  background: var(--orange);
+  animation: blink 1s step-end infinite;
+  vertical-align: text-bottom;
+}
+
+@keyframes blink {
+  50% { opacity: 0; }
+}
+
+.results {
+  flex: 1;
+  padding: 0 0.875rem;
+  overflow: hidden;
+}
+
+.resultsLabel {
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #8a93a6;
+  margin-bottom: 0.625rem;
+}
+
+.card {
+  border: 1px solid #e8eaf0;
+  border-radius: 0.875rem;
+  padding: 0.875rem;
+  margin-bottom: 0.625rem;
+  opacity: 0;
+  transform: translateY(8px);
+  animation: pop 0.35s ease forwards;
+}
+
+@keyframes pop {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.cardName {
+  font-weight: 700;
+  font-size: 0.9375rem;
+}
+
+.cardMeta {
+  font-size: 0.75rem;
+  color: #8a93a6;
+  margin-top: 0.125rem;
+}
+
+.offerings {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.375rem;
+  margin-top: 0.625rem;
+}
+
+.offering {
+  font-size: 0.75rem;
+  padding: 0.25rem 0.5rem;
+  border-radius: 999px;
+  background: #f1f3f7;
+  color: #55607a;
+}
+
+.offeringHit {
+  background: rgba(240, 122, 44, 0.15);
+  color: #b4550f;
+  font-weight: 700;
+}
+
+.demoCaption {
+  margin-top: 2rem;
+  font-size: 1.0625rem;
+  line-height: 1.5;
+  font-weight: 400;
+  color: var(--muted-on-orange);
+}
+
+/* Prueba social */
+
+/* Prueba social */
+
+/* Apilado, no baseline: alinear un número de 72px con texto de 17px por su
+   baseline hunde la primera línea del párrafo a media altura del número. */
+.dato {
+  display: block;
+}
+
+.bigNumber {
+  display: block;
+  font-size: clamp(3.5rem, 16vw, 5rem);
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  line-height: 1;
+  color: var(--orange-text);
+}
+
+.datoTexto {
+  display: block;
+  margin-top: var(--s2);
+  font-size: 1.125rem;
+  line-height: 1.45;
+  color: var(--muted-on-light);
+}
+
+/* Dos columnas, no tres: a 360px las tiles de 3 columnas salen de ~104px y
+   ningún nombre de negocio cabe sin truncarse. */
+.mosaico {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--s2);
+  margin-top: var(--s4);
+}
+
+.mosaicoItem {
+  position: relative;
+  aspect-ratio: 4 / 3;
+  border-radius: 0.75rem;
+  overflow: hidden;
+  background: #e7e2da;
+}
+
+.mosaicoFoto {
+  object-fit: cover;
+}
+
+.mosaicoNombre {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: 2rem 0.625rem 0.5rem;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  line-height: 1.25;
+  color: #fff;
+  background: linear-gradient(to top, rgba(11, 21, 38, 0.9), transparent);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* Buscador "¿ya estás en Vichente?" */
+
+.buscador {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  background: #fff;
+  border: 1px solid rgba(20, 33, 61, 0.2);
+  border-radius: 999px;
+  padding: 0.875rem 1.25rem;
+  margin-top: 2rem;
+}
+
+.buscador:focus-within {
+  outline: 2px solid var(--orange-text);
+  outline-offset: 1px;
+}
+
+.buscadorInput {
+  flex: 1;
+  min-width: 0;
+  border: none;
+  outline: none;
+  background: transparent;
+  font: inherit;
+  font-size: 1rem;
+  color: var(--navy);
+}
+
+.buscadorResultados {
+  margin-top: 1rem;
+  display: grid;
+  gap: 0.625rem;
+  min-height: 3rem;
+}
+
+.hallazgo {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+  background: #fff;
+  border: 1px solid rgba(20, 33, 61, 0.12);
+  border-radius: 0.875rem;
+  padding: 0.75rem 0.875rem;
+}
+
+.hallazgoAviso {
+  flex-basis: 100%;
+  margin-top: 0.125rem;
+  padding-top: 0.625rem;
+  border-top: 1px solid rgba(20, 33, 61, 0.08);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  line-height: 1.4;
+  color: var(--orange-text);
+}
+
+.hallazgoTexto {
+  flex: 1;
+  min-width: 0;
+}
+
+.hallazgoFoto {
+  flex: none;
+  width: 3rem;
+  height: 3rem;
+  border-radius: 0.625rem;
+  object-fit: cover;
+}
+
+.hallazgoSinFoto {
+  flex: none;
+  width: 3rem;
+  height: 3rem;
+  border-radius: 0.625rem;
+  background: var(--cream);
+  display: grid;
+  place-items: center;
+  font-size: 1.25rem;
+}
+
+.btnChico {
+  flex: none;
+  border: none;
+  cursor: pointer;
+  background: var(--navy);
+  color: #fff;
+  font: inherit;
+  font-size: 0.875rem;
+  font-weight: 700;
+  border-radius: 999px;
+  padding: 0.5rem 0.875rem;
+}
+
+.linkSubrayado {
+  text-decoration: underline;
+  font-weight: 700;
+}
+
+.linkBtn {
+  justify-self: start;
+  background: none;
+  border: none;
+  padding: 0.25rem 0;
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.9375rem;
+  font-weight: 700;
+  color: var(--orange-text);
+  text-decoration: underline;
+}
+
+/* Radios de municipio: 3 opciones, un tap — mejor que abrir un select nativo */
+
+.radios {
+  display: grid;
+  gap: 0.5rem;
+  margin-top: 0.25rem;
+}
+
+.radio {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  border: 1px solid rgba(20, 33, 61, 0.2);
+  border-radius: 0.75rem;
+  padding: 0.875rem 1rem;
+  font-size: 1rem;
+  cursor: pointer;
+}
+
+.radio:has(input:checked) {
+  border-color: var(--orange-text);
+  background: rgba(240, 122, 44, 0.08);
+  font-weight: 700;
+}
+
+.radio input {
+  accent-color: var(--orange-text);
+  width: 1.125rem;
+  height: 1.125rem;
+}
+
+.municipios {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 1.5rem;
+}
+
+.municipio {
+  border: 1px solid rgba(20, 33, 61, 0.15);
+  border-radius: 0.625rem;
+  padding: 0.5rem 0.875rem;
+  font-weight: 600;
+  font-size: 0.9375rem;
+}
+
+/* Objeción */
+
+.compare {
+  display: grid;
+  gap: 1rem;
+  margin-top: 2.5rem;
+}
+
+.compareCard {
+  border-radius: 1rem;
+  padding: 1.5rem;
+}
+
+.compareOld {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.compareNew {
+  background: var(--orange);
+  color: var(--navy);
+}
+
+.compareTitle {
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  opacity: 0.8;
+  margin-bottom: 0.75rem;
+}
+
+.compareLine {
+  font-size: 1.25rem;
+  font-weight: 700;
+  line-height: 1.35;
+}
+
+/* Color explícito y no opacity: el opacity del padre también apaga al <strong>
+   de adentro, que es justo lo que no queremos que se apague. */
+.compareSub {
+  margin-top: 0.75rem;
+  font-size: 0.9375rem;
+  line-height: 1.45;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.compareNew .compareSub {
+  color: var(--muted-on-orange);
+}
+
+.compareNew .compareSub strong {
+  color: var(--navy);
+}
+
+@media (min-width: 40rem) {
+  .compare {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+/* Formulario */
+
+.form {
+  display: grid;
+  gap: 1.125rem;
+  margin-top: 2.5rem;
+}
+
+/* .field se usa tanto en <div> como en <fieldset> (municipio, giro). El fieldset
+   trae marco y padding nativos del navegador, con el legend incrustado en el
+   borde: sin este reset, esos dos campos salen enmarcados y los demás no. */
+.field {
+  display: grid;
+  gap: 0.4375rem;
+  border: none;
+  padding: 0;
+  margin: 0;
+  min-width: 0;
+}
+
+.label {
+  font-size: 0.875rem;
+  font-weight: 700;
+  padding: 0; /* el <legend> trae padding lateral propio */
+}
+
+.optional {
+  font-weight: 500;
+  color: #8a93a6;
+}
+
+.input,
+.textarea {
+  width: 100%;
+  font: inherit;
+  font-size: 1rem; /* 16px: menos y iOS hace zoom al enfocar */
+  color: var(--navy);
+  background: #fff;
+  border: 1px solid rgba(20, 33, 61, 0.2);
+  border-radius: 0.75rem;
+  padding: 0.875rem 1rem;
+}
+
+.input:focus,
+.textarea:focus {
+  outline: 2px solid var(--orange);
+  outline-offset: 1px;
+  border-color: transparent;
+}
+
+.textarea {
+  min-height: 6rem;
+  resize: vertical;
+}
+
+.hint {
+  font-size: 0.8125rem;
+  color: #8a93a6;
+}
+
+.nota {
+  font-size: 0.875rem;
+  line-height: 1.5;
+  color: var(--muted-on-light);
+}
+
+.nota strong {
+  color: var(--navy);
+}
+
+/* "Nosotros lo subimos": el negocio no se autopublica y eso tiene que quedar
+   claro antes de que llene nada, no después de enviar. */
+.avisoContacto {
+  margin-top: var(--s3);
+  padding: 0.875rem 1rem;
+  border-left: 3px solid var(--orange);
+  background: var(--cream);
+  border-radius: 0 0.5rem 0.5rem 0;
+  font-size: 0.9375rem;
+  line-height: 1.45;
+  color: var(--muted-on-light);
+}
+
+/* Offerings: el campo que de verdad importa de este form */
+
+.offeringsInput {
+  display: flex;
+  gap: 0.5rem;
+  align-items: stretch;
+}
+
+.offeringsInput .input {
+  flex: 1;
+  min-width: 0;
+}
+
+.btnAgregar {
+  flex: none;
+  border: none;
+  cursor: pointer;
+  background: var(--navy);
+  color: #fff;
+  font: inherit;
+  font-size: 0.9375rem;
+  font-weight: 700;
+  border-radius: 0.75rem;
+  padding: 0 1.125rem;
+}
+
+.btnAgregar:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+.offeringsLista {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+}
+
+.offeringChip {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  background: rgba(240, 122, 44, 0.12);
+  border: 1px solid rgba(240, 122, 44, 0.35);
+  border-radius: 999px;
+  padding: 0.4375rem 0.375rem 0.4375rem 0.875rem;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: var(--orange-text);
+}
+
+.offeringQuitar {
+  border: none;
+  cursor: pointer;
+  background: rgba(240, 122, 44, 0.2);
+  color: var(--orange-text);
+  border-radius: 999px;
+  width: 1.375rem;
+  height: 1.375rem;
+  font-size: 1rem;
+  line-height: 1;
+  display: grid;
+  place-items: center;
+}
+
+.sugerencias {
+  margin-top: 0.875rem;
+}
+
+.sugerenciasLista {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+/* Tocables de 40px: el dedo de un señor en un celular barato, no un mouse. */
+.sugerencia {
+  border: 1px dashed rgba(20, 33, 61, 0.3);
+  background: #fff;
+  color: var(--navy);
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  border-radius: 999px;
+  padding: 0.5rem 0.875rem;
+  min-height: 2.5rem;
+}
+
+.sugerencia:active {
+  background: var(--cream);
+}
+
+/* Giro: dos opciones, lado a lado. Cabe en una línea hasta en 360px. */
+.giros {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.5rem;
+  margin-top: 0.25rem;
+}
+
+.giros .radio {
+  padding: 0.875rem 0.75rem;
+  font-size: 0.9375rem;
+}
+
+.honey {
+  position: absolute;
+  left: -9999px;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+
+.formError {
+  background: #fdecec;
+  border: 1px solid #f3b9b9;
+  color: #9b1c1c;
+  border-radius: 0.75rem;
+  padding: 0.875rem 1rem;
+  font-size: 0.9375rem;
+  font-weight: 600;
+}
+
+.success {
+  text-align: center;
+  padding: 2.5rem 1.5rem;
+  border: 2px solid var(--orange);
+  border-radius: 1.25rem;
+  margin-top: 2.5rem;
+}
+
+.successTitle {
+  font-size: 1.5rem;
+  font-weight: 800;
+  margin-top: 1rem;
+}
+
+.successBody {
+  margin-top: 0.75rem;
+  font-size: 1rem;
+  line-height: 1.5;
+  color: #55607a;
+}
+
+/* CTA sticky */
+
+/* Navy sólido, no blanco translúcido: la barra pasa por encima de secciones
+   naranja y el blanco con blur se ensuciaba contra ellas. */
+.sticky {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 20;
+  /* 1.25rem lateral: el mismo que .section, para que el botón caiga alineado
+     con el contenido de la página y no medio centímetro más afuera. */
+  padding: 0.75rem 1.25rem calc(0.75rem + env(safe-area-inset-bottom));
+  background: var(--navy);
+  transform: translateY(110%);
+  transition: transform 0.25s ease;
+}
+
+/* El label del sticky va en una sola línea: si envuelve, la flecha se queda
+   sola en el segundo renglón. */
+.sticky .btnOrange {
+  white-space: nowrap;
+}
+
+.stickyVisible {
+  transform: translateY(0);
+}
+
+.stickyInner {
+  max-width: 44rem;
+  margin: 0 auto;
+  display: flex;
+  justify-content: center;
+}
+
+.stickySpacer {
+  height: 5.5rem;
+}
+
+/* Footer */
+
+.footer {
+  background: #0b1526;
+  color: #9aa3b5;
+  padding: 2.5rem 1.25rem;
+  font-size: 0.875rem;
+}
+
+.footerInner {
+  max-width: 44rem;
+  margin: 0 auto;
+  display: grid;
+  gap: 1rem;
+}
+
+.footerLogo {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #fff;
+  font-weight: 700;
+  font-size: 1.125rem;
+}
+
+.footerLinks {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.25rem;
+}
+
+.footerLinks a:hover {
+  color: #fff;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .scrollHint,
+  .caret,
+  .card,
+  .sticky {
+    animation: none;
+    transition: none;
+  }
+
+  .card {
+    opacity: 1;
+    transform: none;
+  }
+}
