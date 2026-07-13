@@ -1,5 +1,18 @@
 export const MUNICIPIOS = ["Vicente Guerrero", "Villa Unión", "Nombre de Dios"] as const;
 
+// Los tres municipios son la cobertura de hoy, no la de siempre: hay negocios
+// pegados a la frontera (La Joya, Suchil) que se registrarían si pudieran. Antes
+// el radio los dejaba sin opción y ahí se acababa el flujo. Con "otro" escriben
+// su municipio, la solicitud entra igual a la cola y queda como demanda medida
+// del siguiente lugar a abrir. El valor es un centinela, no un municipio: por eso
+// va en minúscula y no puede chocar con uno real.
+export const MUNICIPIO_OTRO = "otro";
+export const MAX_MUNICIPIO_LEN = 60;
+
+export function esMunicipioCubierto(municipio: string): boolean {
+  return MUNICIPIOS.includes(municipio as (typeof MUNICIPIOS)[number]);
+}
+
 // Dos giros, no más: lo que cambia entre un puesto de tacos y una ferretería no
 // es el formulario, son los ejemplos. Un taquero que lee "cemento, pintura" no
 // entiende qué escribir; uno que lee "boneless, alitas" lo entiende solo.

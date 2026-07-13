@@ -3,7 +3,7 @@
 import { useActionState, useEffect, useState } from "react";
 import s from "./landing.module.css";
 import { registrarNegocio, type CampoError, type RegistroState } from "../../app/actions/registro";
-import { GIROS, MUNICIPIOS, type Giro } from "./data";
+import { GIROS, MAX_MUNICIPIO_LEN, MUNICIPIO_OTRO, MUNICIPIOS, type Giro } from "./data";
 import { useNegocioSeleccionado } from "./NegocioSeleccionado";
 import OfferingsInput from "./OfferingsInput";
 
@@ -27,6 +27,7 @@ export default function RegistroForm() {
   // que ya tiene en la base. Igual puede corregirlo si le pusimos mal la categoría.
   const [giro, setGiro] = useState<Giro | null>(negocio?.giro ?? null);
   const [telefono, setTelefono] = useState("");
+  const [municipio, setMunicipio] = useState("");
 
   const error = state.status === "error" ? state : null;
   const errorEn = (campo: CampoError) => (error?.campo === campo ? error.message : null);
@@ -46,12 +47,23 @@ export default function RegistroForm() {
         <div className={s.inner}>
           <div className={s.success}>
             <CheckCircle />
+            {/* Al de fuera de cobertura no se le puede prometer el alta: en su
+                municipio todavía no hay nada donde publicarlo. Se le dice la
+                verdad — queda apuntado y es lo que decide adónde abrimos. */}
             <p className={s.successTitle}>Listo, ya lo recibimos.</p>
-            <p className={s.successBody}>
-              Te hablamos al teléfono que nos dejaste para confirmar los datos y terminar tu
-              perfil: fotos, horarios y ubicación. <strong>Nosotros lo subimos</strong> — tú ya
-              no tienes que hacer nada.
-            </p>
+            {state.cubierto ? (
+              <p className={s.successBody}>
+                Te hablamos al teléfono que nos dejaste para confirmar los datos y terminar tu
+                perfil: fotos, horarios y ubicación. <strong>Nosotros lo subimos</strong> — tú ya
+                no tienes que hacer nada.
+              </p>
+            ) : (
+              <p className={s.successBody}>
+                Tu municipio todavía no está en Vichente App, pero <strong>ya quedó apuntado</strong>
+                : los negocios que se registran son los que deciden a dónde abrimos. En cuanto
+                lleguemos, <strong>te hablamos</strong> y te subimos.
+              </p>
+            )}
           </div>
         </div>
       </section>
@@ -172,17 +184,56 @@ export default function RegistroForm() {
             <CampoInvalido mensaje={errorEn("contact_name")} />
           </div>
 
+          {/* Fuera de los tres municipios el registro NO se bloquea: hay negocios
+              pegados a la frontera (La Joya, Suchil) que se quedaban sin opción y
+              abandonaban ahí. Se les toma el dato igual; es la mejor señal que
+              tenemos de dónde abrir después. */}
           {!esCompletar && (
             <fieldset className={s.field} id="municipio">
               <legend className={s.label}>Municipio</legend>
               <div className={s.radios}>
                 {MUNICIPIOS.map((m) => (
                   <label key={m} className={s.radio}>
-                    <input type="radio" name="municipio" value={m} />
+                    <input
+                      type="radio"
+                      name="municipio"
+                      value={m}
+                      checked={municipio === m}
+                      onChange={() => setMunicipio(m)}
+                    />
                     <span>{m}</span>
                   </label>
                 ))}
+                <label className={s.radio}>
+                  <input
+                    type="radio"
+                    name="municipio"
+                    value={MUNICIPIO_OTRO}
+                    checked={municipio === MUNICIPIO_OTRO}
+                    onChange={() => setMunicipio(MUNICIPIO_OTRO)}
+                  />
+                  <span>Otro</span>
+                </label>
               </div>
+
+              {municipio === MUNICIPIO_OTRO && (
+                <>
+                  <input
+                    className={s.input}
+                    name="municipio_otro"
+                    type="text"
+                    maxLength={MAX_MUNICIPIO_LEN}
+                    placeholder="Suchil, La Joya…"
+                    aria-label="¿Cuál es tu municipio?"
+                    autoFocus
+                  />
+                  <p className={s.hint}>
+                    Todavía no estamos ahí, pero registra tu negocio igual: los que se apuntan son
+                    los que deciden a dónde abrimos, y te avisamos en cuanto lleguemos.
+                  </p>
+                </>
+              )}
+
               <CampoInvalido mensaje={errorEn("municipio")} />
             </fieldset>
           )}

@@ -8,7 +8,13 @@
 // Nada de esto se publica solo: cae en la cola `pending` y un admin lo revisa,
 // lo contacta y lo sube. La landing es una solicitud, no un alta.
 
-import { GIROS, MUNICIPIOS, type Giro } from "../../components/negocios/data";
+import {
+  GIROS,
+  MAX_MUNICIPIO_LEN,
+  MUNICIPIO_OTRO,
+  esMunicipioCubierto,
+  type Giro,
+} from "../../components/negocios/data";
 
 const SUPABASE_URL = process.env.SUPABASE_URL!;
 const SUPABASE_ANON_KEY = process.env.SUPABASE_ANON_KEY!;
@@ -28,9 +34,12 @@ export type CampoError =
   | "municipio"
   | "general";
 
+/** `cubierto: false` es un registro de un municipio donde todavía no estamos. Se
+ *  guarda igual, pero el acuse no puede prometerle el alta: ahí no hay app que
+ *  lo publique todavía. */
 export type RegistroState =
   | { status: "idle" }
-  | { status: "ok" }
+  | { status: "ok"; cubierto: boolean }
   | { status: "error"; message: string; campo: CampoError };
 
 function clean(value: FormDataEntryValue | null): string {
@@ -84,7 +93,7 @@ export async function registrarNegocio(
   formData: FormData
 ): Promise<RegistroState> {
   // Honeypot: el campo va oculto por CSS, un humano nunca lo llena.
-  if (clean(formData.get("website"))) return { status: "ok" };
+  if (clean(formData.get("website"))) return { status: "ok", cubierto: true };
 
   const offerings = limpiarOfferings(formData.getAll("offerings"));
   // El form lo muestra como "618 123 4567" para que se lea, pero se guarda en
@@ -142,7 +151,19 @@ export async function registrarNegocio(
         campo: "business_name",
       };
     }
-    if (!MUNICIPIOS.includes(municipio as (typeof MUNICIPIOS)[number])) {
+
+    // "otro" no es un municipio: es el dueño diciendo que el suyo no está en la
+    // lista. El nombre real llega en el campo de texto de al lado.
+    if (municipio === MUNICIPIO_OTRO) {
+      municipio = clean(formData.get("municipio_otro")).slice(0, MAX_MUNICIPIO_LEN);
+      if (!municipio) {
+        return {
+          status: "error",
+          message: "Escribe el nombre de tu municipio.",
+          campo: "municipio",
+        };
+      }
+    } else if (!esMunicipioCubierto(municipio)) {
       return { status: "error", message: "Elige tu municipio.", campo: "municipio" };
     }
   }
@@ -177,5 +198,5 @@ export async function registrarNegocio(
     };
   }
 
-  return { status: "ok" };
+  return { status: "ok", cubierto: esMunicipioCubierto(municipio) };
 }
