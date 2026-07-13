@@ -28,18 +28,21 @@ export interface GiroConfig {
   sugerencias: string[];
 }
 
-// Ni el catálogo ni lo genérico: lo que hace que te busquen A TI. "Tacos" lo
-// tiene medio pueblo y no distingue a nadie; "tacos de barbacoa" y "consomé" son
-// los que traen al cliente que quiere justo eso. La pregunta empuja a lo
-// específico porque es lo único que gana una búsqueda.
+// La pregunta se hace desde el lado del cliente, no del dueño: pensar "qué
+// escribe la gente" saca palabras específicas solas, mientras que "qué vendes"
+// saca el rubro. Y el rubro no gana búsquedas: "tacos" lo tiene medio pueblo,
+// "tacos de barbacoa" trae al cliente que quiere justo eso.
+//
+// El hint pide lo que más le piden y lo que lo distingue, NO el catálogo
+// completo: si el dueño se siente obligado a listar todo el menú, abandona.
 //
 // Las sugerencias son tap-to-add: para un dueño que teclea lento en el celular,
 // tocar cuatro chips es la diferencia entre llenar esto y abandonarlo.
 export const GIROS: Record<Giro, GiroConfig> = {
   comida: {
     label: "Vendo comida",
-    pregunta: "¿Por qué te buscan a ti?",
-    hint: "Lo que te distingue, no lo obvio. Si vendes tacos: ¿de qué? «Tacos de barbacoa» o «consomé» te traen al cliente que quiere eso; «tacos» lo tiene medio pueblo.",
+    pregunta: "¿Qué escribe la gente cuando busca lo tuyo?",
+    hint: "Lo que más te piden y lo que te distingue, no todo el menú. Si tu fuerte es la barbacoa: «tacos de barbacoa», «consomé». Con «tacos» te pierdes entre todos.",
     placeholder: "tacos de barbacoa",
     sugerencias: [
       "tacos de barbacoa",
@@ -54,8 +57,8 @@ export const GIROS: Record<Giro, GiroConfig> = {
   },
   comercial: {
     label: "Vendo productos o servicios",
-    pregunta: "¿Por qué te buscan a ti?",
-    hint: "Lo específico, no el rubro. «Ferretería» ya lo dice tu letrero; «cemento», «copias de llaves» o «tubo de cobre» es lo que la gente escribe cuando lo necesita.",
+    pregunta: "¿Qué escribe la gente cuando busca lo tuyo?",
+    hint: "Lo que más te piden y lo que te distingue, no todo el catálogo. Si eres la ferretería del pueblo: «copias de llaves», «cemento», «tubo de cobre». Con «ferretería» te pierdes entre todas.",
     placeholder: "renta de sillas",
     sugerencias: [
       "renta de sillas",
