@@ -30,7 +30,7 @@ export default function HeroNegocios({ businessCount }: { businessCount: number 
         <p className={s.lead}>
           En Vichente App la gente puede buscar cosas como{" "}
           <em className={s.termino}>boneless</em>, <em className={s.termino}>plomero</em> o{" "}
-          <em className={s.termino}>renta de sillas</em>.
+          <em className={s.termino}>renta de sillas</em> y encontrar en segundos quién lo vende o donde encontrarlo.
         </p>
 
         <p className={s.lead}>
