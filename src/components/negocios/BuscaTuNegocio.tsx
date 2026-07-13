@@ -81,7 +81,7 @@ export default function BuscaTuNegocio() {
                     {n.municipio} ·{" "}
                     <a
                       className={s.linkSubrayado}
-                      href={`/${n.slug}`}
+                      href={`https://app.vichente.com/#/business/${n.slug}`}
                       target="_blank"
                       rel="noopener noreferrer"
                     >
