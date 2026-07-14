@@ -66,6 +66,9 @@ const styles = `
 .va-term   { animation: va-term-in 320ms ease-out; }
 .va-chip-btn { transition: transform 140ms ease, box-shadow 140ms ease; }
 .va-chip-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 16px rgba(20,33,61,0.12); }
+/* Un chip que flota es un blanco en movimiento: se congela en cuanto lo apuntas
+   o lo enfocas con teclado, para no pedirle puntería a nadie. */
+.va-chip:hover, .va-chip:focus-within { animation-play-state: paused; }
 .va-cta:hover { transform: translateY(-1px); }
 .va-cta { transition: transform 140ms ease; }
 
