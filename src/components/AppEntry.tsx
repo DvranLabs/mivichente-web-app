@@ -18,8 +18,8 @@ const PLAY_STORE_URL = "https://play.google.com/store/apps/details?id=com.dvranc
 
 // Lo que la gente realmente ocupa en el pueblo. Doble función: enseñan el rango
 // de la app (comida, servicios, salud, refacciones) sin explicarlo.
-const SEARCH_TERMS = ["molletes", "jardinero", "doctor", "ferretería", "farmacia", "tortillas"];
-const CHIPS = ["Tacos", "Horarios de camiones", "Medicos", "Mandaditos"];
+const SEARCH_TERMS = ["molletes", "jardinero", "tacos", "ferretería", "farmacias", "arquitectos"];
+const CHIPS = ["Musicos", "Horarios de camiones", "Doctores", "Mandaditos"];
 
 const ROTATE_MS = 2200;
 
@@ -315,11 +315,7 @@ export default function AppEntry({ platform }: { platform: Platform }) {
                 Descargar app Android
               </a>
             )}
-            {platform !== "android" && (
-              <p style={{ fontSize: "13px", color: "#A99B8C", margin: 0 }}>
-                iPhone: usa la versión web
-              </p>
-            )}
+            
           </div>
         </div>
       </div>
