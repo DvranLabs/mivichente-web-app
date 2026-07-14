@@ -18,8 +18,8 @@ const PLAY_STORE_URL = "https://play.google.com/store/apps/details?id=com.dvranc
 
 // Lo que la gente realmente ocupa en el pueblo. Doble función: enseñan el rango
 // de la app (comida, servicios, salud, refacciones) sin explicarlo.
-const SEARCH_TERMS = ["tacos", "taxi", "doctor", "ferretería", "farmacia", "tortillas"];
-const CHIPS = ["Tacos", "Taxi", "Farmacia", "Ferretería"];
+const SEARCH_TERMS = ["molletes", "jardinero", "doctor", "ferretería", "farmacia", "tortillas"];
+const CHIPS = ["Tacos", "Horarios de camiones", "Medicos", "Mandaditos"];
 
 const ROTATE_MS = 2200;
 
