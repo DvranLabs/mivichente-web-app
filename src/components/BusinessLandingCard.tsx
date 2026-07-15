@@ -12,6 +12,7 @@ interface Business {
   description: string | null;
   photo_url: string | null;
   is_verified: boolean;
+  has_delivery: boolean;
   categories: { name: string } | null;
 }
 
@@ -53,6 +54,16 @@ const VerifiedBadge = () => (
       d="M22.25 12c0-1.43-.88-2.67-2.19-3.34.46-1.39.2-2.9-.81-3.91s-2.52-1.27-3.91-.81c-.66-1.31-1.91-2.19-3.34-2.19s-2.67.88-3.33 2.19c-1.4-.46-2.91-.2-3.92.81s-1.26 2.52-.8 3.91c-1.31.67-2.2 1.91-2.2 3.34s.89 2.67 2.2 3.34c-.46 1.39-.21 2.9.8 3.91s2.52 1.26 3.91.81c.67 1.31 1.91 2.19 3.34 2.19s2.68-.88 3.34-2.19c1.39.45 2.9.2 3.91-.81s1.27-2.52.81-3.91c1.31-.67 2.19-1.91 2.19-3.34z"
     />
     <path fill="#fff" d="M9.64 15.95l-3.55-3.46 1.32-1.35 2.23 2.17 5.4-5.55 1.32 1.35z" />
+  </svg>
+);
+
+const DeliveryIcon = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" strokeWidth={2}>
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      d="M3 13h11V6H3v7zm0 0l2 5h2m7-5h4l3 4v1h-2m-9 0h4m-8 0a2 2 0 104 0m6 0a2 2 0 104 0"
+    />
   </svg>
 );
 
@@ -201,6 +212,26 @@ export default function BusinessLandingCard({ business, webAppUrl, playStoreUrl,
 
             {business.address && (
               <p style={{ fontSize: "14px", color: "#6b7280", margin: "0 0 4px" }}>{business.address}</p>
+            )}
+
+            {business.has_delivery && (
+              <span
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: "6px",
+                  marginTop: "6px",
+                  padding: "4px 10px",
+                  borderRadius: "999px",
+                  background: "#F3EEFC",
+                  color: "#7c3aed",
+                  fontSize: "13px",
+                  fontWeight: 700,
+                }}
+              >
+                <DeliveryIcon />
+                Envío a domicilio
+              </span>
             )}
 
             {business.description && (

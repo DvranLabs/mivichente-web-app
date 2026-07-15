@@ -15,6 +15,7 @@ interface Business {
   description: string | null;
   photo_url: string | null;
   is_verified: boolean;
+  has_delivery: boolean;
   categories: { id: string; name: string } | null;
 }
 
@@ -23,7 +24,7 @@ async function getBusinessBySlug(slug: string): Promise<Business | null> {
   // businesses↔categories (la FK directa category_id y la many-to-many
   // business_categories). Sin el hint, PostgREST responde 300 y esto devuelve null.
   const res = await fetch(
-    `${SUPABASE_URL}/rest/v1/businesses?slug=eq.${encodeURIComponent(slug)}&select=id,slug,name,phone,phone_is_whatsapp,address,description,photo_url,is_verified,categories!businesses_category_id_fkey(id,name)&limit=1`,
+    `${SUPABASE_URL}/rest/v1/businesses?slug=eq.${encodeURIComponent(slug)}&select=id,slug,name,phone,phone_is_whatsapp,address,description,photo_url,is_verified,has_delivery,categories!businesses_category_id_fkey(id,name)&limit=1`,
     {
       headers: {
         apikey: SUPABASE_ANON_KEY,
