@@ -1,3 +1,4 @@
+import { headers } from "next/headers";
 import { notFound } from "next/navigation";
 import BusinessLandingCard from "../../components/BusinessLandingCard";
 
@@ -9,11 +10,12 @@ interface Business {
   slug: string;
   name: string;
   phone: string;
+  phone_is_whatsapp: boolean;
   address: string | null;
   description: string | null;
   photo_url: string | null;
   is_verified: boolean;
-  categories: { name: string } | null;
+  categories: { id: string; name: string } | null;
 }
 
 async function getBusinessBySlug(slug: string): Promise<Business | null> {
@@ -21,7 +23,7 @@ async function getBusinessBySlug(slug: string): Promise<Business | null> {
   // businesses↔categories (la FK directa category_id y la many-to-many
   // business_categories). Sin el hint, PostgREST responde 300 y esto devuelve null.
   const res = await fetch(
-    `${SUPABASE_URL}/rest/v1/businesses?slug=eq.${encodeURIComponent(slug)}&select=id,slug,name,phone,address,description,photo_url,is_verified,categories!businesses_category_id_fkey(name)&limit=1`,
+    `${SUPABASE_URL}/rest/v1/businesses?slug=eq.${encodeURIComponent(slug)}&select=id,slug,name,phone,phone_is_whatsapp,address,description,photo_url,is_verified,categories!businesses_category_id_fkey(id,name)&limit=1`,
     {
       headers: {
         apikey: SUPABASE_ANON_KEY,
@@ -62,6 +64,18 @@ export default async function BusinessSlugPage({ params }: { params: Promise<{ s
   const webAppUrl = `https://app.vichente.com/#/negocio/${business.slug}`;
   const playStoreUrl = "https://play.google.com/store/apps/details?id=com.dvrancorp.vichente";
   const telUrl = business.phone ? `tel:${business.phone}` : null;
+  const userAgent = (await headers()).get("user-agent") ?? "";
+  const isAndroid = /android/i.test(userAgent);
+  const categoryUrl = business.categories ? `https://app.vichente.com/#/category/${business.categories.id}` : null;
 
-  return <BusinessLandingCard business={business} webAppUrl={webAppUrl} playStoreUrl={playStoreUrl} telUrl={telUrl} />;
+  return (
+    <BusinessLandingCard
+      business={business}
+      webAppUrl={webAppUrl}
+      playStoreUrl={playStoreUrl}
+      telUrl={telUrl}
+      isAndroid={isAndroid}
+      categoryUrl={categoryUrl}
+    />
+  );
 }

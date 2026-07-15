@@ -7,6 +7,7 @@ const NAVY = "#14213D";
 interface Business {
   name: string;
   phone: string;
+  phone_is_whatsapp: boolean;
   address: string | null;
   description: string | null;
   photo_url: string | null;
@@ -19,7 +20,15 @@ interface BusinessLandingCardProps {
   webAppUrl: string;
   playStoreUrl: string;
   telUrl: string | null;
+  isAndroid: boolean;
+  categoryUrl: string | null;
 }
+
+const WhatsAppIcon = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+    <path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.45 1.32 4.95L2 22l5.29-1.39a9.9 9.9 0 004.75 1.21h.01c5.46 0 9.91-4.45 9.91-9.91C21.96 6.45 17.5 2 12.04 2zm0 18.11h-.01a8.23 8.23 0 01-4.2-1.15l-.3-.18-3.14.82.84-3.06-.2-.31a8.2 8.2 0 01-1.26-4.4c0-4.53 3.69-8.22 8.23-8.22 2.2 0 4.26.86 5.82 2.41a8.17 8.17 0 012.41 5.82c0 4.53-3.69 8.22-8.19 8.22zm4.51-6.16c-.25-.12-1.46-.72-1.68-.8-.23-.08-.39-.12-.56.12-.16.25-.64.8-.78.96-.14.16-.29.18-.53.06-.25-.12-1.04-.38-1.99-1.22-.73-.65-1.23-1.46-1.37-1.71-.14-.25-.02-.38.11-.51.11-.11.25-.29.37-.43.12-.14.16-.25.25-.41.08-.16.04-.31-.02-.43-.06-.12-.56-1.35-.77-1.85-.2-.48-.41-.42-.56-.42-.14-.01-.31-.01-.48-.01a.92.92 0 00-.67.31c-.23.25-.87.85-.87 2.08s.89 2.41 1.02 2.58c.12.16 1.75 2.67 4.24 3.74.59.26 1.05.41 1.41.52.59.19 1.13.16 1.56.1.48-.07 1.46-.6 1.66-1.17.21-.58.21-1.08.14-1.18-.06-.11-.23-.17-.48-.29z" />
+  </svg>
+);
 
 const StorefrontIcon = () => (
   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
@@ -37,9 +46,13 @@ const PhoneIcon = () => (
   </svg>
 );
 
-const AndroidIcon = () => (
-  <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-    <path d="M6.5 9.5v6a1 1 0 001 1h.5v3a1.5 1.5 0 003 0v-3h2v3a1.5 1.5 0 003 0v-3h.5a1 1 0 001-1v-6h-11zM5.5 9.5a1 1 0 00-1 1V17a1.5 1.5 0 003 0v-6.5a1 1 0 00-1-1h-1zM18.5 9.5a1 1 0 00-1 1V17a1.5 1.5 0 003 0v-6.5a1 1 0 00-1-1h-1zM16.9 5.4l1.05-1.82a.35.35 0 10-.61-.35l-1.07 1.85a6.4 6.4 0 00-4.77 0L10.43 3.23a.35.35 0 10-.61.35L10.87 5.4A6.02 6.02 0 007.5 10.5h9a6.02 6.02 0 00-3.6-5.1zM9.9 8.3a.6.6 0 11.6-.6.6.6 0 01-.6.6zm4.2 0a.6.6 0 11.6-.6.6.6 0 01-.6.6z" />
+const VerifiedBadge = () => (
+  <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+    <path
+      fill="#2563eb"
+      d="M22.25 12c0-1.43-.88-2.67-2.19-3.34.46-1.39.2-2.9-.81-3.91s-2.52-1.27-3.91-.81c-.66-1.31-1.91-2.19-3.34-2.19s-2.67.88-3.33 2.19c-1.4-.46-2.91-.2-3.92.81s-1.26 2.52-.8 3.91c-1.31.67-2.2 1.91-2.2 3.34s.89 2.67 2.2 3.34c-.46 1.39-.21 2.9.8 3.91s2.52 1.26 3.91.81c.67 1.31 1.91 2.19 3.34 2.19s2.68-.88 3.34-2.19c1.39.45 2.9.2 3.91-.81s1.27-2.52.81-3.91c1.31-.67 2.19-1.91 2.19-3.34z"
+    />
+    <path fill="#fff" d="M9.64 15.95l-3.55-3.46 1.32-1.35 2.23 2.17 5.4-5.55 1.32 1.35z" />
   </svg>
 );
 
@@ -77,7 +90,15 @@ const Skyline = () => (
   />
 );
 
-export default function BusinessLandingCard({ business, webAppUrl, playStoreUrl, telUrl }: BusinessLandingCardProps) {
+export default function BusinessLandingCard({ business, webAppUrl, playStoreUrl, telUrl, isAndroid, categoryUrl }: BusinessLandingCardProps) {
+  const whatsappUrl = business.phone_is_whatsapp
+    ? (() => {
+        const digits = business.phone.replace(/\D/g, "");
+        const full = digits.startsWith("52") ? digits : `52${digits}`;
+        return `https://wa.me/${full}`;
+      })()
+    : null;
+
   return (
     <div
       style={{
@@ -85,6 +106,7 @@ export default function BusinessLandingCard({ business, webAppUrl, playStoreUrl,
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
+        minHeight: "100vh",
         background: "linear-gradient(180deg, #FDF3EA 0%, #FCE9D8 100%)",
         fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, sans-serif",
       }}
@@ -163,7 +185,9 @@ export default function BusinessLandingCard({ business, webAppUrl, playStoreUrl,
             <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "8px" }}>
               <h1 style={{ fontSize: "26px", fontWeight: 800, margin: 0, color: NAVY, letterSpacing: "-0.5px" }}>{business.name}</h1>
               {business.is_verified && (
-                <span style={{ color: "#2563eb", fontSize: "18px" }} title="Verificado">✓</span>
+                <span title="Verificado" style={{ display: "inline-flex" }}>
+                  <VerifiedBadge />
+                </span>
               )}
             </div>
 
@@ -184,6 +208,28 @@ export default function BusinessLandingCard({ business, webAppUrl, playStoreUrl,
             )}
 
             <div style={{ marginTop: "28px", display: "flex", flexDirection: "column", gap: "12px" }}>
+              {(whatsappUrl ?? telUrl) && (
+                <a
+                  href={whatsappUrl ?? telUrl!}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    gap: "10px",
+                    background: ORANGE,
+                    color: "#fff",
+                    borderRadius: "14px",
+                    padding: "15px",
+                    fontWeight: 700,
+                    fontSize: "15px",
+                    textDecoration: "none",
+                    boxShadow: "0 8px 20px rgba(240,122,44,0.3)",
+                  }}
+                >
+                  {whatsappUrl ? <WhatsAppIcon /> : <PhoneIcon />}
+                  {whatsappUrl ? "WhatsApp" : "Llamar"} {business.phone}
+                </a>
+              )}
               <a
                 href={webAppUrl}
                 style={{
@@ -191,59 +237,18 @@ export default function BusinessLandingCard({ business, webAppUrl, playStoreUrl,
                   alignItems: "center",
                   justifyContent: "center",
                   gap: "10px",
-                  background: ORANGE,
-                  color: "#fff",
+                  background: "#fff",
+                  color: ORANGE,
+                  border: `1.5px solid ${ORANGE}`,
                   borderRadius: "14px",
                   padding: "15px",
                   fontWeight: 700,
                   fontSize: "15px",
                   textDecoration: "none",
-                  boxShadow: "0 8px 20px rgba(240,122,44,0.3)",
                 }}
               >
                 <StorefrontIcon />
                 Ver negocio en Vichente App
-              </a>
-              {telUrl && (
-                <a
-                  href={telUrl}
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    gap: "10px",
-                    background: "#fff",
-                    color: ORANGE,
-                    border: `1.5px solid ${ORANGE}`,
-                    borderRadius: "14px",
-                    padding: "15px",
-                    fontWeight: 700,
-                    fontSize: "15px",
-                    textDecoration: "none",
-                  }}
-                >
-                  <PhoneIcon />
-                  Llamar {business.phone}
-                </a>
-              )}
-              <a
-                href={playStoreUrl}
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  gap: "10px",
-                  background: "#F3F4F6",
-                  color: "#6b7280",
-                  borderRadius: "14px",
-                  padding: "13px",
-                  fontWeight: 600,
-                  fontSize: "13.5px",
-                  textDecoration: "none",
-                }}
-              >
-                <AndroidIcon />
-                ¿Android? Descarga la app
               </a>
             </div>
 
@@ -255,9 +260,22 @@ export default function BusinessLandingCard({ business, webAppUrl, playStoreUrl,
               <span style={{ flex: 1, height: "1px", background: "#F0EBE5" }} />
             </div>
 
-            <a href="https://app.vichente.com" style={{ color: ORANGE, fontSize: "14px", fontWeight: 700, textDecoration: "none" }}>
-              Explorar más negocios →
-            </a>
+            <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+              <a
+                href={categoryUrl ?? "https://app.vichente.com"}
+                style={{ color: ORANGE, fontSize: "14px", fontWeight: 700, textDecoration: "none" }}
+              >
+                {business.categories ? `Ver otros negocios de ${business.categories.name} →` : "Explorar más negocios →"}
+              </a>
+              {isAndroid && (
+                <a
+                  href={playStoreUrl}
+                  style={{ color: "#9ca3af", fontSize: "13px", fontWeight: 600, textDecoration: "none" }}
+                >
+                  Descubre la nueva app de tu pueblo →
+                </a>
+              )}
+            </div>
           </div>
         </div>
 
