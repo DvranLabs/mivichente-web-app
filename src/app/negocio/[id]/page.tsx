@@ -38,11 +38,12 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
   const { id } = await params;
   const business = await getBusiness(id);
   if (!business) return { title: "Negocio no encontrado — Vichente App" };
+  const title = business.categories?.name ? `${business.name} — ${business.categories.name}` : `${business.name} — Vichente App`;
   return {
-    title: `${business.name} — Vichente App`,
+    title,
     description: business.description ?? `${business.name} — en Vichente, directorio de Nombre de Dios, Vicente Guerrero y Villa Unión`,
     openGraph: {
-      title: `${business.name} — Vichente App`,
+      title,
       description: business.description ?? `${business.name} — en Vichente, directorio de Nombre de Dios, Vicente Guerrero y Villa Unión`,
       images: business.photo_url ? [{ url: business.photo_url }] : [],
     },
