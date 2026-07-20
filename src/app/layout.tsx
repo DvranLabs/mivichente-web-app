@@ -1,5 +1,14 @@
 import type { Metadata } from "next";
+import { Outfit } from "next/font/google";
 import "./globals.css";
+
+// Se expone como variable y NO como fontFamily del body: hoy solo /app la usa.
+// Aplicarla global cambiaría la tipografía de todo el landing sin pedirlo.
+const outfit = Outfit({
+  subsets: ["latin"],
+  variable: "--font-outfit",
+  display: "swap",
+});
 
 export const metadata: Metadata = {
   title: "Vichente App | Descubre negocios de la región",
@@ -52,7 +61,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="es">
+    <html lang="es" className={outfit.variable}>
       <body>{children}</body>
     </html>
   );
