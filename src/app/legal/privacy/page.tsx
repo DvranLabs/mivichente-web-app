@@ -10,7 +10,7 @@ export default function PrivacyPolicyPage() {
       <div className="prose prose-lg max-w-4xl mx-auto">
         <h1>Política de Privacidad</h1>
         <p>
-          <strong>Fecha de efectividad:</strong> 16 de julio de 2025
+          <strong>Fecha de efectividad:</strong> 21 de julio de 2026
         </p>
 
         <p>
@@ -22,83 +22,80 @@ export default function PrivacyPolicyPage() {
 
         <h2>1. Información que Recopilamos</h2>
         <p>
-          Podemos recopilar información sobre ti de varias maneras. La
-          información que podemos recopilar a través de la Aplicación depende
-          del contenido y los materiales que utilices, e incluye:
+          Vichente App es un directorio de negocios locales. No requiere
+          crear una cuenta ni iniciar sesión para usarse. La información que
+          recopilamos depende de cómo interactúes con la Aplicación:
         </p>
 
         <h3>Información que Nos Proporcionas</h3>
         <p>
-          Recopilamos información que nos proporcionas directamente cuando creas una
-          cuenta, te comunicas con nosotros o utilizas ciertas funciones de la
-          Aplicación. Esta información puede incluir:
+          Solo recopilamos datos que nos proporcionas directamente al usar
+          funciones específicas:
         </p>
         <ul>
           <li>
-            <strong>Nombre Completo:</strong> Para personalizar tu experiencia y
-            facilitar la interacción dentro de la comunidad.
+            <strong>Registro de negocio:</strong> Si solicitas que tu
+            negocio aparezca en el directorio, recopilamos el nombre,
+            teléfono, dirección y demás información del negocio que nos
+            envías para publicarlo.
           </li>
           <li>
-            <strong>Número de Teléfono:</strong> Utilizado para la verificación de la
-            cuenta y para permitir la comunicación relacionada con los servicios,
-            como el viaje compartido o las transacciones en el marketplace.
-          </li>
-          <li>
-            <strong>Dirección:</strong> Para ofrecer servicios basados en la ubicación y
-            facilitar las entregas o los puntos de encuentro.
+            <strong>Reportar información incorrecta:</strong> Si reportas
+            que el perfil de un negocio tiene datos desactualizados,
+            recopilamos el motivo que selecciones y la nota opcional que
+            escribas.
           </li>
         </ul>
 
         <h3>Información Recopilada Automáticamente</h3>
-        <p>
-          Cuando accedes a la Aplicación, podemos recopilar automatically
-          cierta información, que incluye:
-        </p>
         <ul>
           <li>
-            <strong>Datos de Uso:</strong> Recopilamos información sobre cómo
-            interactúas con nuestra Aplicación, como las funciones que usas y
-            las acciones que realizas.
+            <strong>Datos de uso:</strong> Qué buscas dentro de la
+            Aplicación y cuántos resultados obtienes, para saber qué
+            negocios faltan en el directorio y mejorar la búsqueda.
           </li>
           <li>
-            <strong>Información del Dispositivo:</strong> Información sobre tu
-            dispositivo móvil, como el modelo de hardware, el sistema operativo
-            y la versión.
+            <strong>Identificador anónimo de dispositivo:</strong> Un
+            identificador aleatorio generado y guardado únicamente en tu
+            dispositivo (no está ligado a tu nombre, correo ni ninguna otra
+            información personal). Se usa junto con los datos de uso y los
+            reportes de información incorrecta para distinguir actividad de
+            distintos dispositivos y evitar reportes repetidos o abusivos.
           </li>
           <li>
-            <strong>Tokens de Notificación Push (FCM Tokens):</strong> Para enviarte
-            notificaciones push con actualizaciones, alertas y otra
-            información relevante sobre nuestros servicios.
+            <strong>Información del dispositivo:</strong> Modelo de
+            hardware, sistema operativo y versión.
           </li>
         </ul>
+        <p>
+          <strong>Favoritos:</strong> Los negocios que marcas como favoritos
+          se guardan únicamente en tu dispositivo (almacenamiento local), no
+          en nuestros servidores.
+        </p>
 
         <h2>2. Uso de Tu Información</h2>
         <p>
-          Tener información precisa sobre ti nos permite ofrecerte una
-          experiencia fluida, eficiente y personalizada. Específicamente,
-          podemos usar la información recopilada sobre ti a través de la
-          Aplicación para:
+          Usamos la información que recopilamos para:
         </p>
         <ul>
-          <li>Crear y gestionar tu cuenta.</li>
-          <li>Personalizar tu experiencia en la Aplicación.</li>
           <li>
-            Facilitar los servicios que ofrecemos, como el viaje compartido y las
-            transacciones en el marketplace.
+            Publicar y mantener actualizada la ficha de un negocio en el
+            directorio.
           </li>
           <li>
-            Enviarte notificaciones push con actualizaciones, alertas y otra
-            información relevante.
+            Revisar y corregir información incorrecta reportada sobre un
+            negocio.
           </li>
           <li>
-            Proporcionar y mejorar la funcionalidad de nuestro directorio de
-            negocios.
+            Entender qué buscan las personas en el directorio y qué
+            negocios faltan por agregar.
           </li>
           <li>
-            Aumentar la eficiencia y el funcionamiento de la Aplicación.
+            Detectar y filtrar reportes repetidos o abusivos provenientes de
+            un mismo dispositivo.
           </li>
           <li>
-            Realizar análisis de datos para mejorar nuestro servicio.
+            Mantener y mejorar el funcionamiento de la Aplicación.
           </li>
         </ul>
 
