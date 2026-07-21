@@ -16,6 +16,28 @@
 import { headers } from "next/headers";
 import AppEntry, { type Platform } from "../../components/AppEntry";
 
+const SUPABASE_URL = process.env.SUPABASE_URL!;
+const SUPABASE_ANON_KEY = process.env.SUPABASE_ANON_KEY!;
+
+// Registra el scan cuando el link trae ?src= (stickers, bio de IG, etc). No
+// bloquea el render si falla: medir el canal no debe tumbar la página de
+// alguien parado frente a un negocio con mala señal.
+async function logScan(src: string, userAgent: string) {
+  try {
+    await fetch(`${SUPABASE_URL}/rest/v1/qr_scans`, {
+      method: "POST",
+      headers: {
+        apikey: SUPABASE_ANON_KEY,
+        Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ src, user_agent: userAgent }),
+    });
+  } catch {
+    // best-effort, ver comentario arriba
+  }
+}
+
 export const metadata = {
   title: "Vichente — Todo tu pueblo, en una búsqueda",
   description:
@@ -90,9 +112,15 @@ const Skyline = () => (
   />
 );
 
-export default async function AppEntryPage() {
+export default async function AppEntryPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ src?: string }>;
+}) {
   const userAgent = (await headers()).get("user-agent") ?? "";
   const platform = detectPlatform(userAgent);
+  const { src } = await searchParams;
+  if (src) await logScan(src, userAgent);
 
   return (
     <main
