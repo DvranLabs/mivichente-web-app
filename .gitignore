@@ -42,3 +42,6 @@ next-env.d.ts
 
 # claude code
 .claude/
+
+# Material grafico del piloto de menu (QR): se regenera con scripts/qr-menu.mjs
+/.qr-menu/
