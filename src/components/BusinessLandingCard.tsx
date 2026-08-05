@@ -8,6 +8,7 @@ interface Business {
   name: string;
   phone: string;
   phone_is_whatsapp: boolean;
+  whatsapp_phone: string | null;
   address: string | null;
   description: string | null;
   photo_url: string | null;
@@ -102,9 +103,12 @@ const Skyline = () => (
 );
 
 export default function BusinessLandingCard({ business, webAppUrl, playStoreUrl, telUrl, isAndroid, categoryUrl }: BusinessLandingCardProps) {
-  const whatsappUrl = business.phone_is_whatsapp
+  // El WhatsApp puede vivir en otro número que el de llamadas: `whatsapp_phone`
+  // manda si existe, si no se cae a `phone` (y sólo si ese sí tiene WhatsApp).
+  const whatsappNumber = business.whatsapp_phone ?? (business.phone_is_whatsapp ? business.phone : null);
+  const whatsappUrl = whatsappNumber
     ? (() => {
-        const digits = business.phone.replace(/\D/g, "");
+        const digits = whatsappNumber.replace(/\D/g, "");
         const full = digits.startsWith("52") ? digits : `52${digits}`;
         return `https://wa.me/${full}`;
       })()
@@ -258,7 +262,7 @@ export default function BusinessLandingCard({ business, webAppUrl, playStoreUrl,
                   }}
                 >
                   {whatsappUrl ? <WhatsAppIcon /> : <PhoneIcon />}
-                  {whatsappUrl ? "WhatsApp" : "Llamar"} {business.phone}
+                  {whatsappUrl ? "WhatsApp" : "Llamar"} {whatsappNumber ?? business.phone}
                 </a>
               )}
               <a
