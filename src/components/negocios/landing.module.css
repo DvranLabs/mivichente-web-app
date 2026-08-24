@@ -23,6 +23,15 @@
   --s3: 1.5rem;
   --s4: 2.5rem;
 
+  /* Alto total del banner de la app, borde incluido. La página lo compensa con
+     padding-top y el hero lo resta de su 100svh, así que si cambia el padding
+     del banner tiene que cambiar aquí. */
+  --banner-h: 3rem;
+
+  /* El banner va fixed, así que la página tiene que dejarle el hueco: si no, el
+     hero arranca tapado. */
+  padding-top: var(--banner-h);
+
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   line-height: 1.35;
   -webkit-font-smoothing: antialiased;
@@ -165,10 +174,60 @@
   white-space: nowrap;
 }
 
+/* Banner de la app */
+
+/* Blanco: la página arranca en navy y sigue en navy un buen rato, así que una
+   barra oscura arriba se leía como parte del hero y se perdía. El blanco es el
+   único fondo que no aparece en las primeras pantallas — por eso se ve.
+   El filo naranja abajo es lo que lo separa cuando pasa por encima de las
+   secciones claras (.onWhite, .onCream), donde el blanco sí se confunde.
+   fixed y no sticky: `html, body { overflow-x: hidden }` (globals.css) convierte
+   al body en contenedor de scroll, y ahí sticky no pega nada — la barra se iba
+   con el scroll. El hueco lo deja el padding-top de .page. */
+.bannerApp {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 30;
+  background: #fff;
+  border-bottom: 2px solid var(--orange);
+}
+
+/* Toda la barra es el área tocable: en un celular nadie apunta a las dos
+   palabras del final. */
+.bannerAppLink {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  /* El borde inferior de 2px va aparte, por eso se resta de --banner-h. */
+  min-height: calc(var(--banner-h) - 2px);
+  padding: 0.4375rem 1.25rem;
+  font-size: 0.875rem;
+  line-height: 1.25;
+  text-align: center;
+}
+
+.bannerAppTexto {
+  color: var(--muted-on-light);
+}
+
+/* --orange-text y no --orange: sobre blanco el naranja de marca da 2.8:1 y
+   reprueba AA. El botón del hero sigue siendo una píldora sólida, así que este
+   link de texto no le compite aunque compartan familia de color. */
+.bannerAppCta {
+  color: var(--orange-text);
+  font-weight: 700;
+  white-space: nowrap;
+}
+
 /* Hero */
 
+/* Resta el banner: sin esto el hero mide 100svh debajo de una barra de 46px y
+   la página arranca con scroll que no lleva a nada. */
 .hero {
-  min-height: 100svh;
+  min-height: calc(100svh - var(--banner-h));
   display: flex;
   flex-direction: column;
   justify-content: center;

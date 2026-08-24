@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 
+import BannerApp from "../components/negocios/BannerApp";
 import HeroNegocios from "../components/negocios/HeroNegocios";
 import BuscaTuNegocio from "../components/negocios/BuscaTuNegocio";
 import ProblemaSection from "../components/negocios/ProblemaSection";
@@ -135,6 +136,9 @@ export default async function HomePage() {
   return (
     <div className={s.page}>
       <NegocioProvider>
+        {/* Fuera del <main>: la página le habla al dueño de negocio, esto es la
+            salida del que solo quiere buscar algo. */}
+        <BannerApp />
         <main>
           {/* Dolor → cómo se resuelve → ahora búscate → esto es real → objeción →
               conversión. El buscador va DESPUÉS del mockup: si llega antes, el
