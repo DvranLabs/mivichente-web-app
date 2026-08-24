@@ -1,10 +1,15 @@
 // Tarjeta "minilanding" para negocios: se usa tanto en /negocio/[id] como en /[slug].
 // Estilos inline (sin cliente) para mantener estas páginas como Server Components rápidas.
+// Excepción: el botón de contacto es un client component chico (ContactLink) para
+// registrar la intención de contacto sin volver toda la tarjeta 'use client'.
+
+import ContactLink from "./ContactLink";
 
 const ORANGE = "#F07A2C";
 const NAVY = "#14213D";
 
 interface Business {
+  id: string;
   name: string;
   phone: string;
   phone_is_whatsapp: boolean;
@@ -244,8 +249,10 @@ export default function BusinessLandingCard({ business, webAppUrl, playStoreUrl,
 
             <div style={{ marginTop: "28px", display: "flex", flexDirection: "column", gap: "12px" }}>
               {(whatsappUrl ?? telUrl) && (
-                <a
+                <ContactLink
                   href={whatsappUrl ?? telUrl!}
+                  businessId={business.id}
+                  channel={whatsappUrl ? "whatsapp" : "call"}
                   style={{
                     display: "flex",
                     alignItems: "center",
@@ -263,7 +270,7 @@ export default function BusinessLandingCard({ business, webAppUrl, playStoreUrl,
                 >
                   {whatsappUrl ? <WhatsAppIcon /> : <PhoneIcon />}
                   {whatsappUrl ? "WhatsApp" : "Llamar"} {whatsappNumber ?? business.phone}
-                </a>
+                </ContactLink>
               )}
               <a
                 href={webAppUrl}
