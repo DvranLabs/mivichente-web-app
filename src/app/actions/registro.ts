@@ -109,6 +109,12 @@ export async function registrarNegocio(
   const contactPhoneCrudo = clean(formData.get("contact_phone")).replace(/\D/g, "");
   const contactPhone = contactPhoneCrudo.length >= 10 ? contactPhoneCrudo : "";
   const description = clean(formData.get("description"));
+  // Los tres que hoy se persiguen por WhatsApp después del registro. Se piden
+  // aquí porque este es el único momento en que el dueño tiene el contexto
+  // abierto: después hay que ir a buscarlo, y muchos no contestan.
+  const address = clean(formData.get("address")).slice(0, 200);
+  const hoursNote = clean(formData.get("hours_note")).slice(0, 200);
+  const socialUrl = clean(formData.get("social_url")).slice(0, 300);
   const businessId = clean(formData.get("business_id"));
   const giroCrudo = clean(formData.get("giro"));
   const giro: Giro | null = giroCrudo in GIROS ? (giroCrudo as Giro) : null;
@@ -208,6 +214,9 @@ export async function registrarNegocio(
       giro,
       business_id: businessId || null,
       photo_paths: photoPaths,
+      address: address || null,
+      hours_note: hoursNote || null,
+      social_url: socialUrl || null,
     }),
     cache: "no-store",
   });

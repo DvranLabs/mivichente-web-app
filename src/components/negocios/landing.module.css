@@ -1067,6 +1067,24 @@
   color: #fff;
 }
 
+/* Bloque de los datos que antes se perseguían por WhatsApp. Agrupados y con el
+   trato dicho arriba, para que se lea como algo que le conviene al dueño y no
+   como un formulario que se alargó. */
+.bloqueExtra {
+  display: grid;
+  gap: 1.125rem;
+  background: rgba(20, 33, 61, 0.03);
+  border: 1px solid rgba(20, 33, 61, 0.1);
+  border-radius: 0.875rem;
+  padding: 1.125rem;
+}
+
+.bloqueExtraTitulo {
+  font-size: 0.875rem;
+  color: #5c6577;
+  margin: 0;
+}
+
 /* Foto del negocio en el registro. El input real va oculto y el label hace de
    botón: así se estiliza sin pelearse con el control nativo. */
 .fotoInput {

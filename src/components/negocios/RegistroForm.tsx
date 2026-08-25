@@ -39,6 +39,9 @@ export default function RegistroForm() {
   const [municipio, setMunicipio] = useState("");
   const [municipioOtro, setMunicipioOtro] = useState("");
   const [descripcion, setDescripcion] = useState("");
+  const [direccion, setDireccion] = useState("");
+  const [horario, setHorario] = useState("");
+  const [redSocial, setRedSocial] = useState("");
   // Mientras la foto se comprime en el navegador todavía no está en el input:
   // enviar ahí mandaría el archivo original, que el server rechaza por tamaño.
   const [fotoOcupada, setFotoOcupada] = useState(false);
@@ -297,6 +300,82 @@ export default function RegistroForm() {
               <CampoInvalido mensaje={errorEn("municipio")} />
             </fieldset>
           )}
+
+          {/* Los tres datos que hoy se persiguen por WhatsApp DESPUÉS del alta.
+              Se piden aquí porque este es el único momento en que el dueño tiene
+              el contexto abierto y ganas: ya decidió, ya está escribiendo. Tres
+              días después se le pregunta a alguien a media chamba, y muchos no
+              contestan.
+
+              Van agrupados y con el trato explícito ("nos lo das ahora, sale
+              completo más rápido") en vez de sueltos entre los requeridos: así
+              se lee como algo que le conviene, no como un formulario que creció. */}
+          <div className={s.bloqueExtra}>
+            <p className={s.bloqueExtraTitulo}>
+              Lo de abajo es <strong>opcional</strong>, pero si nos lo das ahora tu negocio queda
+              completo más rápido — y no te andamos buscando después.
+            </p>
+
+            <div className={s.field}>
+              <label className={s.label} htmlFor="address">
+                ¿Dónde estás?
+              </label>
+              <input
+                className={s.input}
+                id="address"
+                name="address"
+                type="text"
+                maxLength={200}
+                autoComplete="street-address"
+                placeholder="Calle Hidalgo 12, o junto a la primaria"
+                value={direccion}
+                onChange={(e) => setDireccion(e.target.value)}
+              />
+              {/* Una referencia del pueblo vale más que una calle formal: la app
+                  abre Google Maps buscando por nombre y dirección, y así es como
+                  la gente de aquí explica dónde está. */}
+              <p className={s.hint}>
+                Con esto te ponemos el botón de cómo llegar. Una referencia sirve igual.
+              </p>
+            </div>
+
+            <div className={s.field}>
+              <label className={s.label} htmlFor="hours_note">
+                ¿A qué hora abres?
+              </label>
+              <input
+                className={s.input}
+                id="hours_note"
+                name="hours_note"
+                type="text"
+                maxLength={200}
+                placeholder="9 a 6, domingos cerrado"
+                value={horario}
+                onChange={(e) => setHorario(e.target.value)}
+              />
+              {/* A propósito un campo de texto y no siete días con turnos: eso
+                  es trabajo del admin al aprobar, no del dueño en su celular. */}
+              <p className={s.hint}>Como tú lo digas, nosotros lo acomodamos.</p>
+            </div>
+
+            <div className={s.field}>
+              <label className={s.label} htmlFor="social_url">
+                ¿Tienes Facebook o Instagram?
+              </label>
+              <input
+                className={s.input}
+                id="social_url"
+                name="social_url"
+                type="text"
+                inputMode="url"
+                maxLength={300}
+                placeholder="facebook.com/minegocio"
+                value={redSocial}
+                onChange={(e) => setRedSocial(e.target.value)}
+              />
+              <p className={s.hint}>Lo ponemos en tu perfil para que te sigan.</p>
+            </div>
+          </div>
 
           <div className={s.field}>
             <label className={s.label} htmlFor="description">
