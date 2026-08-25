@@ -53,6 +53,16 @@ export default function RegistroForm() {
   // lo dejaría en bucle.
   const alOcuparFoto = useCallback((ocupado: boolean) => setFotoOcupada(ocupado), []);
 
+  // La app manda a este formulario con `?src=app` en vez de tener el suyo. Se
+  // lee del navegador y no con `useSearchParams` porque esta página es estática
+  // y ese hook la forzaría a renderizarse en cada request. El server valida el
+  // valor contra una lista blanca — aquí solo se transporta.
+  const [source, setSource] = useState("landing");
+  useEffect(() => {
+    const src = new URLSearchParams(window.location.search).get("src");
+    if (src === "app") setSource("app");
+  }, []);
+
   // El botón está hasta abajo: si el mensaje sale arriba y la página no se mueve,
   // el dueño ve que "no pasó nada" y le vuelve a dar. Lo llevamos al campo.
   useEffect(() => {
@@ -397,6 +407,8 @@ export default function RegistroForm() {
               onChange={(e) => setDescripcion(e.target.value)}
             />
           </div>
+
+          <input type="hidden" name="source" value={source} />
 
           <div className={s.honey} aria-hidden>
             <label htmlFor="website">No llenes este campo</label>

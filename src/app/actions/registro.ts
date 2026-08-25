@@ -115,6 +115,12 @@ export async function registrarNegocio(
   const address = clean(formData.get("address")).slice(0, 200);
   const hoursNote = clean(formData.get("hours_note")).slice(0, 200);
   const socialUrl = clean(formData.get("social_url")).slice(0, 300);
+  // De qué superficie llegó. La app manda a este mismo formulario con `?src=app`
+  // en vez de tener el suyo; sin esto no habría forma de saber si ese cambio le
+  // costó registros o se los ganó. Lista blanca: el valor viaja en una URL
+  // pública y no puede entrar cualquier cosa a la columna.
+  const srcCrudo = clean(formData.get("source"));
+  const source = srcCrudo === "app" ? "app" : "landing";
   const businessId = clean(formData.get("business_id"));
   const giroCrudo = clean(formData.get("giro"));
   const giro: Giro | null = giroCrudo in GIROS ? (giroCrudo as Giro) : null;
@@ -217,6 +223,7 @@ export async function registrarNegocio(
       address: address || null,
       hours_note: hoursNote || null,
       social_url: socialUrl || null,
+      source,
     }),
     cache: "no-store",
   });
