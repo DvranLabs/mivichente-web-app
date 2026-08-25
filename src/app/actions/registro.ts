@@ -10,11 +10,13 @@
 
 import {
   GIROS,
+  MAX_FOTOS,
   MAX_MUNICIPIO_LEN,
   MUNICIPIO_OTRO,
   esMunicipioCubierto,
   type Giro,
 } from "../../components/negocios/data";
+import { subirFotosRegistro } from "../../lib/foto-registro";
 
 const SUPABASE_URL = process.env.SUPABASE_URL!;
 const SUPABASE_ANON_KEY = process.env.SUPABASE_ANON_KEY!;
@@ -100,6 +102,12 @@ export async function registrarNegocio(
   // dígitos pelones: así sale directo a un tel: o un wa.me sin romperse.
   const phone = clean(formData.get("phone")).replace(/\D/g, "");
   const contactName = clean(formData.get("contact_name"));
+  // El del dueño, aparte del público. No es redundante: el público lo contesta
+  // quien esté en el mostrador, así que no sirve para avisarle al dueño que ya
+  // puede administrar su ficha. Opcional — un teléfono incompleto se ignora en
+  // vez de rebotar el registro, que es lo que de verdad importa guardar.
+  const contactPhoneCrudo = clean(formData.get("contact_phone")).replace(/\D/g, "");
+  const contactPhone = contactPhoneCrudo.length >= 10 ? contactPhoneCrudo : "";
   const description = clean(formData.get("description"));
   const businessId = clean(formData.get("business_id"));
   const giroCrudo = clean(formData.get("giro"));
@@ -168,6 +176,19 @@ export async function registrarNegocio(
     }
   }
 
+  // Hasta acá ya pasó todo lo que puede rebotar el registro, así que subir las
+  // fotos ahora evita dejar archivos de solicitudes que nunca se guardaron.
+  // Lo que falle se salta y el registro sigue: perder el alta por una foto sería
+  // cambiar el problema caro (nadie tiene foto) por uno peor (nadie se registra).
+  //
+  // El tope de 3 lo aplica el cliente, pero se repite acá porque un FormData
+  // armado a mano puede traer las que quiera.
+  const fotos = formData
+    .getAll("foto")
+    .filter((f): f is File => f instanceof File && f.size > 0)
+    .slice(0, MAX_FOTOS);
+  const photoPaths = fotos.length > 0 ? await subirFotosRegistro(fotos) : [];
+
   const res = await fetch(`${SUPABASE_URL}/rest/v1/business_registrations`, {
     method: "POST",
     headers: {
@@ -181,10 +202,12 @@ export async function registrarNegocio(
       description: description || null,
       phone,
       contact_name: contactName,
+      contact_phone: contactPhone || null,
       municipio,
       offerings,
       giro,
       business_id: businessId || null,
+      photo_paths: photoPaths,
     }),
     cache: "no-store",
   });

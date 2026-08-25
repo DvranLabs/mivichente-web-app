@@ -9,6 +9,18 @@ export const MUNICIPIOS = ["Vicente Guerrero", "Villa Unión", "Nombre de Dios"]
 export const MUNICIPIO_OTRO = "otro";
 export const MAX_MUNICIPIO_LEN = 60;
 
+/**
+ * Cuántas fotos puede subir el dueño al registrarse.
+ *
+ * Tres y no más: la primera es la portada y es la que resuelve el problema
+ * —sin ella la tarjeta que el dueño publica en sus redes sale con el logo de
+ * Vichente en vez del suyo—, las otras dos son de regalo. Subir de a muchas
+ * sobre datos móviles es donde la gente abandona a media carga, y cada foto que
+ * entra por un formulario abierto es una que un admin tiene que revisar antes
+ * de que se publique.
+ */
+export const MAX_FOTOS = 3;
+
 export function esMunicipioCubierto(municipio: string): boolean {
   return MUNICIPIOS.includes(municipio as (typeof MUNICIPIOS)[number]);
 }

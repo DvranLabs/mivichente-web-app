@@ -1067,6 +1067,104 @@
   color: #fff;
 }
 
+/* Foto del negocio en el registro. El input real va oculto y el label hace de
+   botón: así se estiliza sin pelearse con el control nativo. */
+.fotoInput {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.fotoBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.625rem;
+  cursor: pointer;
+  width: 100%;
+  min-height: 5.5rem;
+  color: var(--navy);
+  background: #fff;
+  border: 1px dashed rgba(20, 33, 61, 0.35);
+  border-radius: 0.75rem;
+  padding: 1rem;
+  font-size: 0.9375rem;
+  font-weight: 700;
+  text-align: center;
+}
+
+.fotoBtn:hover {
+  border-color: var(--orange);
+  color: var(--orange);
+}
+
+/* El input está oculto, así que el foco del teclado tiene que verse en el
+   label o el campo queda inalcanzable sin mouse. */
+.fotoInput:focus-visible + .fotoBtn {
+  outline: 2px solid var(--orange);
+  outline-offset: 1px;
+}
+
+.fotoLista {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.fotoItem {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.375rem;
+}
+
+.fotoPreviewImg {
+  flex: none;
+  width: 6rem;
+  height: 6rem;
+  border-radius: 0.75rem;
+  object-fit: cover;
+  background: rgba(20, 33, 61, 0.06);
+}
+
+/* La primera foto es la del perfil y la de la tarjeta. Se marca para que el
+   dueño sepa cuál es sin tener que adivinar por la posición. */
+.fotoPortada {
+  position: absolute;
+  top: 0.375rem;
+  left: 0.375rem;
+  background: var(--navy);
+  color: #fff;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  border-radius: 999px;
+  padding: 0.1875rem 0.5rem;
+}
+
+.fotoQuitar {
+  flex: none;
+  border: 1px solid rgba(20, 33, 61, 0.2);
+  cursor: pointer;
+  background: #fff;
+  color: var(--navy);
+  font: inherit;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  border-radius: 999px;
+  padding: 0.3125rem 0.75rem;
+}
+
+.fotoQuitar:hover {
+  border-color: var(--orange);
+  color: var(--orange);
+}
+
 @media (prefers-reduced-motion: reduce) {
   .scrollHint,
   .caret,

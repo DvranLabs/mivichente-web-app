@@ -1,9 +1,10 @@
 "use client";
 
-import { useActionState, useEffect, useState } from "react";
+import { useActionState, useCallback, useEffect, useState } from "react";
 import s from "./landing.module.css";
 import { registrarNegocio, type CampoError, type RegistroState } from "../../app/actions/registro";
 import { GIROS, MAX_MUNICIPIO_LEN, MUNICIPIO_OTRO, MUNICIPIOS, type Giro } from "./data";
+import FotoInput from "./FotoInput";
 import { useNegocioSeleccionado } from "./NegocioSeleccionado";
 import OfferingsInput from "./OfferingsInput";
 
@@ -25,12 +26,29 @@ export default function RegistroForm() {
 
   // Al negocio que ya existe no le preguntamos su giro: se deduce de la categoría
   // que ya tiene en la base. Igual puede corregirlo si le pusimos mal la categoría.
+  // TODOS los campos van controlados a propósito. React resetea el form cuando
+  // la action termina, así que un input no controlado se vacía justo cuando el
+  // server devolvió un error — el dueño corrige el campo que le señalamos, le
+  // da enviar y ahora falta el nombre, que él ya había escrito. Ese ciclo no
+  // tiene salida visible y el registro se abandona ahí.
   const [giro, setGiro] = useState<Giro | null>(negocio?.giro ?? null);
+  const [nombre, setNombre] = useState("");
   const [telefono, setTelefono] = useState("");
+  const [nombreContacto, setNombreContacto] = useState("");
+  const [telefonoDueno, setTelefonoDueno] = useState("");
   const [municipio, setMunicipio] = useState("");
+  const [municipioOtro, setMunicipioOtro] = useState("");
+  const [descripcion, setDescripcion] = useState("");
+  // Mientras la foto se comprime en el navegador todavía no está en el input:
+  // enviar ahí mandaría el archivo original, que el server rechaza por tamaño.
+  const [fotoOcupada, setFotoOcupada] = useState(false);
 
   const error = state.status === "error" ? state : null;
   const errorEn = (campo: CampoError) => (error?.campo === campo ? error.message : null);
+
+  // Estable: FotoInput la llama desde un efecto y una función nueva por render
+  // lo dejaría en bucle.
+  const alOcuparFoto = useCallback((ocupado: boolean) => setFotoOcupada(ocupado), []);
 
   // El botón está hasta abajo: si el mensaje sale arriba y la página no se mueve,
   // el dueño ve que "no pasó nada" y le vuelve a dar. Lo llevamos al campo.
@@ -53,15 +71,14 @@ export default function RegistroForm() {
             <p className={s.successTitle}>Listo, ya lo recibimos.</p>
             {state.cubierto ? (
               <p className={s.successBody}>
-                Te hablamos al teléfono que nos dejaste para confirmar los datos y terminar tu
-                perfil: fotos, horarios y ubicación. <strong>Nosotros lo subimos</strong> — tú ya
-                no tienes que hacer nada.
+                Ya la estamos revisando. <strong>Nosotros subimos tu negocio</strong> — tú ya no
+                tienes que hacer nada. Si nos falta algo, te buscamos al teléfono que nos dejaste.
               </p>
             ) : (
               <p className={s.successBody}>
                 Tu municipio todavía no está en Vichente App, pero <strong>ya quedó apuntado</strong>
                 : los negocios que se registran son los que deciden a dónde abrimos. En cuanto
-                lleguemos, <strong>te hablamos</strong> y te subimos.
+                lleguemos, <strong>tu negocio entra</strong>.
               </p>
             )}
           </div>
@@ -89,11 +106,17 @@ export default function RegistroForm() {
         </p>
 
         {/* Hoy el negocio no se publica solo: la solicitud entra a una cola,
-            alguien del equipo la revisa y la sube. Va antes del form, no después. */}
+            alguien del equipo la revisa y la sube. Va antes del form, no después.
+
+            NO se promete llamar. Antes decía "te hablamos para confirmar" y eso
+            no siempre pasa — a veces la solicitud trae todo y se sube sin más.
+            Prometer una llamada que puede no llegar deja al dueño esperando y
+            nos vuelve los que no cumplen. Lo que sí es cierto siempre es que
+            alguien la revisa y que él no tiene que hacer nada más. */}
         <p className={s.avisoContacto}>
-          <strong>Esto no se publica solo.</strong> Nos llega tu solicitud,{" "}
-          <strong>te hablamos</strong> para confirmar, y <strong>nosotros lo subimos</strong> a
-          Vichente App. Tú no tienes que hacer nada más.
+          <strong>Esto no se publica solo.</strong> Nos llega tu solicitud, alguien del equipo la
+          revisa y <strong>nosotros subimos tu negocio</strong> a Vichente App. Tú no tienes que
+          hacer nada más.
         </p>
 
         <form action={formAction} className={s.form} key={negocio?.id ?? "nuevo"} noValidate>
@@ -112,6 +135,8 @@ export default function RegistroForm() {
                 maxLength={120}
                 autoComplete="organization"
                 placeholder="Taquería Los Amigos"
+                value={nombre}
+                onChange={(e) => setNombre(e.target.value)}
                 aria-invalid={errorEn("business_name") ? true : undefined}
               />
               <CampoInvalido mensaje={errorEn("business_name")} />
@@ -147,6 +172,11 @@ export default function RegistroForm() {
             />
           )}
 
+          {/* Hoy, cuando no llega foto, alguien del equipo entra a mano a
+              Facebook a buscarle una. Pedirla aquí es el único momento en que el
+              dueño ya está del otro lado y le cuesta un tap. */}
+          <FotoInput onOcupado={alOcuparFoto} />
+
           <div className={s.field}>
             <label className={s.label} htmlFor="phone">
               Teléfono o WhatsApp
@@ -164,7 +194,7 @@ export default function RegistroForm() {
               aria-invalid={errorEn("phone") ? true : undefined}
             />
             <CampoInvalido mensaje={errorEn("phone")} />
-            <p className={s.hint}>Por ahí te hablamos, y es el que verán tus clientes.</p>
+            <p className={s.hint}>Es el que verán tus clientes.</p>
           </div>
 
           <div className={s.field}>
@@ -179,9 +209,37 @@ export default function RegistroForm() {
               maxLength={120}
               autoComplete="name"
               placeholder="Tu nombre"
+              value={nombreContacto}
+              onChange={(e) => setNombreContacto(e.target.value)}
               aria-invalid={errorEn("contact_name") ? true : undefined}
             />
             <CampoInvalido mensaje={errorEn("contact_name")} />
+          </div>
+
+          {/* El teléfono de arriba lo contesta quien esté en el mostrador, así
+              que no sirve para hablarle al dueño. Este es el que va a hacer
+              falta el día que se abra la administración del propio negocio, y
+              conseguirlo después cuesta una visita. Se pide diciendo para qué
+              es y prometiendo que no se publica — sin eso, nadie lo llena. */}
+          <div className={s.field}>
+            <label className={s.label} htmlFor="contact_phone">
+              ¿Tu teléfono personal? <span className={s.optional}>(opcional)</span>
+            </label>
+            <input
+              className={s.input}
+              id="contact_phone"
+              name="contact_phone"
+              type="tel"
+              inputMode="numeric"
+              autoComplete="tel"
+              placeholder="618 123 4567"
+              value={telefonoDueno}
+              onChange={(e) => setTelefonoDueno(formatearTelefono(e.target.value))}
+            />
+            <p className={s.hint}>
+              <strong>No se publica.</strong> Nos sirve para buscarte a ti y no al negocio — por
+              ejemplo el día que puedas manejar tu perfil por tu cuenta.
+            </p>
           </div>
 
           {/* Fuera de los tres municipios el registro NO se bloquea: hay negocios
@@ -225,11 +283,13 @@ export default function RegistroForm() {
                     maxLength={MAX_MUNICIPIO_LEN}
                     placeholder="Suchil, La Joya…"
                     aria-label="¿Cuál es tu municipio?"
+                    value={municipioOtro}
+                    onChange={(e) => setMunicipioOtro(e.target.value)}
                     autoFocus
                   />
                   <p className={s.hint}>
                     Todavía no estamos ahí, pero registra tu negocio igual: los que se apuntan son
-                    los que deciden a dónde abrimos, y te avisamos en cuanto lleguemos.
+                    los que deciden a dónde abrimos.
                   </p>
                 </>
               )}
@@ -252,6 +312,8 @@ export default function RegistroForm() {
                   ? "Mi teléfono cambió. Abrimos de 9 a 6, cerrado los domingos."
                   : "Servicio a domicilio los fines de semana. Abrimos de 9 a 6."
               }
+              value={descripcion}
+              onChange={(e) => setDescripcion(e.target.value)}
             />
           </div>
 
@@ -268,8 +330,14 @@ export default function RegistroForm() {
             </p>
           )}
 
-          <button className={s.btnOrange} type="submit" disabled={pending}>
-            {pending ? "Enviando…" : esCompletar ? "Enviar mis datos" : "Registrar mi negocio"}
+          <button className={s.btnOrange} type="submit" disabled={pending || fotoOcupada}>
+            {pending
+              ? "Enviando…"
+              : fotoOcupada
+                ? "Preparando tus fotos…"
+                : esCompletar
+                  ? "Enviar mis datos"
+                  : "Registrar mi negocio"}
           </button>
 
           {/* Cuando algo es gratis, la duda es dónde está el gato encerrado. Se
