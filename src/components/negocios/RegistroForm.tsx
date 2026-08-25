@@ -318,7 +318,7 @@ export default function RegistroForm() {
 
             <div className={s.field}>
               <label className={s.label} htmlFor="address">
-                ¿Dónde estás?
+                ¿Dónde está tu negocio?
               </label>
               <input
                 className={s.input}
@@ -359,8 +359,10 @@ export default function RegistroForm() {
             </div>
 
             <div className={s.field}>
+              {/* "¿Tienes Facebook?" se leía como si le pidiéramos su perfil
+                  personal. Es la página del negocio. */}
               <label className={s.label} htmlFor="social_url">
-                ¿Tienes Facebook o Instagram?
+                ¿Tu negocio tiene Facebook o Instagram?
               </label>
               <input
                 className={s.input}
@@ -373,7 +375,7 @@ export default function RegistroForm() {
                 value={redSocial}
                 onChange={(e) => setRedSocial(e.target.value)}
               />
-              <p className={s.hint}>Lo ponemos en tu perfil para que te sigan.</p>
+              <p className={s.hint}>La ponemos en tu perfil de Vichente para que te sigan.</p>
             </div>
           </div>
 
