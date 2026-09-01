@@ -28,7 +28,27 @@
   --font-display: var(--font-outfit), system-ui, -apple-system, sans-serif;
   --font-ui: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
 
-  min-height: 100vh;
+  /* `.page` es su propio contenedor de scroll — necesario porque
+     `overflow-x: hidden` en `html, body` (globals.css, protege al resto del
+     landing de scroll horizontal) rompe `position: sticky` en cualquier
+     descendiente: el sticky se ancla al scrollport del ancestro con overflow
+     no-visible, y en iOS Safari / Chrome viejo directamente no se pega.
+     Mismo patrón que ya usa el admin (`html.h-dvh` + único scroller interno,
+     ver Arquitectura). `height` fijo, no `min-height`: si no, `.page` crece
+     con el contenido y deja de ser el que scrollea. Fallback a 100vh para
+     navegadores sin soporte de unidades dinámicas — `html`/`body` no tienen
+     `height` propio (ver globals.css), así que no se arma un segundo scroller
+     anidado aunque el fallback mida distinto al viewport real.
+
+     Sin `-webkit-overflow-scrolling: touch` a propósito: es legacy de antes
+     de iOS 13 (hoy el scroll con momentum es nativo en cualquier
+     `overflow: auto`) y hay reportes de que rompe `position: sticky` dentro
+     del mismo contenedor en iOS Safari viejo — exactamente el bug que este
+     cambio existe para arreglar. */
+  height: 100vh;
+  height: 100dvh;
+  overflow-y: auto;
+  overflow-x: hidden;
   background: var(--bg);
   color: var(--fg);
   font-family: var(--font-ui);
@@ -332,4 +352,16 @@
   font-weight: 700;
   color: var(--fg);
   margin: 0 0 8px;
+}
+
+/* `.page` con `height` + `overflow-y: auto` es correcto en pantalla (es el
+   contenedor de scroll que necesita el sticky, ver arriba) pero al imprimir
+   un contenedor de alto fijo con overflow se recorta a una sola hoja — el
+   navegador no pagina lo que está "fuera" del scroll. Sin este reset, guardar
+   el menú como PDF o imprimirlo deja fuera todo lo que no cupo en pantalla. */
+@media print {
+  .page {
+    height: auto;
+    overflow: visible;
+  }
 }
