@@ -112,7 +112,18 @@ export interface DescripcionParseada {
 
 // Para cortar el texto en segmentos se exige los dos puntos: es lo único que
 // distingue una etiqueta de verdad de la palabra suelta a media frase.
-const CORTE_ETIQUETA = /(?=\b(?:Incluye|Contiene|Sabores|Sabor|Con)\s*:)/i;
+//
+// `Tamaños` y `Opciones` se agregaron el 2026-09-03 y NO son cosmética: la
+// captura real las usa (23 y 1 ítems en prod), y sin estar acá sólo funcionaban
+// cuando iban al principio del texto, por el fallback de `indexOf(":")` de
+// abajo. Al revés — "Contiene: jamón, piña. Tamaños: chica $90, mediana $220" —
+// el corte nunca ocurría y la lista salía como
+// ["jamón", "piña. Tamaños: chica $90", "mediana $220"]. Eso obligaba a pedirle
+// al capturista "si usas Tamaños, ponlo primero", una regla del parser filtrada
+// a la UI que nadie podía deducir. Si se agrega una etiqueta acá, se agrega
+// también a la ayuda del formulario (admin, `menu-item-form.tsx`).
+const CORTE_ETIQUETA =
+  /(?=\b(?:Incluye|Contiene|Sabores|Sabor|Tamaños|Opciones|Con)\s*:)/i;
 
 // Dentro de un segmento sí se acepta la etiqueta sin dos puntos, porque ahí ya
 // va al principio y no hay ambigüedad: "Incluye 2 Sabritas a elegir, elote, …"
