@@ -18,11 +18,15 @@ export const metadata: Metadata = {
   creator: "Vichente Team",
   publisher: "Vichente App",
   robots: "index, follow",
-  metadataBase: new URL("https://landing.vichente.com"),
+  // El dominio de producción es vichente.com; `landing.vichente.com` no
+  // resuelve (verificado 2026-09-04). Contra ese host resolvía Next TODA
+  // `og:image` relativa del sitio, así que Facebook pedía una imagen que no
+  // existía y el link salía sin preview.
+  metadataBase: new URL("https://vichente.com"),
   openGraph: {
     title: "Vichente App | Descubre negocios de la región",
     description: "Descubre y conecta con los mejores negocios locales de Nombre de Dios, Vicente Guerrero y Villa Unión. Encuentra servicios, productos y comercios cerca de ti.",
-    url: "https://landing.vichente.com",
+    url: "https://vichente.com",
     siteName: "Vichente App",
     images: [
       {
