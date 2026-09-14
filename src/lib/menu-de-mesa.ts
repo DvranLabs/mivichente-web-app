@@ -8,15 +8,35 @@
 const SUPABASE_URL = process.env.SUPABASE_URL!;
 const SUPABASE_ANON_KEY = process.env.SUPABASE_ANON_KEY!;
 
-export interface MenuItem {
+/** Un tamaño del platillo, con su propio precio. */
+export interface MenuVariant {
   name: string;
   /** PostgREST serializa `numeric` como string ("75.00"), no como number. */
+  price: string | number;
+  order_index: number;
+}
+
+export interface MenuItem {
+  name: string;
+  /**
+   * PostgREST serializa `numeric` como string ("75.00"), no como number.
+   *
+   * Con variantes esto es el MENOR de ellas, o sea un "desde" — no el precio
+   * del platillo. Lo etiqueta `MenuDeMesa`.
+   */
   price: string | number | null;
   description: string | null;
   image_url: string | null;
   section: string | null;
   order_index: number;
   updated_at: string;
+  /**
+   * Los tamaños vivían aplanados dentro de `description` como
+   * "Tamaños: chica $90, mediana $220...". Desde el 2026-09-14 son filas y
+   * llegan por acá; `variantesComoGrupo` las devuelve con la misma forma que
+   * produce el parser para que el render no tenga que distinguirlas.
+   */
+  business_service_variants?: MenuVariant[] | null;
 }
 
 export interface MenuBusiness {
@@ -28,7 +48,7 @@ export interface MenuBusiness {
 }
 
 const SELECT =
-  "id,slug,name,photo_url,business_services(name,price,description,image_url,section,order_index,updated_at)";
+  "id,slug,name,photo_url,business_services(name,price,description,image_url,section,order_index,updated_at,business_service_variants(name,price,order_index))";
 
 async function supabaseGet<T>(path: string): Promise<T[] | null> {
   try {
@@ -192,6 +212,31 @@ export function formatearPrecio(price: string | number | null): string | null {
   if (price === null || price === undefined || price === "") return null;
   const n = typeof price === "number" ? price : Number(price);
   return Number.isFinite(n) ? PRECIO.format(n) : null;
+}
+
+/**
+ * Los tamaños del platillo con la MISMA forma que produce `parseDescripcion`,
+ * para que el render los pinte como un grupo más y no tenga que saber que
+ * vienen de otro lado.
+ *
+ * Hasta el 2026-09-14 estos mismos datos viajaban dentro de `description` como
+ * "Tamaños: chica $90, mediana $220..." y el parser los cortaba por comas. La
+ * lista se ve igual; lo que cambia es que ahora cada precio es un número
+ * consultable y no un pedazo de texto, así que se formatea igual que el del
+ * platillo en vez de salir crudo.
+ */
+export function variantesComoGrupo(
+  item: MenuItem,
+): { etiqueta: string; partes: string[] } | null {
+  const variantes = item.business_service_variants;
+  if (!variantes || variantes.length === 0) return null;
+  const partes = [...variantes]
+    .sort((a, b) => a.order_index - b.order_index)
+    .map((v) => {
+      const precio = formatearPrecio(v.price);
+      return precio ? `${v.name} ${precio}` : v.name;
+    });
+  return { etiqueta: "Tamaños", partes };
 }
 
 const FECHA = new Intl.DateTimeFormat("es-MX", {
