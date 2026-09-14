@@ -14,6 +14,7 @@ import {
   fechaDeActualizacion,
   formatearPrecio,
   parseDescripcion,
+  variantesComoGrupo,
   type MenuBusiness,
   type MenuItem,
 } from "../../lib/menu-de-mesa";
@@ -110,7 +111,13 @@ function Seccion({
 
 function Platillo({ item, prioridad }: { item: MenuItem; prioridad: boolean }) {
   const precio = formatearPrecio(item.price);
-  const { grupos, parrafo } = parseDescripcion(item.description);
+  const { grupos: gruposTexto, parrafo } = parseDescripcion(item.description);
+
+  // Los tamaños salieron de `description` a su propia tabla el 2026-09-14, pero
+  // se pintan igual que antes. Van PRIMERO porque es lo que el comensal busca
+  // cuando el platillo tiene varias medidas.
+  const tamanos = variantesComoGrupo(item);
+  const grupos = tamanos ? [tamanos, ...gruposTexto] : gruposTexto;
 
   return (
     <article className={styles.dish}>
@@ -129,7 +136,11 @@ function Platillo({ item, prioridad }: { item: MenuItem; prioridad: boolean }) {
       <div className={styles.dishBody}>
         <div className={styles.dishTop}>
           <h3 className={styles.dishName}>{item.name}</h3>
-          {precio && <span className={styles.price}>{precio}</span>}
+          {precio && (
+            <span className={styles.price}>
+              {tamanos ? `desde ${precio}` : precio}
+            </span>
+          )}
         </div>
 
         {parrafo && <p className={styles.parrafo}>{parrafo}</p>}
