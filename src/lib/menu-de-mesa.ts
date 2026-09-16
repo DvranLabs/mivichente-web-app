@@ -135,7 +135,7 @@ export interface DescripcionParseada {
 //
 // `Tamaños` y `Opciones` se agregaron el 2026-09-03 y NO son cosmética: la
 // captura real las usa (23 y 1 ítems en prod), y sin estar acá sólo funcionaban
-// cuando iban al principio del texto, por el fallback de `indexOf(":")` de
+// cuando iban al principio del texto, por el reconocimiento de etiqueta de
 // abajo. Al revés — "Contiene: jamón, piña. Tamaños: chica $90, mediana $220" —
 // el corte nunca ocurría y la lista salía como
 // ["jamón", "piña. Tamaños: chica $90", "mediana $220"]. Eso obligaba a pedirle
@@ -151,6 +151,21 @@ const CORTE_ETIQUETA =
 // — arrancaría con cosas como "Con leche" y partiría un nombre en pedazos.
 const ETIQUETA_SIN_DOSPUNTOS = /^(Incluye|Contiene|Sabores|Sabor)\b\s*(.+)$/i;
 
+// La etiqueta con dos puntos tiene que ser una de la lista, no cualquier palabra
+// que anteceda a un ":". Hasta el 2026-09-16 esto era un `indexOf(":")` y agarraba
+// el primer dos puntos del segmento viniera de donde viniera, así que una etiqueta
+// inventada rompía el texto en vez de dejarlo pasar. Con "Elige fruta y base /
+// Frutas: … / Bases: …" (captura real de K-ffess) salía un grupo con encabezado de
+// dos renglones, "ELIGE FRUTA Y BASE FRUTAS", y un elemento que mezclaba las dos
+// listas, "plátano o mango\nBases: almendra".
+//
+// Con la lista cerrada, lo que no se reconoce cae a párrafo — la regla de siempre:
+// una captura con otro formato se lee raro, no se rompe. Los modificadores de
+// platillo se van a modelar aparte, como ya pasó con los tamaños; esto solo evita
+// que mientras tanto se vean mal.
+const ETIQUETA_CON_DOSPUNTOS =
+  /^(Incluye|Contiene|Sabores|Sabor|Tamaños|Opciones|Con)\s*:([\s\S]*)$/i;
+
 export function parseDescripcion(description: string | null): DescripcionParseada {
   const texto = description?.trim();
   if (!texto) return { grupos: [], parrafo: null };
@@ -160,13 +175,12 @@ export function parseDescripcion(description: string | null): DescripcionParsead
   const sueltos: string[] = [];
 
   for (const segmento of segmentos) {
-    const corte = segmento.indexOf(":");
     let etiqueta: string;
     let resto: string;
 
-    if (corte !== -1) {
-      etiqueta = segmento.slice(0, corte).trim();
-      resto = segmento.slice(corte + 1);
+    const conDospuntos = segmento.match(ETIQUETA_CON_DOSPUNTOS);
+    if (conDospuntos) {
+      [, etiqueta, resto] = conDospuntos;
     } else {
       const m = segmento.match(ETIQUETA_SIN_DOSPUNTOS);
       if (!m) {

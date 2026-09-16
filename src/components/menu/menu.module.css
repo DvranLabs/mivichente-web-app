@@ -228,6 +228,11 @@
   font-size: 13.5px;
   color: var(--fg-muted);
   line-height: 1.45;
+  /* La captura que el parser no reconoce vuelve entera como párrafo, y suele
+     traer sus propios renglones ("Elige fruta y base / Frutas: … / Bases: …").
+     Sin esto el HTML los colapsa y el texto sale de corrido; la app sí los
+     respeta, así que el mismo platillo se leía distinto en cada superficie. */
+  white-space: pre-line;
 }
 
 .grupo {
