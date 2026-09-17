@@ -426,30 +426,69 @@ function laEstructuraLoCubre(
   return cubiertas / palabras.length >= minima;
 }
 
-// Un renglón con encabezado ("Bases: almendra, nuez, …") se poda cuando la
-// estructura cubre la MAYORÍA de sus palabras: el encabezado es texto de
-// captura y no tiene por qué existir en ninguna tabla. Un renglón SIN
-// encabezado es prosa hasta que se demuestre lo contrario, así que ahí se exige
-// cobertura COMPLETA.
+// Parte un renglón en encabezado y cola: "Bases: almendra, nuez" -> "Bases" y
+// " almendra, nuez". Lo usa `podarRenglon` para distinguir una lista capturada
+// de la prosa del platillo.
 //
-// Es la diferencia entre "Leche entera o deslactosada" (3 de 3, el grupo Leche
-// ya lo dice, se va) y "Hamburguesa con queso, jamón y piña" contra un grupo de
-// extras con esos tres (3 de 4, pero "hamburguesa" es lo que el platillo ES, así
-// que se queda). Sin la distinción, el renglón sin etiqueta —que es el caso
-// común de la captura libre, y la razón de que exista el párrafo— se podía
-// perder completo por parecerse a una lista.
-const TIENE_ENCABEZADO = /^[^\n:]{1,40}:/;
+// El tope de 40 caracteres antes de los dos puntos es lo que mantiene el riesgo
+// chico: sin él, cualquier prosa con dos puntos a media frase se trataría como
+// lista. Aun así, una prosa corta con dos puntos ("Nuevo: leche entera") entra
+// por aquí y se le poda la cola. El fallback cae del lado seguro —se conserva
+// el encabezado y lo que la estructura no cubra— pero si aparece un caso real
+// que se lea mal, es este número el que hay que mover.
+const TIENE_ENCABEZADO = /^([^\n:]{1,40}):([\s\S]*)$/;
 
-function elRenglonYaEstaEnLaEstructura(renglon: string, vocabulario: Set<string>): boolean {
-  const minima = TIENE_ENCABEZADO.test(renglon) ? COBERTURA_MINIMA : 1;
-  return laEstructuraLoCubre(renglon, vocabulario, minima);
+// "Incluye:" / "Contiene:" / "Ingredientes:" nunca se poda. Es lo que el
+// platillo TRAE, no lo que el cliente elige; la estructura no lo guarda en
+// ninguna columna, así que podarlo por parecido de palabras (una pizza que
+// "Contiene: piña" y tiene un grupo con esa fruta) lo perdería para siempre, no
+// sólo durante la recaptura.
+//
+// Se prueba también contra el encabezado de un renglón suelto, no sólo contra
+// la etiqueta de un grupo del parser: "Ingredientes:" no está en la lista
+// cerrada de `parseDescripcion`, así que nunca llega a ser grupo y cae al
+// párrafo, que es justo donde se podaría sin esta guarda.
+const ETIQUETA_DE_INGREDIENTES = /^(Incluye|Contiene|Ingredientes)$/i;
+
+/**
+ * Un renglón del texto suelto sin los pedazos que la estructura ya dice, o
+ * `null` si no queda nada que valga pintar.
+ *
+ * Un renglón CON encabezado ("Bases: almendra, nuez, …") se poda ítem por ítem,
+ * igual que un grupo del parser y por el mismo motivo: un grupo a medio
+ * capturar es legítimo, y podar el renglón entero se llevaría justo los ítems
+ * que todavía no están capturados. Caso vivo en la captura de hoy: el grupo
+ * `Base` de Mini hot cakes no tiene "Mermelada de fresa" (el de Crepa sí), así
+ * que con la poda por renglón completo ese ingrediente desaparecía del menú.
+ *
+ * Un renglón SIN encabezado es prosa hasta que se demuestre lo contrario, así
+ * que ahí se exige cobertura COMPLETA y se conserva o se va entero. Es la
+ * diferencia entre "Leche entera o deslactosada" (3 de 3, el grupo Leche ya lo
+ * dice, se va) y "Hamburguesa con queso, jamón y piña" contra un grupo de
+ * extras con esos tres: "hamburguesa" es lo que el platillo ES, así que se
+ * queda.
+ */
+function podarRenglon(renglon: string, vocabulario: Set<string>): string | null {
+  const conEncabezado = renglon.match(TIENE_ENCABEZADO);
+  if (!conEncabezado) {
+    return laEstructuraLoCubre(renglon, vocabulario, 1) ? null : renglon;
+  }
+
+  const [, encabezado, cola] = conEncabezado;
+  if (ETIQUETA_DE_INGREDIENTES.test(encabezado.trim())) return renglon;
+
+  const items = separarLista(cola);
+  // Sin ítems que medir ("Opciones:" a secas, o una cola que no es lista) se
+  // decide el renglón completo con el umbral laxo: el encabezado es texto de
+  // captura y no tiene por qué existir en ninguna tabla.
+  if (items.length === 0) {
+    return laEstructuraLoCubre(renglon, vocabulario, COBERTURA_MINIMA) ? null : renglon;
+  }
+
+  const sobreviven = items.filter((item) => !laEstructuraLoCubre(item, vocabulario));
+  if (sobreviven.length === 0) return null;
+  return `${encabezado}: ${sobreviven.join(", ")}`;
 }
-
-// "Incluye:" / "Contiene:" nunca se poda. Es lo que el platillo TRAE, no lo que
-// el cliente elige; la estructura no lo guarda en ninguna columna, así que
-// podarlo por parecido de palabras (una pizza que "Contiene: piña" y tiene un
-// grupo con esa fruta) lo perdería para siempre, no sólo durante la recaptura.
-const ETIQUETA_DE_INGREDIENTES = /^(Incluye|Contiene)$/i;
 
 /**
  * La descripción sin los pedazos que los grupos capturados ya dicen.
@@ -486,9 +525,9 @@ export function podarLoQueCubreLaEstructura(
   const sueltos = parseada.sueltos
     .flatMap((suelto) => suelto.split("\n"))
     .map((renglon) => renglon.trim())
-    .filter(
-      (renglon) => renglon.length > 0 && !elRenglonYaEstaEnLaEstructura(renglon, vocabulario),
-    );
+    .filter((renglon) => renglon.length > 0)
+    .map((renglon) => podarRenglon(renglon, vocabulario))
+    .filter((renglon): renglon is string => renglon !== null);
 
   // Se unen con salto de línea y no con espacio: `.parrafo` se pinta con
   // `white-space: pre-line` a propósito (ver `menu.module.css`), porque la app
