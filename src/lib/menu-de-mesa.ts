@@ -158,14 +158,6 @@ export function agruparPorSeccion(items: MenuItem[]): MenuSection[] {
 }
 
 /**
- * Lo que hoy es un párrafo cortado a dos líneas se vuelve una lista de qué trae.
- *
- * El formato de captura es texto libre y nadie lo valida ("Incluye: a, b, c",
- * "Sabores: x, y", o las dos juntas). Por eso: si el texto no trae una etiqueta
- * reconocible, se devuelve tal cual como párrafo en vez de inventar una lista
- * partiendo por comas — una captura con otro formato se lee raro, no se rompe.
- */
-/**
  * Un bloque listo para pintar. Los grupos del texto, los tamaños y las opciones
  * capturadas llegan todos con esta forma para que el render no tenga que saber
  * de dónde salió cada uno.
@@ -223,6 +215,14 @@ const ETIQUETA_SIN_DOSPUNTOS = /^(Incluye|Contiene|Sabores|Sabor)\b\s*(.+)$/i;
 const ETIQUETA_CON_DOSPUNTOS =
   /^(Incluye|Contiene|Sabores|Sabor|Tamaños|Opciones|Con)\s*:([\s\S]*)$/i;
 
+/**
+ * Lo que hoy es un párrafo cortado a dos líneas se vuelve una lista de qué trae.
+ *
+ * El formato de captura es texto libre y nadie lo valida ("Incluye: a, b, c",
+ * "Sabores: x, y", o las dos juntas). Por eso: si el texto no trae una etiqueta
+ * reconocible, se devuelve tal cual como párrafo en vez de inventar una lista
+ * partiendo por comas — una captura con otro formato se lee raro, no se rompe.
+ */
 export function parseDescripcion(description: string | null): DescripcionParseada {
   const texto = description?.trim();
   if (!texto) return { grupos: [], parrafo: null, sueltos: [] };
@@ -413,13 +413,36 @@ function vocabularioDeLaEstructura(item: MenuItem): Set<string> | null {
   return vocabulario.size > 0 ? vocabulario : null;
 }
 
-function laEstructuraLoCubre(texto: string, vocabulario: Set<string>): boolean {
+function laEstructuraLoCubre(
+  texto: string,
+  vocabulario: Set<string>,
+  minima = COBERTURA_MINIMA,
+): boolean {
   const palabras = palabrasSignificativas(texto);
   if (palabras.length === 0) return false;
   const cubiertas = palabras.filter((p) =>
     formas(p).some((forma) => vocabulario.has(forma)),
   ).length;
-  return cubiertas / palabras.length >= COBERTURA_MINIMA;
+  return cubiertas / palabras.length >= minima;
+}
+
+// Un renglón con encabezado ("Bases: almendra, nuez, …") se poda cuando la
+// estructura cubre la MAYORÍA de sus palabras: el encabezado es texto de
+// captura y no tiene por qué existir en ninguna tabla. Un renglón SIN
+// encabezado es prosa hasta que se demuestre lo contrario, así que ahí se exige
+// cobertura COMPLETA.
+//
+// Es la diferencia entre "Leche entera o deslactosada" (3 de 3, el grupo Leche
+// ya lo dice, se va) y "Hamburguesa con queso, jamón y piña" contra un grupo de
+// extras con esos tres (3 de 4, pero "hamburguesa" es lo que el platillo ES, así
+// que se queda). Sin la distinción, el renglón sin etiqueta —que es el caso
+// común de la captura libre, y la razón de que exista el párrafo— se podía
+// perder completo por parecerse a una lista.
+const TIENE_ENCABEZADO = /^[^\n:]{1,40}:/;
+
+function elRenglonYaEstaEnLaEstructura(renglon: string, vocabulario: Set<string>): boolean {
+  const minima = TIENE_ENCABEZADO.test(renglon) ? COBERTURA_MINIMA : 1;
+  return laEstructuraLoCubre(renglon, vocabulario, minima);
 }
 
 // "Incluye:" / "Contiene:" nunca se poda. Es lo que el platillo TRAE, no lo que
@@ -442,11 +465,20 @@ export function podarLoQueCubreLaEstructura(
   const vocabulario = vocabularioDeLaEstructura(item);
   if (!vocabulario) return parseada;
 
-  const grupos = parseada.grupos.filter(
-    (grupo) =>
-      ETIQUETA_DE_INGREDIENTES.test(grupo.etiqueta.trim()) ||
-      !laEstructuraLoCubre(grupo.partes.join(" "), vocabulario),
-  );
+  const grupos: GrupoVisible[] = [];
+  for (const grupo of parseada.grupos) {
+    if (ETIQUETA_DE_INGREDIENTES.test(grupo.etiqueta.trim())) {
+      grupos.push(grupo);
+      continue;
+    }
+    // Opción por opción y no el grupo entero: un grupo a medio capturar es
+    // legítimo (así lo dice la migración que creó las tablas), y podar el grupo
+    // completo se llevaría justo las opciones que todavía no están capturadas.
+    // Con "Sabores: capuchino, caramelo, moka" contra un grupo Sabor que sólo
+    // tiene los dos primeros, "moka" se sigue viendo.
+    const partes = grupo.partes.filter((parte) => !laEstructuraLoCubre(parte, vocabulario));
+    if (partes.length > 0) grupos.push({ ...grupo, partes });
+  }
 
   // Renglón por renglón y no el párrafo entero: el Café frío trae "A las rocas"
   // (que se queda) y "Leche entera o deslactosada" (que no) en el mismo bloque
@@ -454,9 +486,15 @@ export function podarLoQueCubreLaEstructura(
   const sueltos = parseada.sueltos
     .flatMap((suelto) => suelto.split("\n"))
     .map((renglon) => renglon.trim())
-    .filter((renglon) => renglon.length > 0 && !laEstructuraLoCubre(renglon, vocabulario));
+    .filter(
+      (renglon) => renglon.length > 0 && !elRenglonYaEstaEnLaEstructura(renglon, vocabulario),
+    );
 
-  return { grupos, sueltos, parrafo: sueltos.join(" ") || null };
+  // Se unen con salto de línea y no con espacio: `.parrafo` se pinta con
+  // `white-space: pre-line` a propósito (ver `menu.module.css`), porque la app
+  // respeta los renglones de la captura y el mismo platillo se leía distinto en
+  // cada superficie.
+  return { grupos, sueltos, parrafo: sueltos.join("\n") || null };
 }
 
 /** Todo lo que se pinta debajo del nombre de un platillo, ya resuelto. */
