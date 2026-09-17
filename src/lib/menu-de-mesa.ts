@@ -272,17 +272,34 @@ function separarLista(texto: string): string[] {
   return partes;
 }
 
-const PRECIO = new Intl.NumberFormat("es-MX", {
+// Dos formatos y no uno con `minimumFractionDigits: 0`: así un precio con
+// centavos sale "$12.50" y no "$12.5", que es como se escribe el dinero. Los
+// enteros —todo lo capturado hasta hoy— siguen saliendo sin decimales.
+//
+// El port a Dart de esto (`mobile/lib/core/utils/descripcion_servicio.dart`)
+// tiene que dar el mismo string: el code review del 2026-09-17 encontró que
+// divergían en las dos mitades del formato, y el separador de miles se ve hoy
+// en prod (3 servicios de $1000 o más, el mayor de $1,900), así que el mismo
+// precio salía "$1,900" en el menú de mesa y "$1900" en la ficha.
+const PRECIO_ENTERO = new Intl.NumberFormat("es-MX", {
   style: "currency",
   currency: "MXN",
   minimumFractionDigits: 0,
+  maximumFractionDigits: 0,
+});
+
+const PRECIO_CON_CENTAVOS = new Intl.NumberFormat("es-MX", {
+  style: "currency",
+  currency: "MXN",
+  minimumFractionDigits: 2,
   maximumFractionDigits: 2,
 });
 
 export function formatearPrecio(price: string | number | null): string | null {
   if (price === null || price === undefined || price === "") return null;
   const n = typeof price === "number" ? price : Number(price);
-  return Number.isFinite(n) ? PRECIO.format(n) : null;
+  if (!Number.isFinite(n)) return null;
+  return Number.isInteger(n) ? PRECIO_ENTERO.format(n) : PRECIO_CON_CENTAVOS.format(n);
 }
 
 /**
@@ -413,6 +430,8 @@ interface OpcionResumida {
   palabras: string[];
   /** Su `price_delta`. 0 es el caso normal: la mayoría de las opciones no cuesta. */
   monto: number;
+  /** A qué grupo pertenece. Los precios se comparan dentro de un grupo, no entre todos. */
+  grupo: number;
 }
 
 /** Lo que hay que saber de los grupos capturados para decidir qué poda. */
@@ -428,6 +447,7 @@ function resumenDeLaEstructura(item: MenuItem): ResumenDeLaEstructura | null {
 
   const vocabulario = new Set<string>();
   const opciones: OpcionResumida[] = [];
+  let numeroDeGrupo = 0;
   for (const grupo of grupos) {
     const suyas = grupo.business_service_options ?? [];
     // Un grupo sin opciones no aporta al vocabulario: si "Extra" quedó
@@ -444,8 +464,10 @@ function resumenDeLaEstructura(item: MenuItem): ResumenDeLaEstructura | null {
       opciones.push({
         palabras: palabrasSignificativas(opcion.name),
         monto: Number.isFinite(extra) ? extra : 0,
+        grupo: numeroDeGrupo,
       });
     }
+    numeroDeGrupo += 1;
   }
   return vocabulario.size > 0 ? { vocabulario, opciones } : null;
 }
@@ -471,17 +493,46 @@ function montosDeclarados(texto: string): Set<number> {
   return montos;
 }
 
-/** Las opciones capturadas que este pedazo de texto nombra. */
-function opcionesQueNombra(
+/**
+ * Los precios de las opciones que este pedazo de texto nombra, acotados al
+ * grupo al que el texto se refiere.
+ *
+ * Lo del grupo no es cosmética: sin eso, una opción de OTRO grupo se cuela por
+ * compartir una palabra y desalinea la comparación de precios. Caso real del
+ * Café frío: el ítem "cold foam de vainilla o caramelo +$13" nombra a los dos
+ * cold foam del grupo `Extra`, pero también a la opción "Vainilla" del grupo
+ * `Sabor`, que no cuesta — y entonces los precios capturados parecían ser
+ * {$13, $0} contra un texto que declara solo $13.
+ *
+ * El grupo que manda es el que más opciones nombra. Si dos empatan, se unen sus
+ * precios, que es el lado conservador: más precios distintos hacen menos
+ * probable la poda, y no podar solo deja texto repetido mientras no podar de más
+ * borra información.
+ */
+function montosQueNombra(
   texto: string,
   estructura: ResumenDeLaEstructura,
-): OpcionResumida[] {
+): Set<number> | null {
   const presentes = new Set(palabrasSignificativas(texto).flatMap(formas));
-  return estructura.opciones.filter(
+  const nombradas = estructura.opciones.filter(
     (opcion) =>
       opcion.palabras.length > 0 &&
       opcion.palabras.every((palabra) => formas(palabra).some((f) => presentes.has(f))),
   );
+  if (nombradas.length === 0) return null;
+
+  const porGrupo = new Map<number, OpcionResumida[]>();
+  for (const opcion of nombradas) {
+    const suyas = porGrupo.get(opcion.grupo) ?? [];
+    suyas.push(opcion);
+    porGrupo.set(opcion.grupo, suyas);
+  }
+  const mayor = Math.max(...[...porGrupo.values()].map((g) => g.length));
+  const montos = new Set<number>();
+  for (const suyas of porGrupo.values()) {
+    if (suyas.length === mayor) for (const opcion of suyas) montos.add(opcion.monto);
+  }
+  return montos;
 }
 
 function laEstructuraLoCubre(
@@ -513,9 +564,8 @@ function laEstructuraLoCubre(
   // frío: su grupo `Extra` tiene los dos cold foam a $13, y si uno de los dos se
   // captura en el default 0, el conjunto plano sigue conteniendo el 13 que trae
   // el otro — el renglón se podaba y el chip del caramelo quedaba sin precio.
-  const nombradas = opcionesQueNombra(texto, estructura);
-  if (nombradas.length === 0) return false;
-  const capturados = new Set(nombradas.map((o) => o.monto));
+  const capturados = montosQueNombra(texto, estructura);
+  if (capturados === null) return false;
   return (
     capturados.size === declarados.size && [...capturados].every((m) => declarados.has(m))
   );
