@@ -328,10 +328,13 @@ export function gruposDeOpciones(item: MenuItem): GrupoVisible[] {
   if (!grupos || grupos.length === 0) return [];
 
   const visibles: GrupoVisible[] = [];
-  for (const grupo of [...grupos].sort((a, b) => a.order_index - b.order_index)) {
-    const opciones = [...(grupo.business_service_options ?? [])].sort(
-      (a, b) => a.order_index - b.order_index,
-    );
+  // Se desempata por nombre porque `order_index` tiene default 0 en las dos
+  // tablas: con varios grupos u opciones en 0, el orden dependería del que
+  // devuelva PostgREST. `Array.sort` de JS es estable y `List.sort` de Dart no
+  // lo garantiza, así que sin el desempate las dos superficies podrían pintar
+  // el mismo platillo en orden distinto — y la app, entre corridas.
+  for (const grupo of [...grupos].sort(porOrdenYNombre)) {
+    const opciones = [...(grupo.business_service_options ?? [])].sort(porOrdenYNombre);
     const partes = opciones.map((opcion) => {
       const extra = Number(opcion.price_delta);
       const precio = Number.isFinite(extra) && extra > 0 ? formatearPrecio(extra) : null;
@@ -340,6 +343,13 @@ export function gruposDeOpciones(item: MenuItem): GrupoVisible[] {
     if (partes.length > 0) visibles.push({ etiqueta: grupo.name, partes });
   }
   return visibles;
+}
+
+function porOrdenYNombre(
+  a: { order_index: number; name: string },
+  b: { order_index: number; name: string },
+): number {
+  return a.order_index - b.order_index || a.name.localeCompare(b.name, "es");
 }
 
 // ── El mismo dato no se pinta dos veces ───────────────────────────────────
@@ -397,12 +407,19 @@ function formas(palabra: string): string[] {
   return todas;
 }
 
+/** Una opción capturada, reducida a lo que el dedupe necesita comparar. */
+interface OpcionResumida {
+  /** Sus palabras significativas, para saber si un pedazo de texto la nombra. */
+  palabras: string[];
+  /** Su `price_delta`. 0 es el caso normal: la mayoría de las opciones no cuesta. */
+  monto: number;
+}
+
 /** Lo que hay que saber de los grupos capturados para decidir qué poda. */
 interface ResumenDeLaEstructura {
   /** Nombres de grupos y de opciones, en todas sus formas. */
   vocabulario: Set<string>;
-  /** Los montos que la estructura declara de verdad (los que suman algo). */
-  montos: Set<number>;
+  opciones: OpcionResumida[];
 }
 
 function resumenDeLaEstructura(item: MenuItem): ResumenDeLaEstructura | null {
@@ -410,30 +427,62 @@ function resumenDeLaEstructura(item: MenuItem): ResumenDeLaEstructura | null {
   if (!grupos || grupos.length === 0) return null;
 
   const vocabulario = new Set<string>();
-  const montos = new Set<number>();
+  const opciones: OpcionResumida[] = [];
   for (const grupo of grupos) {
-    const opciones = grupo.business_service_options ?? [];
+    const suyas = grupo.business_service_options ?? [];
     // Un grupo sin opciones no aporta al vocabulario: si "Extra" quedó
     // capturado vacío, "Extra: shot de espresso +$12" en la descripción es lo
     // único que le avisa al cliente y no debe podarse.
-    if (opciones.length === 0) continue;
-    for (const texto of [grupo.name, ...opciones.map((o) => o.name)]) {
+    if (suyas.length === 0) continue;
+    for (const texto of [grupo.name, ...suyas.map((o) => o.name)]) {
       for (const palabra of palabrasSignificativas(texto)) {
         for (const forma of formas(palabra)) vocabulario.add(forma);
       }
     }
-    for (const opcion of opciones) {
+    for (const opcion of suyas) {
       const extra = Number(opcion.price_delta);
-      if (Number.isFinite(extra) && extra > 0) montos.add(extra);
+      opciones.push({
+        palabras: palabrasSignificativas(opcion.name),
+        monto: Number.isFinite(extra) ? extra : 0,
+      });
     }
   }
-  return vocabulario.size > 0 ? { vocabulario, montos } : null;
+  return vocabulario.size > 0 ? { vocabulario, opciones } : null;
 }
 
 // Solo los montos escritos con "$" cuentan como precio. Un número suelto puede
 // ser parte del nombre del platillo ("Incluye 2 Sabritas", "6 oz") y tomarlo por
 // precio dejaría renglones vivos sin razón.
 const MONTO = /\$\s*(\d+(?:\.\d{1,2})?)/g;
+
+// "sin costo" / "sin cargo" / "gratis" es un precio declarado, y vale 0. Sin
+// esto, "Endulzantes: azúcar sin costo o miel +$10" (captura real de la Tisana)
+// parecería declarar un solo precio cuando declara dos, y el ítem se quedaría
+// vivo duplicando lo que los chips ya dicen.
+//
+// Pide las dos palabras juntas a propósito: "sin" suelto es lo que separa las
+// dos opciones del Brownie ("con nuez, sin nuez") y no habla de dinero.
+const SIN_COSTO = /\bsin\s+(?:costo|cargo)\b|\bgratis\b/i;
+
+/** Los precios que un pedazo de texto declara, incluido el cero explícito. */
+function montosDeclarados(texto: string): Set<number> {
+  const montos = new Set<number>([...texto.matchAll(MONTO)].map((m) => Number(m[1])));
+  if (SIN_COSTO.test(texto)) montos.add(0);
+  return montos;
+}
+
+/** Las opciones capturadas que este pedazo de texto nombra. */
+function opcionesQueNombra(
+  texto: string,
+  estructura: ResumenDeLaEstructura,
+): OpcionResumida[] {
+  const presentes = new Set(palabrasSignificativas(texto).flatMap(formas));
+  return estructura.opciones.filter(
+    (opcion) =>
+      opcion.palabras.length > 0 &&
+      opcion.palabras.every((palabra) => formas(palabra).some((f) => presentes.has(f))),
+  );
+}
 
 function laEstructuraLoCubre(
   texto: string,
@@ -447,12 +496,29 @@ function laEstructuraLoCubre(
   ).length;
   if (cubiertas / palabras.length < minima) return false;
 
-  // El monto que dice el texto tiene que estar capturado. Si el renglón dice
-  // "+$12" y ninguna opción cobra 12, la estructura NO está diciendo lo mismo:
-  // podarlo pintaría "Shot de espresso" a secas y el cliente vería gratis lo que
-  // cuesta $12. `price_delta` tiene default 0, así que la captura a medias es el
-  // caso normal y no el raro.
-  return [...texto.matchAll(MONTO)].every((m) => estructura.montos.has(Number(m[1])));
+  // Si el texto no habla de dinero, la cobertura de palabras decide sola. Es el
+  // caso de 16 de los 19 grupos que K-fféss necesita.
+  const declarados = montosDeclarados(texto);
+  if (declarados.size === 0) return true;
+
+  // Si el texto SÍ habla de dinero, los precios que declara tienen que ser
+  // exactamente los de las opciones que nombra. `price_delta` tiene default 0,
+  // así que una captura a medias es el caso normal: si el texto dice "+$12" y la
+  // opción quedó en 0, podar el renglón pintaría "Shot de espresso" a secas y el
+  // comensal vería gratis lo que cuesta $12.
+  //
+  // Se compara contra las opciones que el texto NOMBRA y no contra todos los
+  // montos del platillo, porque un conjunto plano solo verifica "alguien cobra
+  // $13" y no "esto cobra $13". Lo cazó el code review con el caso real del Café
+  // frío: su grupo `Extra` tiene los dos cold foam a $13, y si uno de los dos se
+  // captura en el default 0, el conjunto plano sigue conteniendo el 13 que trae
+  // el otro — el renglón se podaba y el chip del caramelo quedaba sin precio.
+  const nombradas = opcionesQueNombra(texto, estructura);
+  if (nombradas.length === 0) return false;
+  const capturados = new Set(nombradas.map((o) => o.monto));
+  return (
+    capturados.size === declarados.size && [...capturados].every((m) => declarados.has(m))
+  );
 }
 
 // Parte un renglón en encabezado y cola: "Bases: almendra, nuez" -> "Bases" y
@@ -461,10 +527,16 @@ function laEstructuraLoCubre(
 //
 // El tope de 40 caracteres antes de los dos puntos es lo que mantiene el riesgo
 // chico: sin él, cualquier prosa con dos puntos a media frase se trataría como
-// lista. Aun así, una prosa corta con dos puntos ("Nuevo: leche entera") entra
-// por aquí y se le poda la cola. El fallback cae del lado seguro —se conserva
-// el encabezado y lo que la estructura no cubra— pero si aparece un caso real
-// que se lea mal, es este número el que hay que mover.
+// lista. Aun así, una prosa corta con dos puntos entra por aquí y se le poda la
+// cola, y medir por ítem volvió ese riesgo MAYOR, no menor: antes las palabras
+// del encabezado diluían la cobertura y el renglón entero sobrevivía; ahora el
+// encabezado sale de la medición y cada fragmento se juzga solo. El caso que lo
+// muestra —lo construyó el code review— es "Nota: preparado al momento, pide tu
+// leche entera o deslactosada", que antes se conservaba completo y ahora queda
+// en "Nota: preparado al momento".
+//
+// No hay ningún encabezado así en las 25 descripciones capturadas, así que hoy
+// no se lee mal en ningún menú. Si aparece, es este número el que hay que mover.
 const TIENE_ENCABEZADO = /^([^\n:]{1,40}):([\s\S]*)$/;
 
 // "Incluye:" / "Contiene:" / "Ingredientes:" nunca se poda. Es lo que el
@@ -506,6 +578,20 @@ function podarRenglon(renglon: string, estructura: ResumenDeLaEstructura): strin
   const [, encabezado, cola] = conEncabezado;
   if (ETIQUETA_DE_INGREDIENTES.test(encabezado.trim())) return renglon;
 
+  // La granularidad llega hasta donde `separarLista` corta, y eso deja un
+  // límite conocido: parte por comas y solo el último ítem por " y ", nunca por
+  // " o ". En la captura real las 14 listas terminan en "X o Y" ("cajeta o
+  // Nutella", "mango o cheesecake"), así que ese par se mide como un solo ítem
+  // y la decisión vuelve a ser todo-o-nada sobre los dos.
+  //
+  // **Partir por " o " NO es el fix**, y está probado: "cold foam de vainilla o
+  // caramelo +$13" daría ["cold foam de vainilla", "caramelo +$13"], y el
+  // segundo fragmento ya no nombra a ninguna opción —el nombre capturado es
+  // "Cold foam de caramelo" y se quedó sin su prefijo—, así que sobreviviría
+  // como "Extra: caramelo +$13" al lado de los chips que dicen lo mismo. Partir
+  // rompe los nombres compuestos que comparten prefijo, que es justo la forma
+  // que tiene esta captura. Si algún día se cambia, se cambia en las dos
+  // superficies: el gemelo en Dart replica el límite a propósito.
   const items = separarLista(cola);
   // Sin ítems que medir ("Opciones:" a secas, o una cola que no es lista) se
   // decide el renglón completo con el umbral laxo: el encabezado es texto de
@@ -516,6 +602,12 @@ function podarRenglon(renglon: string, estructura: ResumenDeLaEstructura): strin
 
   const sobreviven = items.filter((item) => !laEstructuraLoCubre(item, estructura));
   if (sobreviven.length === 0) return null;
+  // Si no se podó nada, se devuelve el renglón tal como lo capturaron. Volver a
+  // armarlo es lossy y no habría ganado nada: `separarLista` quita el punto
+  // final y parte por comas, así que un "+$1,200" saldría "+$1, 200" y un " y "
+  // se volvería ", ". La regla del módulo es que una captura con otro formato se
+  // lea raro, no que se rompa.
+  if (sobreviven.length === items.length) return renglon;
   return `${encabezado}: ${sobreviven.join(", ")}`;
 }
 
