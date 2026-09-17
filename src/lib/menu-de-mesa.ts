@@ -16,6 +16,30 @@ export interface MenuVariant {
   order_index: number;
 }
 
+/** Una opción elegible de un grupo: "Capuchino", "Shot de espresso". */
+export interface MenuOption {
+  name: string;
+  /**
+   * Lo que esta opción le SUMA al precio de la línea; 0 = sin costo.
+   * PostgREST serializa `numeric` como string ("12.00"), no como number.
+   */
+  price_delta: string | number;
+  order_index: number;
+}
+
+/**
+ * Un grupo de opciones del platillo: "Sabor", "Leche", "Extra".
+ *
+ * La diferencia con `MenuVariant` es qué le hacen al precio: el tamaño lo FIJA,
+ * el grupo le SUMA. Un mismo platillo usa los dos (el Café caliente de K-fféss
+ * tiene tamaño Mediano/Grande Y extra de shot de espresso).
+ */
+export interface MenuOptionGroup {
+  name: string;
+  order_index: number;
+  business_service_options?: MenuOption[] | null;
+}
+
 export interface MenuItem {
   name: string;
   /**
@@ -37,6 +61,14 @@ export interface MenuItem {
    * produce el parser para que el render no tenga que distinguirlas.
    */
   business_service_variants?: MenuVariant[] | null;
+  /**
+   * Sabor, leche, extras: lo que el cliente ELIGE además del tamaño. Vivían
+   * aplanados dentro de `description` ("Sabores: capuchino, caramelo") y desde
+   * el 2026-09-16 son filas. Mientras dure la recaptura el mismo platillo
+   * puede tener las dos cosas, y `podarLoQueCubreLaEstructura` decide qué
+   * pedazo del texto se sigue pintando.
+   */
+  business_service_option_groups?: MenuOptionGroup[] | null;
 }
 
 export interface MenuBusiness {
@@ -47,8 +79,17 @@ export interface MenuBusiness {
   business_services: MenuItem[];
 }
 
+// Los dos embeds anidados no necesitan hint de FK: hay una sola relación entre
+// `business_services` y cada tabla hija. (El hint hace falta con `categories`,
+// donde hay dos.) Verificado contra prod con la anon key antes de salir: 200 y
+// `business_service_option_groups: []` en cada platillo. Importa porque si el
+// select pide algo que PostgREST no puede resolver, `supabaseGet` se traga el
+// error, la página no encuentra negocio y da 404 en TODOS los menús de mesa —
+// los de los QR ya pegados en las mesas.
 const SELECT =
-  "id,slug,name,photo_url,business_services(name,price,description,image_url,section,order_index,updated_at,business_service_variants(name,price,order_index))";
+  "id,slug,name,photo_url,business_services(name,price,description,image_url,section,order_index,updated_at," +
+  "business_service_variants(name,price,order_index)," +
+  "business_service_option_groups(name,order_index,business_service_options(name,price_delta,order_index)))";
 
 async function supabaseGet<T>(path: string): Promise<T[] | null> {
   try {
@@ -124,10 +165,26 @@ export function agruparPorSeccion(items: MenuItem[]): MenuSection[] {
  * reconocible, se devuelve tal cual como párrafo en vez de inventar una lista
  * partiendo por comas — una captura con otro formato se lee raro, no se rompe.
  */
+/**
+ * Un bloque listo para pintar. Los grupos del texto, los tamaños y las opciones
+ * capturadas llegan todos con esta forma para que el render no tenga que saber
+ * de dónde salió cada uno.
+ */
+export interface GrupoVisible {
+  etiqueta: string;
+  partes: string[];
+}
+
 export interface DescripcionParseada {
-  grupos: { etiqueta: string; partes: string[] }[];
+  grupos: GrupoVisible[];
   /** Texto que no encajó en ningún grupo; se muestra como párrafo. */
   parrafo: string | null;
+  /**
+   * Los mismos segmentos sueltos que forman `parrafo`, sin unir. Se exponen
+   * porque podar el texto duplicado se hace renglón por renglón, y una vez
+   * unidos el límite entre segmentos ya no se puede recuperar.
+   */
+  sueltos: string[];
 }
 
 // Para cortar el texto en segmentos se exige los dos puntos: es lo único que
@@ -168,7 +225,7 @@ const ETIQUETA_CON_DOSPUNTOS =
 
 export function parseDescripcion(description: string | null): DescripcionParseada {
   const texto = description?.trim();
-  if (!texto) return { grupos: [], parrafo: null };
+  if (!texto) return { grupos: [], parrafo: null, sueltos: [] };
 
   const segmentos = texto.split(CORTE_ETIQUETA).map((s) => s.trim()).filter(Boolean);
   const grupos: DescripcionParseada["grupos"] = [];
@@ -195,7 +252,7 @@ export function parseDescripcion(description: string | null): DescripcionParsead
     else sueltos.push(segmento);
   }
 
-  return { grupos, parrafo: sueltos.join(" ") || null };
+  return { grupos, parrafo: sueltos.join(" ") || null, sueltos };
 }
 
 function separarLista(texto: string): string[] {
@@ -239,9 +296,7 @@ export function formatearPrecio(price: string | number | null): string | null {
  * consultable y no un pedazo de texto, así que se formatea igual que el del
  * platillo en vez de salir crudo.
  */
-export function variantesComoGrupo(
-  item: MenuItem,
-): { etiqueta: string; partes: string[] } | null {
+export function variantesComoGrupo(item: MenuItem): GrupoVisible | null {
   const variantes = item.business_service_variants;
   if (!variantes || variantes.length === 0) return null;
   const partes = [...variantes]
@@ -251,6 +306,184 @@ export function variantesComoGrupo(
       return precio ? `${v.name} ${precio}` : v.name;
     });
   return { etiqueta: "Tamaños", partes };
+}
+
+/**
+ * Las opciones capturadas como estructura, con la MISMA forma que produce
+ * `parseDescripcion` — igual que `variantesComoGrupo` hace con los tamaños.
+ *
+ * Una opción con costo se pinta con su "+": el precio grande de la card es el
+ * "desde" y no lo incluye, así que el chip es lo único que avisa que el shot de
+ * espresso cuesta $12. Las de `price_delta = 0` no anuncian nada — 16 de los 19
+ * grupos que K-fféss necesita son elecciones sin costo, y un "+$0" en cada una
+ * sería ruido.
+ *
+ * Un grupo sin opciones se ignora. La base lo permite a propósito (un grupo a
+ * medio capturar es legítimo) y el editor del admin lo valida, pero esta
+ * superficie no debe confiar en eso: puede haber datos previos a esa validación
+ * o creados por SQL directo.
+ */
+export function gruposDeOpciones(item: MenuItem): GrupoVisible[] {
+  const grupos = item.business_service_option_groups;
+  if (!grupos || grupos.length === 0) return [];
+
+  const visibles: GrupoVisible[] = [];
+  for (const grupo of [...grupos].sort((a, b) => a.order_index - b.order_index)) {
+    const opciones = [...(grupo.business_service_options ?? [])].sort(
+      (a, b) => a.order_index - b.order_index,
+    );
+    const partes = opciones.map((opcion) => {
+      const extra = Number(opcion.price_delta);
+      const precio = Number.isFinite(extra) && extra > 0 ? formatearPrecio(extra) : null;
+      return precio ? `${opcion.name} +${precio}` : opcion.name;
+    });
+    if (partes.length > 0) visibles.push({ etiqueta: grupo.name, partes });
+  }
+  return visibles;
+}
+
+// ── El mismo dato no se pinta dos veces ───────────────────────────────────
+//
+// Mientras dure la recaptura (`2d0ckbksx`) un platillo puede tener sus opciones
+// en la estructura Y en el texto de la descripción. Cuando están en la
+// estructura, la estructura manda: es la que sabe cuánto suma cada opción. Del
+// texto se sigue pintando solo lo que la estructura no cubre.
+//
+// Comparar ENCABEZADOS no sirve, y está verificado con la captura real: el
+// Brownie tiene el grupo "Nuez" y su descripción dice "Opciones: con nuez, sin
+// nuez" — dos encabezados distintos para el mismo dato. Y hay renglones que ni
+// llegan a grupo: "Leche entera o deslactosada" y "Extra: shot de espresso
+// +$12" caen a párrafo, porque ninguna de las dos etiquetas está en la lista
+// cerrada del parser. Así que lo que decide es el CONTENIDO: si las palabras de
+// un renglón ya están en los grupos capturados, ese renglón es la misma
+// información dicha de otra forma.
+
+// Palabras que no dicen de qué habla un renglón, así que no cuentan para
+// decidir si la estructura lo cubre.
+const PALABRAS_DE_ENLACE = new Set([
+  "a", "al", "con", "de", "del", "e", "el", "en", "la", "las", "lo", "los",
+  "o", "para", "por", "sin", "su", "u", "un", "una", "y",
+]);
+
+// Qué fracción de las palabras de un renglón tiene que estar en la estructura
+// para dejar de pintarlo.
+//
+// No es 1.0 porque la captura de texto trae palabras que ninguna columna
+// guarda y que tampoco son información nueva: "Endulzantes: azúcar sin costo o
+// miel +$10" tiene "costo" de sobra (3 de 4), y "Elige fruta y base" tiene
+// "elige" (2 de 3). El piso lo fija el caso contrario, el del Café frío: "A las
+// rocas" no tiene NINGUNA palabra en la estructura (0 de 1) y tiene que seguir
+// viéndose, porque es información del platillo que no vive en otro lado.
+const COBERTURA_MINIMA = 0.6;
+
+function palabrasSignificativas(texto: string): string[] {
+  return texto
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9]+/g, " ")
+    .split(" ")
+    .filter((p) => p.length > 1 && !/^\d+$/.test(p) && !PALABRAS_DE_ENLACE.has(p));
+}
+
+// Singular y plural cuentan como la misma palabra: el texto dice "Frutas:" y
+// "Bases:" donde los grupos se llaman "Fruta" y "Base". Se prueban las dos
+// formas en vez de reducir todo a una raíz porque ninguna regla simple acierta
+// las dos ("bases" sin "es" queda en "bas", que no es "base").
+function formas(palabra: string): string[] {
+  const todas = [palabra];
+  if (palabra.length > 3 && palabra.endsWith("s")) todas.push(palabra.slice(0, -1));
+  if (palabra.length > 4 && palabra.endsWith("es")) todas.push(palabra.slice(0, -2));
+  return todas;
+}
+
+function vocabularioDeLaEstructura(item: MenuItem): Set<string> | null {
+  const grupos = item.business_service_option_groups;
+  if (!grupos || grupos.length === 0) return null;
+
+  const vocabulario = new Set<string>();
+  for (const grupo of grupos) {
+    const textos = [grupo.name, ...(grupo.business_service_options ?? []).map((o) => o.name)];
+    for (const texto of textos) {
+      for (const palabra of palabrasSignificativas(texto)) {
+        for (const forma of formas(palabra)) vocabulario.add(forma);
+      }
+    }
+  }
+  return vocabulario.size > 0 ? vocabulario : null;
+}
+
+function laEstructuraLoCubre(texto: string, vocabulario: Set<string>): boolean {
+  const palabras = palabrasSignificativas(texto);
+  if (palabras.length === 0) return false;
+  const cubiertas = palabras.filter((p) =>
+    formas(p).some((forma) => vocabulario.has(forma)),
+  ).length;
+  return cubiertas / palabras.length >= COBERTURA_MINIMA;
+}
+
+// "Incluye:" / "Contiene:" nunca se poda. Es lo que el platillo TRAE, no lo que
+// el cliente elige; la estructura no lo guarda en ninguna columna, así que
+// podarlo por parecido de palabras (una pizza que "Contiene: piña" y tiene un
+// grupo con esa fruta) lo perdería para siempre, no sólo durante la recaptura.
+const ETIQUETA_DE_INGREDIENTES = /^(Incluye|Contiene)$/i;
+
+/**
+ * La descripción sin los pedazos que los grupos capturados ya dicen.
+ *
+ * Sin grupos capturados devuelve la descripción intacta: un platillo sin
+ * opciones estructuradas se ve exactamente igual que antes, que es la mayoría
+ * del directorio y hoy —con las dos tablas vacías en prod— es todo.
+ */
+export function podarLoQueCubreLaEstructura(
+  parseada: DescripcionParseada,
+  item: MenuItem,
+): DescripcionParseada {
+  const vocabulario = vocabularioDeLaEstructura(item);
+  if (!vocabulario) return parseada;
+
+  const grupos = parseada.grupos.filter(
+    (grupo) =>
+      ETIQUETA_DE_INGREDIENTES.test(grupo.etiqueta.trim()) ||
+      !laEstructuraLoCubre(grupo.partes.join(" "), vocabulario),
+  );
+
+  // Renglón por renglón y no el párrafo entero: el Café frío trae "A las rocas"
+  // (que se queda) y "Leche entera o deslactosada" (que no) en el mismo bloque
+  // de texto suelto.
+  const sueltos = parseada.sueltos
+    .flatMap((suelto) => suelto.split("\n"))
+    .map((renglon) => renglon.trim())
+    .filter((renglon) => renglon.length > 0 && !laEstructuraLoCubre(renglon, vocabulario));
+
+  return { grupos, sueltos, parrafo: sueltos.join(" ") || null };
+}
+
+/** Todo lo que se pinta debajo del nombre de un platillo, ya resuelto. */
+export interface DetalleDelPlatillo {
+  parrafo: string | null;
+  grupos: GrupoVisible[];
+  /** El platillo tiene tamaños, así que su precio es un "desde". */
+  precioEsDesde: boolean;
+}
+
+/**
+ * Los tres orígenes de los bloques de un platillo, en el orden en que se
+ * pintan: los tamaños, lo que quede del texto, y las opciones capturadas.
+ *
+ * Los tamaños van PRIMERO porque es lo que el comensal busca cuando el platillo
+ * tiene varias medidas. Lo que sobrevive del texto va antes que la estructura
+ * porque lo que sobrevive es "Incluye:" / "Contiene:" —qué trae el platillo—, y
+ * eso se lee antes de elegir.
+ */
+export function detalleDelPlatillo(item: MenuItem): DetalleDelPlatillo {
+  const tamanos = variantesComoGrupo(item);
+  const texto = podarLoQueCubreLaEstructura(parseDescripcion(item.description), item);
+  return {
+    parrafo: texto.parrafo,
+    grupos: [...(tamanos ? [tamanos] : []), ...texto.grupos, ...gruposDeOpciones(item)],
+    precioEsDesde: tamanos !== null,
+  };
 }
 
 const FECHA = new Intl.DateTimeFormat("es-MX", {
