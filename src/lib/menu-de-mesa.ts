@@ -362,11 +362,34 @@ export function gruposDeOpciones(item: MenuItem): GrupoVisible[] {
   return visibles;
 }
 
+/**
+ * La clave con la que se desempata un orden: minúsculas y sin diacríticos.
+ *
+ * No se usa `localeCompare("es")` porque el gemelo en Dart no tiene collation de
+ * locale y compara unidades UTF-16, así que el desempate —que existe justamente
+ * para que las dos superficies no pinten distinto— se volvía él mismo la
+ * divergencia en cuanto un nombre mezclara mayúscula o acento: JS ordenaba
+ * [avena, Ázucar, Bebida, ñandú, Zapote] y Dart [Bebida, Zapote, avena, Ázucar,
+ * ñandú]. Lo cazó el code review corriendo las dos.
+ *
+ * Es la misma normalización que usa `palabrasSignificativas`, para no tener dos
+ * ideas de qué es "la misma palabra" en el mismo archivo.
+ */
+function claveDeOrden(nombre: string): string {
+  return nombre
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "");
+}
+
 function porOrdenYNombre(
   a: { order_index: number; name: string },
   b: { order_index: number; name: string },
 ): number {
-  return a.order_index - b.order_index || a.name.localeCompare(b.name, "es");
+  if (a.order_index !== b.order_index) return a.order_index - b.order_index;
+  const ca = claveDeOrden(a.name);
+  const cb = claveDeOrden(b.name);
+  return ca < cb ? -1 : ca > cb ? 1 : 0;
 }
 
 // ── El mismo dato no se pinta dos veces ───────────────────────────────────
@@ -395,12 +418,16 @@ const PALABRAS_DE_ENLACE = new Set([
 // Qué fracción de las palabras de un renglón tiene que estar en la estructura
 // para dejar de pintarlo.
 //
-// No es 1.0 porque la captura de texto trae palabras que ninguna columna
-// guarda y que tampoco son información nueva: "Endulzantes: azúcar sin costo o
-// miel +$10" tiene "costo" de sobra (3 de 4), y "Elige fruta y base" tiene
-// "elige" (2 de 3). El piso lo fija el caso contrario, el del Café frío: "A las
-// rocas" no tiene NINGUNA palabra en la estructura (0 de 1) y tiene que seguir
-// viéndose, porque es información del platillo que no vive en otro lado.
+// No es 1.0 porque la captura de texto trae palabras que ninguna columna guarda
+// y que tampoco son información nueva. El piso lo fija el caso contrario, el del
+// Café frío: "A las rocas" no tiene NINGUNA palabra en la estructura (0 de 1) y
+// tiene que seguir viéndose, porque es información del platillo que no vive en
+// otro lado.
+//
+// El margen real es más chico de lo que parece, y conviene saberlo antes de
+// subirlo: desde que se mide por ítem y no por renglón, el encabezado sale de la
+// cuenta. El ítem "azúcar sin costo o miel +$10" de la Tisana queda en 2 de 3
+// (0.667), no en 3 de 4, así que 0.7 ya lo dejaría vivo.
 const COBERTURA_MINIMA = 0.6;
 
 function palabrasSignificativas(texto: string): string[] {
@@ -504,14 +531,25 @@ function montosDeclarados(texto: string): Set<number> {
  * `Sabor`, que no cuesta — y entonces los precios capturados parecían ser
  * {$13, $0} contra un texto que declara solo $13.
  *
- * El grupo que manda es el que más opciones nombra. Si dos empatan, se unen sus
- * precios, que es el lado conservador: más precios distintos hacen menos
- * probable la poda, y no podar solo deja texto repetido mientras no podar de más
- * borra información.
+ * El grupo que manda es el que más opciones nombra. Cuando dos empatan, gana el
+ * que declara exactamente los precios del texto, si hay uno solo así; si no,
+ * se unen los precios de los empatados.
+ *
+ * El desempate no es adorno, y la unión a secas no es "el lado conservador"
+ * como decía este comentario antes: falla en las dos direcciones, y el code
+ * review reprodujo las dos. Hacia el falso negativo, hoy "Extra: cold foam de
+ * vainilla o caramelo +$13" solo poda porque la opción del grupo `Sabor` se
+ * llama "Caramelo especial" y nombra 1 contra 2 de `Extra`; si la recaptura la
+ * deja en "Caramelo" —como ya está en Frappé base café— el empate 2-2 daría
+ * {$13, $0} contra un texto que declara {$13} y el renglón sobreviviría
+ * duplicando los chips. Hacia el otro lado, con los precios declarados
+ * repartidos en dos grupos empatados la unión COMPLETA el conjunto y poda donde
+ * un grupo solo no podaría.
  */
 function montosQueNombra(
   texto: string,
   estructura: ResumenDeLaEstructura,
+  declarados: Set<number>,
 ): Set<number> | null {
   const presentes = new Set(palabrasSignificativas(texto).flatMap(formas));
   const nombradas = estructura.opciones.filter(
@@ -528,11 +566,20 @@ function montosQueNombra(
     porGrupo.set(opcion.grupo, suyas);
   }
   const mayor = Math.max(...[...porGrupo.values()].map((g) => g.length));
-  const montos = new Set<number>();
-  for (const suyas of porGrupo.values()) {
-    if (suyas.length === mayor) for (const opcion of suyas) montos.add(opcion.monto);
-  }
-  return montos;
+  const empatados = [...porGrupo.values()]
+    .filter((suyas) => suyas.length === mayor)
+    .map((suyas) => new Set(suyas.map((o) => o.monto)));
+
+  const exactos = empatados.filter((montos) => mismoConjunto(montos, declarados));
+  if (exactos.length === 1) return exactos[0];
+
+  const union = new Set<number>();
+  for (const montos of empatados) for (const monto of montos) union.add(monto);
+  return union;
+}
+
+function mismoConjunto(a: Set<number>, b: Set<number>): boolean {
+  return a.size === b.size && [...a].every((x) => b.has(x));
 }
 
 function laEstructuraLoCubre(
@@ -564,11 +611,9 @@ function laEstructuraLoCubre(
   // frío: su grupo `Extra` tiene los dos cold foam a $13, y si uno de los dos se
   // captura en el default 0, el conjunto plano sigue conteniendo el 13 que trae
   // el otro — el renglón se podaba y el chip del caramelo quedaba sin precio.
-  const capturados = montosQueNombra(texto, estructura);
+  const capturados = montosQueNombra(texto, estructura, declarados);
   if (capturados === null) return false;
-  return (
-    capturados.size === declarados.size && [...capturados].every((m) => declarados.has(m))
-  );
+  return mismoConjunto(capturados, declarados);
 }
 
 // Parte un renglón en encabezado y cola: "Bases: almendra, nuez" -> "Bases" y
@@ -642,6 +687,16 @@ function podarRenglon(renglon: string, estructura: ResumenDeLaEstructura): strin
   // rompe los nombres compuestos que comparten prefijo, que es justo la forma
   // que tiene esta captura. Si algún día se cambia, se cambia en las dos
   // superficies: el gemelo en Dart replica el límite a propósito.
+  //
+  // Lo que agrandó este límite es el guard de precios, y también está
+  // reproducido: un ítem que declara UN precio y nombra dos opciones con montos
+  // distintos ya no se poda. "Leche: entera o de avena +$8" contra
+  // Leche{Entera $0, De avena $8} se podaba cuando los montos se comparaban en
+  // bola y ahora sobrevive duplicando los chips. No está en la captura de hoy
+  // —los dos cold foam cuestan igual— pero es la forma de 14 de las listas.
+  // Ojo con el arreglo que parece obvio: relajar el predicado a "los declarados
+  // están entre los capturados" reintroduce justo el agujero que este guard
+  // cerró, el del `price_delta` en su default 0.
   const items = separarLista(cola);
   // Sin ítems que medir ("Opciones:" a secas, o una cola que no es lista) se
   // decide el renglón completo con el umbral laxo: el encabezado es texto de
