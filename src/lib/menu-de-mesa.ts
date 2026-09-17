@@ -317,7 +317,12 @@ export function variantesComoGrupo(item: MenuItem): GrupoVisible | null {
   const variantes = item.business_service_variants;
   if (!variantes || variantes.length === 0) return null;
   const partes = [...variantes]
-    .sort((a, b) => a.order_index - b.order_index)
+    // Con el desempate por nombre, igual que los grupos de opciones: si dos
+    // tamaños comparten `order_index` el orden sería el de PostgREST, y la
+    // ficha de la app sí desempata. Era la tercera lista de la card y la última
+    // que quedaba fuera del invariante de que el mismo platillo se pinte igual
+    // en las dos superficies.
+    .sort(porOrdenYNombre)
     .map((v) => {
       const precio = formatearPrecio(v.price);
       return precio ? `${v.name} ${precio}` : v.name;
@@ -570,8 +575,25 @@ function montosQueNombra(
     .filter((suyas) => suyas.length === mayor)
     .map((suyas) => new Set(suyas.map((o) => o.monto)));
 
+  // El desempate NO aplica cuando otro grupo empatado se ve como el dueño del
+  // monto pero está capturado a medias: trae alguno de los precios declarados y
+  // además uno ajeno. Sin esta guarda, el desempate reabría justo el hoyo que el
+  // guard cerró — con `Extra{vainilla $13, caramelo $0}` y un segundo grupo
+  // empatado cuyas opciones están las dos en $13, ganaba el segundo, el renglón
+  // se podaba y el chip del caramelo quedaba sin precio. Lo reprodujo el code
+  // review.
+  //
+  // El caso que el desempate sí tiene que resolver es distinto: ahí el otro
+  // grupo empatado no trae NINGÚN precio declarado (solo ceros), así que no es
+  // candidato a ser el dueño y no debe estorbar.
+  const hayOtroAMedias = empatados.some(
+    (montos) =>
+      !mismoConjunto(montos, declarados) &&
+      [...montos].some((m) => declarados.has(m)) &&
+      [...montos].some((m) => !declarados.has(m)),
+  );
   const exactos = empatados.filter((montos) => mismoConjunto(montos, declarados));
-  if (exactos.length === 1) return exactos[0];
+  if (exactos.length === 1 && !hayOtroAMedias) return exactos[0];
 
   const union = new Set<number>();
   for (const montos of empatados) for (const monto of montos) union.add(monto);
