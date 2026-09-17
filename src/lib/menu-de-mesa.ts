@@ -397,33 +397,62 @@ function formas(palabra: string): string[] {
   return todas;
 }
 
-function vocabularioDeLaEstructura(item: MenuItem): Set<string> | null {
+/** Lo que hay que saber de los grupos capturados para decidir qué poda. */
+interface ResumenDeLaEstructura {
+  /** Nombres de grupos y de opciones, en todas sus formas. */
+  vocabulario: Set<string>;
+  /** Los montos que la estructura declara de verdad (los que suman algo). */
+  montos: Set<number>;
+}
+
+function resumenDeLaEstructura(item: MenuItem): ResumenDeLaEstructura | null {
   const grupos = item.business_service_option_groups;
   if (!grupos || grupos.length === 0) return null;
 
   const vocabulario = new Set<string>();
+  const montos = new Set<number>();
   for (const grupo of grupos) {
-    const textos = [grupo.name, ...(grupo.business_service_options ?? []).map((o) => o.name)];
-    for (const texto of textos) {
+    const opciones = grupo.business_service_options ?? [];
+    // Un grupo sin opciones no aporta al vocabulario: si "Extra" quedó
+    // capturado vacío, "Extra: shot de espresso +$12" en la descripción es lo
+    // único que le avisa al cliente y no debe podarse.
+    if (opciones.length === 0) continue;
+    for (const texto of [grupo.name, ...opciones.map((o) => o.name)]) {
       for (const palabra of palabrasSignificativas(texto)) {
         for (const forma of formas(palabra)) vocabulario.add(forma);
       }
     }
+    for (const opcion of opciones) {
+      const extra = Number(opcion.price_delta);
+      if (Number.isFinite(extra) && extra > 0) montos.add(extra);
+    }
   }
-  return vocabulario.size > 0 ? vocabulario : null;
+  return vocabulario.size > 0 ? { vocabulario, montos } : null;
 }
+
+// Solo los montos escritos con "$" cuentan como precio. Un número suelto puede
+// ser parte del nombre del platillo ("Incluye 2 Sabritas", "6 oz") y tomarlo por
+// precio dejaría renglones vivos sin razón.
+const MONTO = /\$\s*(\d+(?:\.\d{1,2})?)/g;
 
 function laEstructuraLoCubre(
   texto: string,
-  vocabulario: Set<string>,
+  estructura: ResumenDeLaEstructura,
   minima = COBERTURA_MINIMA,
 ): boolean {
   const palabras = palabrasSignificativas(texto);
   if (palabras.length === 0) return false;
   const cubiertas = palabras.filter((p) =>
-    formas(p).some((forma) => vocabulario.has(forma)),
+    formas(p).some((forma) => estructura.vocabulario.has(forma)),
   ).length;
-  return cubiertas / palabras.length >= minima;
+  if (cubiertas / palabras.length < minima) return false;
+
+  // El monto que dice el texto tiene que estar capturado. Si el renglón dice
+  // "+$12" y ninguna opción cobra 12, la estructura NO está diciendo lo mismo:
+  // podarlo pintaría "Shot de espresso" a secas y el cliente vería gratis lo que
+  // cuesta $12. `price_delta` tiene default 0, así que la captura a medias es el
+  // caso normal y no el raro.
+  return [...texto.matchAll(MONTO)].every((m) => estructura.montos.has(Number(m[1])));
 }
 
 // Parte un renglón en encabezado y cola: "Bases: almendra, nuez" -> "Bases" y
@@ -468,10 +497,10 @@ const ETIQUETA_DE_INGREDIENTES = /^(Incluye|Contiene|Ingredientes)$/i;
  * extras con esos tres: "hamburguesa" es lo que el platillo ES, así que se
  * queda.
  */
-function podarRenglon(renglon: string, vocabulario: Set<string>): string | null {
+function podarRenglon(renglon: string, estructura: ResumenDeLaEstructura): string | null {
   const conEncabezado = renglon.match(TIENE_ENCABEZADO);
   if (!conEncabezado) {
-    return laEstructuraLoCubre(renglon, vocabulario, 1) ? null : renglon;
+    return laEstructuraLoCubre(renglon, estructura, 1) ? null : renglon;
   }
 
   const [, encabezado, cola] = conEncabezado;
@@ -482,10 +511,10 @@ function podarRenglon(renglon: string, vocabulario: Set<string>): string | null 
   // decide el renglón completo con el umbral laxo: el encabezado es texto de
   // captura y no tiene por qué existir en ninguna tabla.
   if (items.length === 0) {
-    return laEstructuraLoCubre(renglon, vocabulario, COBERTURA_MINIMA) ? null : renglon;
+    return laEstructuraLoCubre(renglon, estructura, COBERTURA_MINIMA) ? null : renglon;
   }
 
-  const sobreviven = items.filter((item) => !laEstructuraLoCubre(item, vocabulario));
+  const sobreviven = items.filter((item) => !laEstructuraLoCubre(item, estructura));
   if (sobreviven.length === 0) return null;
   return `${encabezado}: ${sobreviven.join(", ")}`;
 }
@@ -501,8 +530,8 @@ export function podarLoQueCubreLaEstructura(
   parseada: DescripcionParseada,
   item: MenuItem,
 ): DescripcionParseada {
-  const vocabulario = vocabularioDeLaEstructura(item);
-  if (!vocabulario) return parseada;
+  const estructura = resumenDeLaEstructura(item);
+  if (!estructura) return parseada;
 
   const grupos: GrupoVisible[] = [];
   for (const grupo of parseada.grupos) {
@@ -515,7 +544,7 @@ export function podarLoQueCubreLaEstructura(
     // completo se llevaría justo las opciones que todavía no están capturadas.
     // Con "Sabores: capuchino, caramelo, moka" contra un grupo Sabor que sólo
     // tiene los dos primeros, "moka" se sigue viendo.
-    const partes = grupo.partes.filter((parte) => !laEstructuraLoCubre(parte, vocabulario));
+    const partes = grupo.partes.filter((parte) => !laEstructuraLoCubre(parte, estructura));
     if (partes.length > 0) grupos.push({ ...grupo, partes });
   }
 
@@ -526,7 +555,7 @@ export function podarLoQueCubreLaEstructura(
     .flatMap((suelto) => suelto.split("\n"))
     .map((renglon) => renglon.trim())
     .filter((renglon) => renglon.length > 0)
-    .map((renglon) => podarRenglon(renglon, vocabulario))
+    .map((renglon) => podarRenglon(renglon, estructura))
     .filter((renglon): renglon is string => renglon !== null);
 
   // Se unen con salto de línea y no con espacio: `.parrafo` se pinta con
