@@ -16,6 +16,30 @@ export interface MenuVariant {
   order_index: number;
 }
 
+/** Una opción elegible de un grupo: "Capuchino", "Shot de espresso". */
+export interface MenuOption {
+  name: string;
+  /**
+   * Lo que esta opción le SUMA al precio de la línea; 0 = sin costo.
+   * PostgREST serializa `numeric` como string ("12.00"), no como number.
+   */
+  price_delta: string | number;
+  order_index: number;
+}
+
+/**
+ * Un grupo de opciones del platillo: "Sabor", "Leche", "Extra".
+ *
+ * La diferencia con `MenuVariant` es qué le hacen al precio: el tamaño lo FIJA,
+ * el grupo le SUMA. Un mismo platillo usa los dos (el Café caliente de K-fféss
+ * tiene tamaño Mediano/Grande Y extra de shot de espresso).
+ */
+export interface MenuOptionGroup {
+  name: string;
+  order_index: number;
+  business_service_options?: MenuOption[] | null;
+}
+
 export interface MenuItem {
   name: string;
   /**
@@ -37,6 +61,14 @@ export interface MenuItem {
    * produce el parser para que el render no tenga que distinguirlas.
    */
   business_service_variants?: MenuVariant[] | null;
+  /**
+   * Sabor, leche, extras: lo que el cliente ELIGE además del tamaño. Vivían
+   * aplanados dentro de `description` ("Sabores: capuchino, caramelo") y desde
+   * el 2026-09-16 son filas. Mientras dure la recaptura el mismo platillo
+   * puede tener las dos cosas, y `podarLoQueCubreLaEstructura` decide qué
+   * pedazo del texto se sigue pintando.
+   */
+  business_service_option_groups?: MenuOptionGroup[] | null;
 }
 
 export interface MenuBusiness {
@@ -47,8 +79,17 @@ export interface MenuBusiness {
   business_services: MenuItem[];
 }
 
+// Los dos embeds anidados no necesitan hint de FK: hay una sola relación entre
+// `business_services` y cada tabla hija. (El hint hace falta con `categories`,
+// donde hay dos.) Verificado contra prod con la anon key antes de salir: 200 y
+// `business_service_option_groups: []` en cada platillo. Importa porque si el
+// select pide algo que PostgREST no puede resolver, `supabaseGet` se traga el
+// error, la página no encuentra negocio y da 404 en TODOS los menús de mesa —
+// los de los QR ya pegados en las mesas.
 const SELECT =
-  "id,slug,name,photo_url,business_services(name,price,description,image_url,section,order_index,updated_at,business_service_variants(name,price,order_index))";
+  "id,slug,name,photo_url,business_services(name,price,description,image_url,section,order_index,updated_at," +
+  "business_service_variants(name,price,order_index)," +
+  "business_service_option_groups(name,order_index,business_service_options(name,price_delta,order_index)))";
 
 async function supabaseGet<T>(path: string): Promise<T[] | null> {
   try {
@@ -117,17 +158,25 @@ export function agruparPorSeccion(items: MenuItem[]): MenuSection[] {
 }
 
 /**
- * Lo que hoy es un párrafo cortado a dos líneas se vuelve una lista de qué trae.
- *
- * El formato de captura es texto libre y nadie lo valida ("Incluye: a, b, c",
- * "Sabores: x, y", o las dos juntas). Por eso: si el texto no trae una etiqueta
- * reconocible, se devuelve tal cual como párrafo en vez de inventar una lista
- * partiendo por comas — una captura con otro formato se lee raro, no se rompe.
+ * Un bloque listo para pintar. Los grupos del texto, los tamaños y las opciones
+ * capturadas llegan todos con esta forma para que el render no tenga que saber
+ * de dónde salió cada uno.
  */
+export interface GrupoVisible {
+  etiqueta: string;
+  partes: string[];
+}
+
 export interface DescripcionParseada {
-  grupos: { etiqueta: string; partes: string[] }[];
+  grupos: GrupoVisible[];
   /** Texto que no encajó en ningún grupo; se muestra como párrafo. */
   parrafo: string | null;
+  /**
+   * Los mismos segmentos sueltos que forman `parrafo`, sin unir. Se exponen
+   * porque podar el texto duplicado se hace renglón por renglón, y una vez
+   * unidos el límite entre segmentos ya no se puede recuperar.
+   */
+  sueltos: string[];
 }
 
 // Para cortar el texto en segmentos se exige los dos puntos: es lo único que
@@ -166,9 +215,17 @@ const ETIQUETA_SIN_DOSPUNTOS = /^(Incluye|Contiene|Sabores|Sabor)\b\s*(.+)$/i;
 const ETIQUETA_CON_DOSPUNTOS =
   /^(Incluye|Contiene|Sabores|Sabor|Tamaños|Opciones|Con)\s*:([\s\S]*)$/i;
 
+/**
+ * Lo que hoy es un párrafo cortado a dos líneas se vuelve una lista de qué trae.
+ *
+ * El formato de captura es texto libre y nadie lo valida ("Incluye: a, b, c",
+ * "Sabores: x, y", o las dos juntas). Por eso: si el texto no trae una etiqueta
+ * reconocible, se devuelve tal cual como párrafo en vez de inventar una lista
+ * partiendo por comas — una captura con otro formato se lee raro, no se rompe.
+ */
 export function parseDescripcion(description: string | null): DescripcionParseada {
   const texto = description?.trim();
-  if (!texto) return { grupos: [], parrafo: null };
+  if (!texto) return { grupos: [], parrafo: null, sueltos: [] };
 
   const segmentos = texto.split(CORTE_ETIQUETA).map((s) => s.trim()).filter(Boolean);
   const grupos: DescripcionParseada["grupos"] = [];
@@ -195,7 +252,7 @@ export function parseDescripcion(description: string | null): DescripcionParsead
     else sueltos.push(segmento);
   }
 
-  return { grupos, parrafo: sueltos.join(" ") || null };
+  return { grupos, parrafo: sueltos.join(" ") || null, sueltos };
 }
 
 function separarLista(texto: string): string[] {
@@ -215,17 +272,34 @@ function separarLista(texto: string): string[] {
   return partes;
 }
 
-const PRECIO = new Intl.NumberFormat("es-MX", {
+// Dos formatos y no uno con `minimumFractionDigits: 0`: así un precio con
+// centavos sale "$12.50" y no "$12.5", que es como se escribe el dinero. Los
+// enteros —todo lo capturado hasta hoy— siguen saliendo sin decimales.
+//
+// El port a Dart de esto (`mobile/lib/core/utils/descripcion_servicio.dart`)
+// tiene que dar el mismo string: el code review del 2026-09-17 encontró que
+// divergían en las dos mitades del formato, y el separador de miles se ve hoy
+// en prod (3 servicios de $1000 o más, el mayor de $1,900), así que el mismo
+// precio salía "$1,900" en el menú de mesa y "$1900" en la ficha.
+const PRECIO_ENTERO = new Intl.NumberFormat("es-MX", {
   style: "currency",
   currency: "MXN",
   minimumFractionDigits: 0,
+  maximumFractionDigits: 0,
+});
+
+const PRECIO_CON_CENTAVOS = new Intl.NumberFormat("es-MX", {
+  style: "currency",
+  currency: "MXN",
+  minimumFractionDigits: 2,
   maximumFractionDigits: 2,
 });
 
 export function formatearPrecio(price: string | number | null): string | null {
   if (price === null || price === undefined || price === "") return null;
   const n = typeof price === "number" ? price : Number(price);
-  return Number.isFinite(n) ? PRECIO.format(n) : null;
+  if (!Number.isFinite(n)) return null;
+  return Number.isInteger(n) ? PRECIO_ENTERO.format(n) : PRECIO_CON_CENTAVOS.format(n);
 }
 
 /**
@@ -239,18 +313,502 @@ export function formatearPrecio(price: string | number | null): string | null {
  * consultable y no un pedazo de texto, así que se formatea igual que el del
  * platillo en vez de salir crudo.
  */
-export function variantesComoGrupo(
-  item: MenuItem,
-): { etiqueta: string; partes: string[] } | null {
+export function variantesComoGrupo(item: MenuItem): GrupoVisible | null {
   const variantes = item.business_service_variants;
   if (!variantes || variantes.length === 0) return null;
   const partes = [...variantes]
-    .sort((a, b) => a.order_index - b.order_index)
+    // Con el desempate por nombre, igual que los grupos de opciones: si dos
+    // tamaños comparten `order_index` el orden sería el de PostgREST, y la
+    // ficha de la app sí desempata. Era la tercera lista de la card y la última
+    // que quedaba fuera del invariante de que el mismo platillo se pinte igual
+    // en las dos superficies.
+    .sort(porOrdenYNombre)
     .map((v) => {
       const precio = formatearPrecio(v.price);
       return precio ? `${v.name} ${precio}` : v.name;
     });
   return { etiqueta: "Tamaños", partes };
+}
+
+/**
+ * Las opciones capturadas como estructura, con la MISMA forma que produce
+ * `parseDescripcion` — igual que `variantesComoGrupo` hace con los tamaños.
+ *
+ * Una opción con costo se pinta con su "+": el precio grande de la card es el
+ * "desde" y no lo incluye, así que el chip es lo único que avisa que el shot de
+ * espresso cuesta $12. Las de `price_delta = 0` no anuncian nada — 16 de los 19
+ * grupos que K-fféss necesita son elecciones sin costo, y un "+$0" en cada una
+ * sería ruido.
+ *
+ * Un grupo sin opciones se ignora. La base lo permite a propósito (un grupo a
+ * medio capturar es legítimo) y el editor del admin lo valida, pero esta
+ * superficie no debe confiar en eso: puede haber datos previos a esa validación
+ * o creados por SQL directo.
+ */
+export function gruposDeOpciones(item: MenuItem): GrupoVisible[] {
+  const grupos = item.business_service_option_groups;
+  if (!grupos || grupos.length === 0) return [];
+
+  const visibles: GrupoVisible[] = [];
+  // Se desempata por nombre porque `order_index` tiene default 0 en las dos
+  // tablas: con varios grupos u opciones en 0, el orden dependería del que
+  // devuelva PostgREST. `Array.sort` de JS es estable y `List.sort` de Dart no
+  // lo garantiza, así que sin el desempate las dos superficies podrían pintar
+  // el mismo platillo en orden distinto — y la app, entre corridas.
+  for (const grupo of [...grupos].sort(porOrdenYNombre)) {
+    const opciones = [...(grupo.business_service_options ?? [])].sort(porOrdenYNombre);
+    const partes = opciones.map((opcion) => {
+      const extra = Number(opcion.price_delta);
+      const precio = Number.isFinite(extra) && extra > 0 ? formatearPrecio(extra) : null;
+      return precio ? `${opcion.name} +${precio}` : opcion.name;
+    });
+    if (partes.length > 0) visibles.push({ etiqueta: grupo.name, partes });
+  }
+  return visibles;
+}
+
+/**
+ * La clave con la que se desempata un orden: minúsculas y sin diacríticos.
+ *
+ * No se usa `localeCompare("es")` porque el gemelo en Dart no tiene collation de
+ * locale y compara unidades UTF-16, así que el desempate —que existe justamente
+ * para que las dos superficies no pinten distinto— se volvía él mismo la
+ * divergencia en cuanto un nombre mezclara mayúscula o acento: JS ordenaba
+ * [avena, Ázucar, Bebida, ñandú, Zapote] y Dart [Bebida, Zapote, avena, Ázucar,
+ * ñandú]. Lo cazó el code review corriendo las dos.
+ *
+ * Es la misma normalización que usa `palabrasSignificativas`, para no tener dos
+ * ideas de qué es "la misma palabra" en el mismo archivo.
+ */
+function claveDeOrden(nombre: string): string {
+  return nombre
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "");
+}
+
+function porOrdenYNombre(
+  a: { order_index: number; name: string },
+  b: { order_index: number; name: string },
+): number {
+  if (a.order_index !== b.order_index) return a.order_index - b.order_index;
+  const ca = claveDeOrden(a.name);
+  const cb = claveDeOrden(b.name);
+  return ca < cb ? -1 : ca > cb ? 1 : 0;
+}
+
+// ── El mismo dato no se pinta dos veces ───────────────────────────────────
+//
+// Mientras dure la recaptura (`2d0ckbksx`) un platillo puede tener sus opciones
+// en la estructura Y en el texto de la descripción. Cuando están en la
+// estructura, la estructura manda: es la que sabe cuánto suma cada opción. Del
+// texto se sigue pintando solo lo que la estructura no cubre.
+//
+// Comparar ENCABEZADOS no sirve, y está verificado con la captura real: el
+// Brownie tiene el grupo "Nuez" y su descripción dice "Opciones: con nuez, sin
+// nuez" — dos encabezados distintos para el mismo dato. Y hay renglones que ni
+// llegan a grupo: "Leche entera o deslactosada" y "Extra: shot de espresso
+// +$12" caen a párrafo, porque ninguna de las dos etiquetas está en la lista
+// cerrada del parser. Así que lo que decide es el CONTENIDO: si las palabras de
+// un renglón ya están en los grupos capturados, ese renglón es la misma
+// información dicha de otra forma.
+
+// Palabras que no dicen de qué habla un renglón, así que no cuentan para
+// decidir si la estructura lo cubre.
+const PALABRAS_DE_ENLACE = new Set([
+  "a", "al", "con", "de", "del", "e", "el", "en", "la", "las", "lo", "los",
+  "o", "para", "por", "sin", "su", "u", "un", "una", "y",
+]);
+
+// Qué fracción de las palabras de un renglón tiene que estar en la estructura
+// para dejar de pintarlo.
+//
+// No es 1.0 porque la captura de texto trae palabras que ninguna columna guarda
+// y que tampoco son información nueva. El piso lo fija el caso contrario, el del
+// Café frío: "A las rocas" no tiene NINGUNA palabra en la estructura (0 de 1) y
+// tiene que seguir viéndose, porque es información del platillo que no vive en
+// otro lado.
+//
+// El margen real es más chico de lo que parece, y conviene saberlo antes de
+// subirlo: desde que se mide por ítem y no por renglón, el encabezado sale de la
+// cuenta. El ítem "azúcar sin costo o miel +$10" de la Tisana queda en 2 de 3
+// (0.667), no en 3 de 4, así que 0.7 ya lo dejaría vivo.
+const COBERTURA_MINIMA = 0.6;
+
+function palabrasSignificativas(texto: string): string[] {
+  return texto
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9]+/g, " ")
+    .split(" ")
+    .filter((p) => p.length > 1 && !/^\d+$/.test(p) && !PALABRAS_DE_ENLACE.has(p));
+}
+
+// Singular y plural cuentan como la misma palabra: el texto dice "Frutas:" y
+// "Bases:" donde los grupos se llaman "Fruta" y "Base". Se prueban las dos
+// formas en vez de reducir todo a una raíz porque ninguna regla simple acierta
+// las dos ("bases" sin "es" queda en "bas", que no es "base").
+function formas(palabra: string): string[] {
+  const todas = [palabra];
+  if (palabra.length > 3 && palabra.endsWith("s")) todas.push(palabra.slice(0, -1));
+  if (palabra.length > 4 && palabra.endsWith("es")) todas.push(palabra.slice(0, -2));
+  return todas;
+}
+
+/** Una opción capturada, reducida a lo que el dedupe necesita comparar. */
+interface OpcionResumida {
+  /** Sus palabras significativas, para saber si un pedazo de texto la nombra. */
+  palabras: string[];
+  /** Su `price_delta`. 0 es el caso normal: la mayoría de las opciones no cuesta. */
+  monto: number;
+  /** A qué grupo pertenece. Los precios se comparan dentro de un grupo, no entre todos. */
+  grupo: number;
+}
+
+/** Lo que hay que saber de los grupos capturados para decidir qué poda. */
+interface ResumenDeLaEstructura {
+  /** Nombres de grupos y de opciones, en todas sus formas. */
+  vocabulario: Set<string>;
+  opciones: OpcionResumida[];
+}
+
+function resumenDeLaEstructura(item: MenuItem): ResumenDeLaEstructura | null {
+  const grupos = item.business_service_option_groups;
+  if (!grupos || grupos.length === 0) return null;
+
+  const vocabulario = new Set<string>();
+  const opciones: OpcionResumida[] = [];
+  let numeroDeGrupo = 0;
+  for (const grupo of grupos) {
+    const suyas = grupo.business_service_options ?? [];
+    // Un grupo sin opciones no aporta al vocabulario: si "Extra" quedó
+    // capturado vacío, "Extra: shot de espresso +$12" en la descripción es lo
+    // único que le avisa al cliente y no debe podarse.
+    if (suyas.length === 0) continue;
+    for (const texto of [grupo.name, ...suyas.map((o) => o.name)]) {
+      for (const palabra of palabrasSignificativas(texto)) {
+        for (const forma of formas(palabra)) vocabulario.add(forma);
+      }
+    }
+    for (const opcion of suyas) {
+      const extra = Number(opcion.price_delta);
+      opciones.push({
+        palabras: palabrasSignificativas(opcion.name),
+        monto: Number.isFinite(extra) ? extra : 0,
+        grupo: numeroDeGrupo,
+      });
+    }
+    numeroDeGrupo += 1;
+  }
+  return vocabulario.size > 0 ? { vocabulario, opciones } : null;
+}
+
+// Solo los montos escritos con "$" cuentan como precio. Un número suelto puede
+// ser parte del nombre del platillo ("Incluye 2 Sabritas", "6 oz") y tomarlo por
+// precio dejaría renglones vivos sin razón.
+const MONTO = /\$\s*(\d+(?:\.\d{1,2})?)/g;
+
+// "sin costo" / "sin cargo" / "gratis" es un precio declarado, y vale 0. Sin
+// esto, "Endulzantes: azúcar sin costo o miel +$10" (captura real de la Tisana)
+// parecería declarar un solo precio cuando declara dos, y el ítem se quedaría
+// vivo duplicando lo que los chips ya dicen.
+//
+// Pide las dos palabras juntas a propósito: "sin" suelto es lo que separa las
+// dos opciones del Brownie ("con nuez, sin nuez") y no habla de dinero.
+const SIN_COSTO = /\bsin\s+(?:costo|cargo)\b|\bgratis\b/i;
+
+/** Los precios que un pedazo de texto declara, incluido el cero explícito. */
+function montosDeclarados(texto: string): Set<number> {
+  const montos = new Set<number>([...texto.matchAll(MONTO)].map((m) => Number(m[1])));
+  if (SIN_COSTO.test(texto)) montos.add(0);
+  return montos;
+}
+
+/**
+ * Los precios de las opciones que este pedazo de texto nombra, acotados al
+ * grupo al que el texto se refiere.
+ *
+ * Lo del grupo no es cosmética: sin eso, una opción de OTRO grupo se cuela por
+ * compartir una palabra y desalinea la comparación de precios. Caso real del
+ * Café frío: el ítem "cold foam de vainilla o caramelo +$13" nombra a los dos
+ * cold foam del grupo `Extra`, pero también a la opción "Vainilla" del grupo
+ * `Sabor`, que no cuesta — y entonces los precios capturados parecían ser
+ * {$13, $0} contra un texto que declara solo $13.
+ *
+ * El grupo que manda es el que más opciones nombra. Cuando dos empatan, gana el
+ * que declara exactamente los precios del texto, si hay uno solo así; si no,
+ * se unen los precios de los empatados.
+ *
+ * El desempate no es adorno, y la unión a secas no es "el lado conservador"
+ * como decía este comentario antes: falla en las dos direcciones, y el code
+ * review reprodujo las dos. Hacia el falso negativo, hoy "Extra: cold foam de
+ * vainilla o caramelo +$13" solo poda porque la opción del grupo `Sabor` se
+ * llama "Caramelo especial" y nombra 1 contra 2 de `Extra`; si la recaptura la
+ * deja en "Caramelo" —como ya está en Frappé base café— el empate 2-2 daría
+ * {$13, $0} contra un texto que declara {$13} y el renglón sobreviviría
+ * duplicando los chips. Hacia el otro lado, con los precios declarados
+ * repartidos en dos grupos empatados la unión COMPLETA el conjunto y poda donde
+ * un grupo solo no podaría.
+ */
+function montosQueNombra(
+  texto: string,
+  estructura: ResumenDeLaEstructura,
+  declarados: Set<number>,
+): Set<number> | null {
+  const presentes = new Set(palabrasSignificativas(texto).flatMap(formas));
+  const nombradas = estructura.opciones.filter(
+    (opcion) =>
+      opcion.palabras.length > 0 &&
+      opcion.palabras.every((palabra) => formas(palabra).some((f) => presentes.has(f))),
+  );
+  if (nombradas.length === 0) return null;
+
+  const porGrupo = new Map<number, OpcionResumida[]>();
+  for (const opcion of nombradas) {
+    const suyas = porGrupo.get(opcion.grupo) ?? [];
+    suyas.push(opcion);
+    porGrupo.set(opcion.grupo, suyas);
+  }
+  const mayor = Math.max(...[...porGrupo.values()].map((g) => g.length));
+  const empatados = [...porGrupo.values()]
+    .filter((suyas) => suyas.length === mayor)
+    .map((suyas) => new Set(suyas.map((o) => o.monto)));
+
+  // El desempate NO aplica cuando otro grupo empatado se ve como el dueño del
+  // monto pero está capturado a medias: trae alguno de los precios declarados y
+  // además uno ajeno. Sin esta guarda, el desempate reabría justo el hoyo que el
+  // guard cerró — con `Extra{vainilla $13, caramelo $0}` y un segundo grupo
+  // empatado cuyas opciones están las dos en $13, ganaba el segundo, el renglón
+  // se podaba y el chip del caramelo quedaba sin precio. Lo reprodujo el code
+  // review.
+  //
+  // El caso que el desempate sí tiene que resolver es distinto: ahí el otro
+  // grupo empatado no trae NINGÚN precio declarado (solo ceros), así que no es
+  // candidato a ser el dueño y no debe estorbar.
+  const hayOtroAMedias = empatados.some(
+    (montos) =>
+      !mismoConjunto(montos, declarados) &&
+      [...montos].some((m) => declarados.has(m)) &&
+      [...montos].some((m) => !declarados.has(m)),
+  );
+  const exactos = empatados.filter((montos) => mismoConjunto(montos, declarados));
+  if (exactos.length === 1 && !hayOtroAMedias) return exactos[0];
+
+  const union = new Set<number>();
+  for (const montos of empatados) for (const monto of montos) union.add(monto);
+  return union;
+}
+
+function mismoConjunto(a: Set<number>, b: Set<number>): boolean {
+  return a.size === b.size && [...a].every((x) => b.has(x));
+}
+
+function laEstructuraLoCubre(
+  texto: string,
+  estructura: ResumenDeLaEstructura,
+  minima = COBERTURA_MINIMA,
+): boolean {
+  const palabras = palabrasSignificativas(texto);
+  if (palabras.length === 0) return false;
+  const cubiertas = palabras.filter((p) =>
+    formas(p).some((forma) => estructura.vocabulario.has(forma)),
+  ).length;
+  if (cubiertas / palabras.length < minima) return false;
+
+  // Si el texto no habla de dinero, la cobertura de palabras decide sola. Es el
+  // caso de 16 de los 19 grupos que K-fféss necesita.
+  const declarados = montosDeclarados(texto);
+  if (declarados.size === 0) return true;
+
+  // Si el texto SÍ habla de dinero, los precios que declara tienen que ser
+  // exactamente los de las opciones que nombra. `price_delta` tiene default 0,
+  // así que una captura a medias es el caso normal: si el texto dice "+$12" y la
+  // opción quedó en 0, podar el renglón pintaría "Shot de espresso" a secas y el
+  // comensal vería gratis lo que cuesta $12.
+  //
+  // Se compara contra las opciones que el texto NOMBRA y no contra todos los
+  // montos del platillo, porque un conjunto plano solo verifica "alguien cobra
+  // $13" y no "esto cobra $13". Lo cazó el code review con el caso real del Café
+  // frío: su grupo `Extra` tiene los dos cold foam a $13, y si uno de los dos se
+  // captura en el default 0, el conjunto plano sigue conteniendo el 13 que trae
+  // el otro — el renglón se podaba y el chip del caramelo quedaba sin precio.
+  const capturados = montosQueNombra(texto, estructura, declarados);
+  if (capturados === null) return false;
+  return mismoConjunto(capturados, declarados);
+}
+
+// Parte un renglón en encabezado y cola: "Bases: almendra, nuez" -> "Bases" y
+// " almendra, nuez". Lo usa `podarRenglon` para distinguir una lista capturada
+// de la prosa del platillo.
+//
+// El tope de 40 caracteres antes de los dos puntos es lo que mantiene el riesgo
+// chico: sin él, cualquier prosa con dos puntos a media frase se trataría como
+// lista. Aun así, una prosa corta con dos puntos entra por aquí y se le poda la
+// cola, y medir por ítem volvió ese riesgo MAYOR, no menor: antes las palabras
+// del encabezado diluían la cobertura y el renglón entero sobrevivía; ahora el
+// encabezado sale de la medición y cada fragmento se juzga solo. El caso que lo
+// muestra —lo construyó el code review— es "Nota: preparado al momento, pide tu
+// leche entera o deslactosada", que antes se conservaba completo y ahora queda
+// en "Nota: preparado al momento".
+//
+// No hay ningún encabezado así en las 25 descripciones capturadas, así que hoy
+// no se lee mal en ningún menú. Si aparece, es este número el que hay que mover.
+const TIENE_ENCABEZADO = /^([^\n:]{1,40}):([\s\S]*)$/;
+
+// "Incluye:" / "Contiene:" / "Ingredientes:" nunca se poda. Es lo que el
+// platillo TRAE, no lo que el cliente elige; la estructura no lo guarda en
+// ninguna columna, así que podarlo por parecido de palabras (una pizza que
+// "Contiene: piña" y tiene un grupo con esa fruta) lo perdería para siempre, no
+// sólo durante la recaptura.
+//
+// Se prueba también contra el encabezado de un renglón suelto, no sólo contra
+// la etiqueta de un grupo del parser: "Ingredientes:" no está en la lista
+// cerrada de `parseDescripcion`, así que nunca llega a ser grupo y cae al
+// párrafo, que es justo donde se podaría sin esta guarda.
+const ETIQUETA_DE_INGREDIENTES = /^(Incluye|Contiene|Ingredientes)$/i;
+
+/**
+ * Un renglón del texto suelto sin los pedazos que la estructura ya dice, o
+ * `null` si no queda nada que valga pintar.
+ *
+ * Un renglón CON encabezado ("Bases: almendra, nuez, …") se poda ítem por ítem,
+ * igual que un grupo del parser y por el mismo motivo: un grupo a medio
+ * capturar es legítimo, y podar el renglón entero se llevaría justo los ítems
+ * que todavía no están capturados. Caso vivo en la captura de hoy: el grupo
+ * `Base` de Mini hot cakes no tiene "Mermelada de fresa" (el de Crepa sí), así
+ * que con la poda por renglón completo ese ingrediente desaparecía del menú.
+ *
+ * Un renglón SIN encabezado es prosa hasta que se demuestre lo contrario, así
+ * que ahí se exige cobertura COMPLETA y se conserva o se va entero. Es la
+ * diferencia entre "Leche entera o deslactosada" (3 de 3, el grupo Leche ya lo
+ * dice, se va) y "Hamburguesa con queso, jamón y piña" contra un grupo de
+ * extras con esos tres: "hamburguesa" es lo que el platillo ES, así que se
+ * queda.
+ */
+function podarRenglon(renglon: string, estructura: ResumenDeLaEstructura): string | null {
+  const conEncabezado = renglon.match(TIENE_ENCABEZADO);
+  if (!conEncabezado) {
+    return laEstructuraLoCubre(renglon, estructura, 1) ? null : renglon;
+  }
+
+  const [, encabezado, cola] = conEncabezado;
+  if (ETIQUETA_DE_INGREDIENTES.test(encabezado.trim())) return renglon;
+
+  // La granularidad llega hasta donde `separarLista` corta, y eso deja un
+  // límite conocido: parte por comas y solo el último ítem por " y ", nunca por
+  // " o ". En la captura real las 14 listas terminan en "X o Y" ("cajeta o
+  // Nutella", "mango o cheesecake"), así que ese par se mide como un solo ítem
+  // y la decisión vuelve a ser todo-o-nada sobre los dos.
+  //
+  // **Partir por " o " NO es el fix**, y está probado: "cold foam de vainilla o
+  // caramelo +$13" daría ["cold foam de vainilla", "caramelo +$13"], y el
+  // segundo fragmento ya no nombra a ninguna opción —el nombre capturado es
+  // "Cold foam de caramelo" y se quedó sin su prefijo—, así que sobreviviría
+  // como "Extra: caramelo +$13" al lado de los chips que dicen lo mismo. Partir
+  // rompe los nombres compuestos que comparten prefijo, que es justo la forma
+  // que tiene esta captura. Si algún día se cambia, se cambia en las dos
+  // superficies: el gemelo en Dart replica el límite a propósito.
+  //
+  // Lo que agrandó este límite es el guard de precios, y también está
+  // reproducido: un ítem que declara UN precio y nombra dos opciones con montos
+  // distintos ya no se poda. "Leche: entera o de avena +$8" contra
+  // Leche{Entera $0, De avena $8} se podaba cuando los montos se comparaban en
+  // bola y ahora sobrevive duplicando los chips. No está en la captura de hoy
+  // —los dos cold foam cuestan igual— pero es la forma de 14 de las listas.
+  // Ojo con el arreglo que parece obvio: relajar el predicado a "los declarados
+  // están entre los capturados" reintroduce justo el agujero que este guard
+  // cerró, el del `price_delta` en su default 0.
+  const items = separarLista(cola);
+  // Sin ítems que medir ("Opciones:" a secas, o una cola que no es lista) se
+  // decide el renglón completo con el umbral laxo: el encabezado es texto de
+  // captura y no tiene por qué existir en ninguna tabla.
+  if (items.length === 0) {
+    return laEstructuraLoCubre(renglon, estructura, COBERTURA_MINIMA) ? null : renglon;
+  }
+
+  const sobreviven = items.filter((item) => !laEstructuraLoCubre(item, estructura));
+  if (sobreviven.length === 0) return null;
+  // Si no se podó nada, se devuelve el renglón tal como lo capturaron. Volver a
+  // armarlo es lossy y no habría ganado nada: `separarLista` quita el punto
+  // final y parte por comas, así que un "+$1,200" saldría "+$1, 200" y un " y "
+  // se volvería ", ". La regla del módulo es que una captura con otro formato se
+  // lea raro, no que se rompa.
+  if (sobreviven.length === items.length) return renglon;
+  return `${encabezado}: ${sobreviven.join(", ")}`;
+}
+
+/**
+ * La descripción sin los pedazos que los grupos capturados ya dicen.
+ *
+ * Sin grupos capturados devuelve la descripción intacta: un platillo sin
+ * opciones estructuradas se ve exactamente igual que antes, que es la mayoría
+ * del directorio y hoy —con las dos tablas vacías en prod— es todo.
+ */
+export function podarLoQueCubreLaEstructura(
+  parseada: DescripcionParseada,
+  item: MenuItem,
+): DescripcionParseada {
+  const estructura = resumenDeLaEstructura(item);
+  if (!estructura) return parseada;
+
+  const grupos: GrupoVisible[] = [];
+  for (const grupo of parseada.grupos) {
+    if (ETIQUETA_DE_INGREDIENTES.test(grupo.etiqueta.trim())) {
+      grupos.push(grupo);
+      continue;
+    }
+    // Opción por opción y no el grupo entero: un grupo a medio capturar es
+    // legítimo (así lo dice la migración que creó las tablas), y podar el grupo
+    // completo se llevaría justo las opciones que todavía no están capturadas.
+    // Con "Sabores: capuchino, caramelo, moka" contra un grupo Sabor que sólo
+    // tiene los dos primeros, "moka" se sigue viendo.
+    const partes = grupo.partes.filter((parte) => !laEstructuraLoCubre(parte, estructura));
+    if (partes.length > 0) grupos.push({ ...grupo, partes });
+  }
+
+  // Renglón por renglón y no el párrafo entero: el Café frío trae "A las rocas"
+  // (que se queda) y "Leche entera o deslactosada" (que no) en el mismo bloque
+  // de texto suelto.
+  const sueltos = parseada.sueltos
+    .flatMap((suelto) => suelto.split("\n"))
+    .map((renglon) => renglon.trim())
+    .filter((renglon) => renglon.length > 0)
+    .map((renglon) => podarRenglon(renglon, estructura))
+    .filter((renglon): renglon is string => renglon !== null);
+
+  // Se unen con salto de línea y no con espacio: `.parrafo` se pinta con
+  // `white-space: pre-line` a propósito (ver `menu.module.css`), porque la app
+  // respeta los renglones de la captura y el mismo platillo se leía distinto en
+  // cada superficie.
+  return { grupos, sueltos, parrafo: sueltos.join("\n") || null };
+}
+
+/** Todo lo que se pinta debajo del nombre de un platillo, ya resuelto. */
+export interface DetalleDelPlatillo {
+  parrafo: string | null;
+  grupos: GrupoVisible[];
+  /** El platillo tiene tamaños, así que su precio es un "desde". */
+  precioEsDesde: boolean;
+}
+
+/**
+ * Los tres orígenes de los bloques de un platillo, en el orden en que se
+ * pintan: los tamaños, lo que quede del texto, y las opciones capturadas.
+ *
+ * Los tamaños van PRIMERO porque es lo que el comensal busca cuando el platillo
+ * tiene varias medidas. Lo que sobrevive del texto va antes que la estructura
+ * porque lo que sobrevive es "Incluye:" / "Contiene:" —qué trae el platillo—, y
+ * eso se lee antes de elegir.
+ */
+export function detalleDelPlatillo(item: MenuItem): DetalleDelPlatillo {
+  const tamanos = variantesComoGrupo(item);
+  const texto = podarLoQueCubreLaEstructura(parseDescripcion(item.description), item);
+  return {
+    parrafo: texto.parrafo,
+    grupos: [...(tamanos ? [tamanos] : []), ...texto.grupos, ...gruposDeOpciones(item)],
+    precioEsDesde: tamanos !== null,
+  };
 }
 
 const FECHA = new Intl.DateTimeFormat("es-MX", {
