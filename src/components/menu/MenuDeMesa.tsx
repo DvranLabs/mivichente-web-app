@@ -17,6 +17,7 @@ import {
   type MenuBusiness,
   type MenuItem,
 } from "../../lib/menu-de-mesa";
+import FotoAmpliable from "./FotoAmpliable";
 import styles from "./menu.module.css";
 
 /** Cuántos ingredientes se ven antes de plegar el resto. */
@@ -118,16 +119,11 @@ function Platillo({ item, prioridad }: { item: MenuItem; prioridad: boolean }) {
 
   return (
     <article className={styles.dish}>
-      {/* <img> y no next/image a propósito: un host de imagen que no esté en
-          next.config tira 500 y se lleva la página entera, y esta página vive
-          detrás de un QR pegado en una mesa que ya no se puede corregir. */}
       {item.image_url && (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img
+        <FotoAmpliable
           src={item.image_url}
           alt={item.name}
-          loading={prioridad ? "eager" : "lazy"}
-          decoding="async"
+          prioridad={prioridad}
         />
       )}
       <div className={styles.dishBody}>
