@@ -185,12 +185,84 @@
 
 /* La foto contesta la primera pregunta —¿cómo se ve?— antes que cualquier
    texto: los nombres son locales y no dicen nada afuera del pueblo. */
-.dish img {
+.imageButton {
+  width: 100%;
+  display: block;
+  padding: 0;
+  border: 0;
+  background: var(--sunken);
+  color: inherit;
+  cursor: zoom-in;
+}
+
+.imageButton:focus-visible {
+  outline: 3px solid var(--primary);
+  outline-offset: -3px;
+}
+
+.cardImage {
   width: 100%;
   aspect-ratio: 4 / 3;
   object-fit: cover;
   display: block;
   background: var(--sunken);
+}
+
+/* El dialog entra al top layer del navegador: no lo recorta el overflow de la
+   tarjeta y conserva el menú debajo, en el mismo punto de scroll. */
+.imageDialog {
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  max-height: none;
+  margin: 0;
+  padding: max(20px, env(safe-area-inset-top)) max(16px, env(safe-area-inset-right))
+    max(20px, env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left));
+  border: 0;
+  background: transparent;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+.imageDialog[open] {
+  display: grid;
+  place-items: center;
+}
+
+.imageDialog::backdrop {
+  background: rgba(14, 11, 8, 0.92);
+}
+
+.fullImage {
+  width: auto;
+  height: auto;
+  max-width: 100%;
+  max-height: 100%;
+  display: block;
+  object-fit: contain;
+  border-radius: 10px;
+}
+
+.closeImageButton {
+  position: absolute;
+  top: max(20px, env(safe-area-inset-top));
+  right: max(16px, env(safe-area-inset-right));
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  padding: 0 0 4px;
+  border: 1px solid rgba(255, 255, 255, 0.45);
+  border-radius: 999px;
+  background: rgba(31, 26, 20, 0.84);
+  color: #ffffff;
+  font: 300 34px/1 var(--font-ui);
+  cursor: pointer;
+}
+
+.closeImageButton:focus-visible {
+  outline: 3px solid #ffffff;
+  outline-offset: 3px;
 }
 
 .dishBody {
