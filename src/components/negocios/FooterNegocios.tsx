@@ -18,7 +18,7 @@ export default function FooterNegocios() {
           </a>
           <Link href="/legal/terms">Términos</Link>
           <Link href="/legal/privacy">Privacidad</Link>
-          <a href="mailto:contact@vichenteapp.com">Contacto</a>
+          <a href="mailto:vichenteapp@gmail.com">Contacto</a>
         </div>
         <p>© {new Date().getFullYear()} Vichente App. Hecho en Durango.</p>
       </div>
