@@ -110,7 +110,8 @@ export default function PrivacyPolicyPage() {
             dispositivo. No está ligado a tu nombre, teléfono, correo ni a
             ningún otro dato personal. Lo usamos para distinguir la actividad
             de distintos dispositivos y evitar reportes repetidos o abusivos.
-            Si borras los datos de la Aplicación, se genera uno nuevo.
+            Puedes cambiarlo por uno nuevo cuando quieras; la sección 5
+            explica cómo.
           </li>
           <li>
             <strong>Datos de uso:</strong> Junto con ese identificador
