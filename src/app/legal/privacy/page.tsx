@@ -37,8 +37,8 @@ export default function PrivacyPolicyPage() {
             dirección, municipio, giro, horarios, redes sociales y fotos) y
             los datos de la persona de contacto: su nombre y, si lo
             escribe, su teléfono. Los datos del negocio se publican en el
-            directorio; los de la persona de contacto solo los usamos para
-            comunicarnos con ella y no se publican.
+            directorio, y los de la persona de contacto los usamos para
+            comunicarnos con ella.
           </li>
           <li>
             <strong>Reportar información incorrecta:</strong> Si reportas
@@ -110,8 +110,7 @@ export default function PrivacyPolicyPage() {
             dispositivo. No está ligado a tu nombre, teléfono, correo ni a
             ningún otro dato personal. Lo usamos para distinguir la actividad
             de distintos dispositivos y evitar reportes repetidos o abusivos.
-            Si borras los datos de la Aplicación o la desinstalas, se genera
-            uno nuevo.
+            Si borras los datos de la Aplicación, se genera uno nuevo.
           </li>
           <li>
             <strong>Datos de uso:</strong> Junto con ese identificador
@@ -128,6 +127,18 @@ export default function PrivacyPolicyPage() {
             enlace, registramos de qué código o enlace llegaste y el
             identificador del navegador que envía tu dispositivo (user
             agent), que indica el tipo de navegador y de sistema operativo.
+          </li>
+          <li>
+            <strong>Contactos desde vichente.com:</strong> El sitio guarda en
+            tu navegador su propio identificador aleatorio y, junto con él,
+            registra cuándo tocas llamar o WhatsApp en la página de un
+            negocio.
+          </li>
+          <li>
+            <strong>Registros técnicos:</strong> Como cualquier servicio en
+            internet, nuestros servidores y los de nuestros proveedores
+            registran datos técnicos de cada conexión, como la dirección IP,
+            para operar y proteger el servicio.
           </li>
         </ul>
         <p>
@@ -179,7 +190,8 @@ export default function PrivacyPolicyPage() {
           </li>
           <li>
             <strong>Con Proveedores de Servicios:</strong> Guardamos la
-            información en servidores de Supabase. Para los mapas y la
+            información en servidores de Supabase, y el sitio y la versión
+            web se sirven desde Vercel y Firebase Hosting. Para los mapas y la
             ubicación usamos Google Maps; al usar esas funciones aplica la
             Política de Privacidad de Google, que puedes consultar en{' '}
             <a
@@ -216,7 +228,7 @@ export default function PrivacyPolicyPage() {
         <ul>
           <li>
             <strong>Si registraste un negocio:</strong> escríbenos con el
-            nombre del negocio y el teléfono o correo que nos diste, y
+            nombre del negocio y el teléfono que nos diste, y
             corregimos o borramos los datos del registro y de la persona de
             contacto. Si lo pides, también retiramos la ficha del directorio.
           </li>
@@ -224,8 +236,10 @@ export default function PrivacyPolicyPage() {
             <strong>Actividad de uso:</strong> como el identificador de
             dispositivo es aleatorio y no está ligado a ti, no podemos saber
             qué actividad es tuya por tu nombre o tu teléfono. Para cortar el
-            vínculo con tu actividad anterior, borra los datos de la
-            Aplicación o desinstálala: se genera un identificador nuevo.
+            vínculo con tu actividad anterior, en Android borra los datos de
+            la Aplicación desde la configuración del dispositivo; en iPhone,
+            desinstálala. En la web, borra los datos del sitio en tu
+            navegador. Así se genera un identificador nuevo.
           </li>
           <li>
             <strong>Pedidos y ubicación:</strong> no hay nada que borrar de
