@@ -10,14 +10,15 @@ export default function PrivacyPolicyPage() {
       <div className="prose prose-lg max-w-4xl mx-auto">
         <h1>Política de Privacidad</h1>
         <p>
-          <strong>Fecha de efectividad:</strong> 21 de julio de 2026
+          <strong>Última actualización:</strong> 1 de octubre de 2026
         </p>
 
         <p>
           Bienvenido a Vichente App (la &quot;Aplicación&quot;). Tu privacidad es
-          importante para nosotros. Esta Política de Privacidad explica cómo
-          recopilamos, usamos, divulgamos y protegemos tu información cuando
-          utilizas nuestra aplicación móvil.
+          importante para nosotros. Esta Política de Privacidad explica qué
+          información recopilamos, para qué la usamos y con quién se comparte
+          cuando usas la Aplicación en Android, en iPhone o en la web
+          (app.vichente.com), y cuando usas el sitio vichente.com.
         </p>
 
         <h2>1. Información que Recopilamos</h2>
@@ -28,16 +29,16 @@ export default function PrivacyPolicyPage() {
         </p>
 
         <h3>Información que Nos Proporcionas</h3>
-        <p>
-          Solo recopilamos datos que nos proporcionas directamente al usar
-          funciones específicas:
-        </p>
         <ul>
           <li>
             <strong>Registro de negocio:</strong> Si solicitas que tu
-            negocio aparezca en el directorio, recopilamos el nombre,
-            teléfono, dirección y demás información del negocio que nos
-            envías para publicarlo.
+            negocio aparezca en el directorio, recopilamos los datos del
+            negocio que nos envías (nombre, descripción, teléfono,
+            dirección, municipio, giro, horarios, redes sociales y fotos) y
+            los datos de la persona de contacto: su nombre y, si lo
+            escribe, su teléfono. Los datos del negocio se publican en el
+            directorio; los de la persona de contacto solo los usamos para
+            comunicarnos con ella y no se publican.
           </li>
           <li>
             <strong>Reportar información incorrecta:</strong> Si reportas
@@ -47,40 +48,100 @@ export default function PrivacyPolicyPage() {
           </li>
         </ul>
 
-        <h3>Información Recopilada Automáticamente</h3>
+        <h3>Pedidos por WhatsApp</h3>
+        <p>
+          Algunos negocios aceptan pedidos desde la Aplicación. Para armar tu
+          pedido escribes tu nombre, tu teléfono, las referencias de tu
+          domicilio, una nota opcional y con cuánto vas a pagar, y marcas
+          en un mapa a dónde te lo llevan. Con eso la Aplicación arma un
+          mensaje y abre WhatsApp para que tú se lo mandes al negocio.
+        </p>
         <ul>
           <li>
-            <strong>Datos de uso:</strong> Qué buscas dentro de la
-            Aplicación y cuántos resultados obtienes, para saber qué
-            negocios faltan en el directorio y mejorar la búsqueda.
+            <strong>No guardamos esos datos.</strong> Se quedan en tu
+            dispositivo mientras armas el pedido y salen únicamente en el
+            mensaje que tú decides enviar. No llegan a nuestros servidores.
           </li>
           <li>
-            <strong>Identificador anónimo de dispositivo:</strong> Un
-            identificador aleatorio generado y guardado únicamente en tu
-            dispositivo (no está ligado a tu nombre, correo ni ninguna otra
-            información personal). Se usa junto con los datos de uso y los
-            reportes de información incorrecta para distinguir actividad de
-            distintos dispositivos y evitar reportes repetidos o abusivos.
+            <strong>Quién los recibe:</strong> el negocio al que le mandas el
+            mensaje, por medio de WhatsApp. A partir de ahí, el uso que el
+            negocio y WhatsApp hagan de esa información se rige por sus
+            propias políticas.
           </li>
           <li>
-            <strong>Información del dispositivo:</strong> Modelo de
-            hardware, sistema operativo y versión.
+            <strong>Lo que sí registramos del pedido:</strong> en qué paso
+            del pedido vas (ver el menú, agregar un producto, empezar el
+            pedido, abrir WhatsApp), cuántos productos lleva y el total,
+            junto con el identificador anónimo de dispositivo. No
+            registramos lo que escribes en el formulario ni tu ubicación.
+          </li>
+        </ul>
+
+        <h3>Ubicación</h3>
+        <p>
+          La Aplicación solo pide acceso a tu ubicación cuando tú tocas el
+          botón de ubicación, nunca al abrirla. Se usa en dos lugares:
+        </p>
+        <ul>
+          <li>
+            <strong>Elegir tu municipio:</strong> con tu ubicación
+            detectamos en qué municipio estás. Solo guardamos en tu
+            dispositivo el nombre del municipio; la posición se descarta.
+          </li>
+          <li>
+            <strong>Marcar a dónde va tu pedido:</strong> con tu ubicación
+            precisa ponemos el punto de entrega en el mapa. Esa coordenada
+            viaja dentro de un enlace de Google Maps en el mensaje de
+            WhatsApp que le mandas al negocio, para que te lleven el pedido.
           </li>
         </ul>
         <p>
-          <strong>Favoritos:</strong> Los negocios que marcas como favoritos
-          se guardan únicamente en tu dispositivo (almacenamiento local), no
-          en nuestros servidores.
+          No guardamos tu ubicación en nuestros servidores. Darnos acceso es
+          opcional: si no lo das, puedes elegir tu municipio de una lista y
+          mover el mapa a mano. Puedes quitar el permiso en cualquier momento
+          desde la configuración de tu dispositivo.
+        </p>
+
+        <h3>Información Recopilada Automáticamente</h3>
+        <ul>
+          <li>
+            <strong>Identificador anónimo de dispositivo:</strong> Un
+            identificador aleatorio que la Aplicación genera y guarda en tu
+            dispositivo. No está ligado a tu nombre, teléfono, correo ni a
+            ningún otro dato personal. Lo usamos para distinguir la actividad
+            de distintos dispositivos y evitar reportes repetidos o abusivos.
+            Si borras los datos de la Aplicación o la desinstalas, se genera
+            uno nuevo.
+          </li>
+          <li>
+            <strong>Datos de uso:</strong> Junto con ese identificador
+            registramos qué buscas dentro de la Aplicación y cuántos
+            resultados obtienes, qué negocio abres desde una búsqueda, cuándo
+            tocas llamar, WhatsApp o el mapa de un negocio, y los pasos del
+            pedido descritos arriba. Sirve para saber qué negocios faltan en
+            el directorio, mejorar la búsqueda y medir si la Aplicación les
+            sirve a los negocios.
+          </li>
+          <li>
+            <strong>Visitas desde códigos QR:</strong> Cuando abres la página
+            de un negocio en vichente.com escaneando un código QR o desde un
+            enlace, registramos de qué código o enlace llegaste y el
+            identificador del navegador que envía tu dispositivo (user
+            agent), que indica el tipo de navegador y de sistema operativo.
+          </li>
+        </ul>
+        <p>
+          <strong>Favoritos y negocios recientes:</strong> Los negocios que
+          marcas como favoritos y los que viste hace poco se guardan
+          únicamente en tu dispositivo, no en nuestros servidores.
         </p>
 
         <h2>2. Uso de Tu Información</h2>
-        <p>
-          Usamos la información que recopilamos para:
-        </p>
+        <p>Usamos la información que recopilamos para:</p>
         <ul>
           <li>
             Publicar y mantener actualizada la ficha de un negocio en el
-            directorio.
+            directorio, y comunicarnos con la persona que lo registró.
           </li>
           <li>
             Revisar y corregir información incorrecta reportada sobre un
@@ -91,24 +152,35 @@ export default function PrivacyPolicyPage() {
             negocios faltan por agregar.
           </li>
           <li>
+            Medir cuántas personas contactan o le piden a cada negocio,
+            sin conocer el contenido de esos contactos o pedidos.
+          </li>
+          <li>
             Detectar y filtrar reportes repetidos o abusivos provenientes de
             un mismo dispositivo.
           </li>
-          <li>
-            Mantener y mejorar el funcionamiento de la Aplicación.
-          </li>
+          <li>Mantener y mejorar el funcionamiento de la Aplicación.</li>
         </ul>
+        <p>
+          No vendemos tu información ni la usamos para mostrarte publicidad.
+        </p>
 
         <h2>3. Divulgación de Tu Información</h2>
         <p>
-          No compartiremos tu información con terceros excepto en las
+          No compartimos tu información con terceros excepto en las
           siguientes situaciones:
         </p>
         <ul>
           <li>
-            <strong>Con Proveedores de Servicios:</strong> Para proporcionar la
-            funcionalidad de mapas y ubicación, utilizamos los servicios de
-            Google Maps. Al utilizar estas funciones, estás sujeto a la
+            <strong>Cuando tú lo decides:</strong> Al mandar un pedido o
+            escribirle a un negocio por WhatsApp, o al llamarle, la
+            información que incluyas le llega a ese negocio por medio de
+            WhatsApp o de tu teléfono.
+          </li>
+          <li>
+            <strong>Con Proveedores de Servicios:</strong> Guardamos la
+            información en servidores de Supabase. Para los mapas y la
+            ubicación usamos Google Maps; al usar esas funciones aplica la
             Política de Privacidad de Google, que puedes consultar en{' '}
             <a
               href="https://policies.google.com/privacy"
@@ -129,32 +201,58 @@ export default function PrivacyPolicyPage() {
 
         <h2>4. Seguridad de Tu Información</h2>
         <p>
-          Utilizamos medidas de seguridad administrativas, técnicas y físicas
-          para ayudar a proteger tu información personal. Si bien hemos tomado
-          medidas razonables para asegurar la información personal que nos
-          proporcionas, ten en cuenta que a pesar de nuestros esfuerzos, ninguna
-          medida de seguridad es perfecta o impenetrable.
+          La información viaja cifrada entre la Aplicación y nuestros
+          servidores, y usamos medidas de seguridad administrativas y
+          técnicas razonables para protegerla. Aun así, ninguna medida de
+          seguridad es perfecta o impenetrable.
         </p>
 
-        <h2>5. Privacidad de los Niños</h2>
+        <h2>5. Tus Derechos y Cómo Borrar Tus Datos</h2>
+        <p>
+          Puedes pedirnos acceder, corregir o borrar tu información, u
+          oponerte a su uso, escribiendo a{' '}
+          <a href="mailto:vichenteapp@gmail.com">vichenteapp@gmail.com</a>.
+        </p>
+        <ul>
+          <li>
+            <strong>Si registraste un negocio:</strong> escríbenos con el
+            nombre del negocio y el teléfono o correo que nos diste, y
+            corregimos o borramos los datos del registro y de la persona de
+            contacto. Si lo pides, también retiramos la ficha del directorio.
+          </li>
+          <li>
+            <strong>Actividad de uso:</strong> como el identificador de
+            dispositivo es aleatorio y no está ligado a ti, no podemos saber
+            qué actividad es tuya por tu nombre o tu teléfono. Para cortar el
+            vínculo con tu actividad anterior, borra los datos de la
+            Aplicación o desinstálala: se genera un identificador nuevo.
+          </li>
+          <li>
+            <strong>Pedidos y ubicación:</strong> no hay nada que borrar de
+            nuestro lado, porque no los guardamos. Para borrar un pedido ya
+            enviado, hazlo en tu WhatsApp o pídeselo al negocio.
+          </li>
+        </ul>
+
+        <h2>6. Privacidad de los Niños</h2>
         <p>
           Nuestra aplicación no está dirigida a niños menores de 13 años y no
           recopilamos conscientemente información de niños menores de 13 años.
         </p>
 
-        <h2>6. Cambios a Esta Política de Privacidad</h2>
+        <h2>7. Cambios a Esta Política de Privacidad</h2>
         <p>
           Podemos actualizar esta Política de Privacidad de vez en cuando. Te
-          notificaremos cualquier cambio publicando la nueva Política de
-          Privacidad en esta página.
+          avisaremos de cualquier cambio publicando la nueva versión en esta
+          página y actualizando la fecha de &quot;Última actualización&quot;.
         </p>
 
-        <h2>7. Contáctanos</h2>
+        <h2>8. Contáctanos</h2>
         <p>
           Si tienes preguntas o comentarios sobre esta Política de Privacidad,
           por favor contáctanos en:
           <br />
-          vichenteapp@gmail.com
+          <a href="mailto:vichenteapp@gmail.com">vichenteapp@gmail.com</a>
           <br />
           dvran-company
         </p>
