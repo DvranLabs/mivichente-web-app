@@ -1,11 +1,11 @@
 import s from "./landing.module.css";
+import { APP_STORE_URL, PLAY_STORE_URL } from "../../lib/tiendas";
 
 const WEB_APP = "https://app.vichente.com";
-const PLAY_STORE = "https://play.google.com/store/apps/details?id=com.dvrancorp.vichente";
 
 // Un dueño escéptico no se registra en algo que no puede ver. La web app es la
-// salida principal porque abre en cualquier iPhone sin instalar nada (la nativa
-// solo existe en Android); Play Store queda como segunda opción.
+// salida principal porque abre en cualquier celular sin instalar nada; las
+// tiendas quedan como segunda opción.
 export default function VerLaApp() {
   return (
     <section className={`${s.section} ${s.onNavy}`}>
@@ -26,11 +26,15 @@ export default function VerLaApp() {
             Abrir Vichente App
           </a>
           <p className={s.heroFoot}>
-            Abre en cualquier celular.{" "}
-            <a className={s.linkSubrayado} href={PLAY_STORE} target="_blank" rel="noopener noreferrer">
-              O bájala de Play Store
+            Abre en cualquier celular. O bájala de{" "}
+            <a className={s.linkSubrayado} href={PLAY_STORE_URL} target="_blank" rel="noopener noreferrer">
+              Play Store
             </a>{" "}
-            si tienes Android.
+            o de{" "}
+            <a className={s.linkSubrayado} href={APP_STORE_URL} target="_blank" rel="noopener noreferrer">
+              App Store
+            </a>
+            .
           </p>
         </div>
       </div>

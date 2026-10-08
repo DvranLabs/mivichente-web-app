@@ -2,6 +2,7 @@ import { headers } from "next/headers";
 import { notFound } from "next/navigation";
 import BusinessLandingCard from "../../../components/BusinessLandingCard";
 import { logScan } from "../../../lib/log-scan";
+import { detectPlatform, storeUrlFor } from "../../../lib/tiendas";
 
 const SUPABASE_URL = process.env.SUPABASE_URL!;
 const SUPABASE_ANON_KEY = process.env.SUPABASE_ANON_KEY!;
@@ -76,18 +77,16 @@ export default async function NegocioPage({
   // los App Links interceptan vichente.com/negocio/:id y abren la app antes de renderizar.
   // Por eso el CTA principal empuja a la web app (app.vichente.com), que funciona en iPhone/web.
   const webAppUrl = `https://app.vichente.com/#/negocio/${id}`;
-  const playStoreUrl = "https://play.google.com/store/apps/details?id=com.dvrancorp.vichente";
   const telUrl = business.phone ? `tel:${business.phone}` : null;
-  const isAndroid = /android/i.test(userAgent);
+  const storeUrl = storeUrlFor(detectPlatform(userAgent));
   const categoryUrl = business.categories ? `https://app.vichente.com/#/category/${business.categories.id}` : null;
 
   return (
     <BusinessLandingCard
       business={business}
       webAppUrl={webAppUrl}
-      playStoreUrl={playStoreUrl}
       telUrl={telUrl}
-      isAndroid={isAndroid}
+      storeUrl={storeUrl}
       categoryUrl={categoryUrl}
     />
   );

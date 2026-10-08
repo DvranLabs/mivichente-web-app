@@ -21,8 +21,8 @@ interface SearchResultsLandingProps {
   termino: string;
   negocios: NegocioResultado[];
   webAppUrl: string;
-  playStoreUrl: string;
-  isAndroid: boolean;
+  // Tienda del teléfono que abrió la página; null en computadora o UA raro.
+  storeUrl: string | null;
 }
 
 const VerifiedBadge = () => (
@@ -143,8 +143,7 @@ export default function SearchResultsLanding({
   termino,
   negocios,
   webAppUrl,
-  playStoreUrl,
-  isAndroid,
+  storeUrl,
 }: SearchResultsLandingProps) {
   const visibles = negocios.slice(0, MAX_VISIBLES);
   const restantes = negocios.length - visibles.length;
@@ -232,9 +231,9 @@ export default function SearchResultsLanding({
                 ? "Buscar otra cosa en Vichente App"
                 : "Abrir en Vichente App"}
           </a>
-          {isAndroid && (
+          {storeUrl && (
             <a
-              href={playStoreUrl}
+              href={storeUrl}
               style={{ color: "#9ca3af", fontSize: "13px", fontWeight: 600, textDecoration: "none", textAlign: "center" }}
             >
               Descubre la nueva app de tu pueblo →
