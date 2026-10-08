@@ -43,15 +43,17 @@ const SearchIcon = ({ size = 20 }: { size?: number }) => (
   </svg>
 );
 
-const AndroidIcon = () => (
-  <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-    <path d="M6.5 9.5v6a1 1 0 001 1h.5v3a1.5 1.5 0 003 0v-3h2v3a1.5 1.5 0 003 0v-3h.5a1 1 0 001-1v-6h-11zM5.5 9.5a1 1 0 00-1 1V17a1.5 1.5 0 003 0v-6.5a1 1 0 00-1-1h-1zM18.5 9.5a1 1 0 00-1 1V17a1.5 1.5 0 003 0v-6.5a1 1 0 00-1-1h-1zM16.9 5.4l1.05-1.82a.35.35 0 10-.61-.35l-1.07 1.85a6.4 6.4 0 00-4.77 0L10.43 3.23a.35.35 0 10-.61.35L10.87 5.4A6.02 6.02 0 007.5 10.5h9a6.02 6.02 0 00-3.6-5.1zM9.9 8.3a.6.6 0 11.6-.6.6.6 0 01-.6.6zm4.2 0a.6.6 0 11.6-.6.6.6 0 01-.6.6z" />
+// Logos oficiales de Simple Icons (simple-icons@13.21.0, apple.svg y
+// android.svg), en monocromo para que tomen el color del texto.
+const AndroidIcon = ({ size = 16 }: { size?: number }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+    <path d="M18.4395 5.5586c-.675 1.1664-1.352 2.3318-2.0274 3.498-.0366-.0155-.0742-.0286-.1113-.043-1.8249-.6957-3.484-.8-4.42-.787-1.8551.0185-3.3544.4643-4.2597.8203-.084-.1494-1.7526-3.021-2.0215-3.4864a1.1451 1.1451 0 0 0-.1406-.1914c-.3312-.364-.9054-.4859-1.379-.203-.475.282-.7136.9361-.3886 1.5019 1.9466 3.3696-.0966-.2158 1.9473 3.3593.0172.031-.4946.2642-1.3926 1.0177C2.8987 12.176.452 14.772 0 18.9902h24c-.119-1.1108-.3686-2.099-.7461-3.0683-.7438-1.9118-1.8435-3.2928-2.7402-4.1836a12.1048 12.1048 0 0 0-2.1309-1.6875c.6594-1.122 1.312-2.2559 1.9649-3.3848.2077-.3615.1886-.7956-.0079-1.1191a1.1001 1.1001 0 0 0-.8515-.5332c-.5225-.0536-.9392.3128-1.0488.5449zm-.0391 8.461c.3944.5926.324 1.3306-.1563 1.6503-.4799.3197-1.188.0985-1.582-.4941-.3944-.5927-.324-1.3307.1563-1.6504.4727-.315 1.1812-.1086 1.582.4941zM7.207 13.5273c.4803.3197.5506 1.0577.1563 1.6504-.394.5926-1.1038.8138-1.584.4941-.48-.3197-.5503-1.0577-.1563-1.6504.4008-.6021 1.1087-.8106 1.584-.4941z" />
   </svg>
 );
 
-const AppleIcon = () => (
-  <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-    <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z" />
+const AppleIcon = ({ size = 16 }: { size?: number }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+    <path d="M12.152 6.896c-.948 0-2.415-1.078-3.96-1.04-2.04.027-3.91 1.183-4.961 3.014-2.117 3.675-.546 9.103 1.519 12.09 1.013 1.454 2.208 3.09 3.792 3.039 1.52-.065 2.09-.987 3.935-.987 1.831 0 2.35.987 3.96.948 1.637-.026 2.676-1.48 3.676-2.948 1.156-1.688 1.636-3.325 1.662-3.415-.039-.013-3.182-1.221-3.22-4.857-.026-3.04 2.48-4.494 2.597-4.559-1.429-2.09-3.623-2.324-4.39-2.376-2-.156-3.675 1.09-4.61 1.09zM15.53 3.83c.843-1.012 1.4-2.427 1.245-3.83-1.207.052-2.662.805-3.532 1.818-.78.896-1.454 2.338-1.273 3.714 1.338.104 2.715-.688 3.559-1.701" />
   </svg>
 );
 
@@ -157,6 +159,17 @@ export default function AppEntry({ platform }: { platform: Platform }) {
   const go = (q: string) => {
     window.location.href = webAppUrlFor(q);
   };
+
+  // En el teléfono el botón grande es la tienda: quien abre /app viene a
+  // descargar, y quien la tiene instalada nunca ve esta página (App Link o
+  // universal link). Fuera del teléfono sigue siendo la web app.
+  const isPhone = platform !== "other";
+  const primary =
+    platform === "ios"
+      ? { href: APP_STORE_URL, label: "Descargar para iPhone", icon: <AppleIcon size={22} /> }
+      : platform === "android"
+        ? { href: PLAY_STORE_URL, label: "Descargar para Android", icon: <AndroidIcon size={22} /> }
+        : { href: WEB_APP_URL, label: "Abrir Vichente", icon: null };
 
   return (
     <>
@@ -398,7 +411,7 @@ export default function AppEntry({ platform }: { platform: Platform }) {
 
         <div className="va-reveal" style={{ animationDelay: "320ms", marginTop: "28px" }}>
           <a
-            href={WEB_APP_URL}
+            href={primary.href}
             className="va-cta"
             style={{
               position: "relative",
@@ -406,6 +419,7 @@ export default function AppEntry({ platform }: { platform: Platform }) {
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
+              gap: "10px",
               background: `linear-gradient(135deg, ${ORANGE_HI} 0%, ${ORANGE} 55%, #DE6A1E 100%)`,
               color: "#fff",
               borderRadius: "17px",
@@ -417,7 +431,10 @@ export default function AppEntry({ platform }: { platform: Platform }) {
               boxShadow: "0 12px 32px rgba(240,122,44,0.36), inset 0 1px 0 rgba(255,255,255,0.28)",
             }}
           >
-            <span style={{ position: "relative", zIndex: 1 }}>Abrir Vichente</span>
+            {primary.icon && (
+              <span style={{ position: "relative", zIndex: 1, display: "flex" }}>{primary.icon}</span>
+            )}
+            <span style={{ position: "relative", zIndex: 1 }}>{primary.label}</span>
             <span
               aria-hidden="true"
               className="va-sheen"
@@ -434,23 +451,27 @@ export default function AppEntry({ platform }: { platform: Platform }) {
             />
           </a>
 
-          {/* Secundario: la tienda del teléfono. Quien llega aquí NO tiene la
-              app (si la tuviera, el App Link o el universal link ya la habría
-              abierto), así que la tienda sí le sirve. En computadora o en iPad
-              con iPadOS 13+ (que se anuncia como Mac) no sabemos qué teléfono
-              trae la persona, así que van las dos. */}
+          {/* Secundario. En el teléfono es la web app, para quien no quiere
+              instalar: mucha gente ya no tiene espacio, y por eso el texto lo
+              dice. En computadora o en iPad con iPadOS 13+ (que se anuncia como
+              Mac) no sabemos qué teléfono trae la persona, así que van las dos
+              tiendas. */}
           <div style={{ marginTop: "16px", display: "flex", justifyContent: "center", flexWrap: "wrap", gap: "12px 22px" }}>
-            {platform !== "ios" && (
-              <a href={PLAY_STORE_URL} className="va-link" style={STORE_LINK_STYLE}>
-                <AndroidIcon />
-                Descargar app Android
+            {isPhone ? (
+              <a href={WEB_APP_URL} className="va-link" style={STORE_LINK_STYLE}>
+                Abrir sin descargar (no ocupa espacio)
               </a>
-            )}
-            {platform !== "android" && (
-              <a href={APP_STORE_URL} className="va-link" style={STORE_LINK_STYLE}>
-                <AppleIcon />
-                Descargar app iPhone
-              </a>
+            ) : (
+              <>
+                <a href={PLAY_STORE_URL} className="va-link" style={STORE_LINK_STYLE}>
+                  <AndroidIcon />
+                  Descargar para Android
+                </a>
+                <a href={APP_STORE_URL} className="va-link" style={STORE_LINK_STYLE}>
+                  <AppleIcon />
+                  Descargar para iPhone
+                </a>
+              </>
             )}
           </div>
         </div>
