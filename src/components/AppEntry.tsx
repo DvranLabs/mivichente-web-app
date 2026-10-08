@@ -434,10 +434,11 @@ export default function AppEntry({ platform }: { platform: Platform }) {
             />
           </a>
 
-          {/* Secundario: la tienda del teléfono. En Android quien llega aquí NO
-              tiene la app (si la tuviera, el App Link ya la habría abierto), así
-              que el Play Store sí le sirve. En computadora o iPad no sabemos qué
-              teléfono trae la persona, así que van las dos. */}
+          {/* Secundario: la tienda del teléfono. Quien llega aquí NO tiene la
+              app (si la tuviera, el App Link o el universal link ya la habría
+              abierto), así que la tienda sí le sirve. En computadora o en iPad
+              con iPadOS 13+ (que se anuncia como Mac) no sabemos qué teléfono
+              trae la persona, así que van las dos. */}
           <div style={{ marginTop: "16px", display: "flex", justifyContent: "center", flexWrap: "wrap", gap: "12px 22px" }}>
             {platform !== "ios" && (
               <a href={PLAY_STORE_URL} className="va-link" style={STORE_LINK_STYLE}>

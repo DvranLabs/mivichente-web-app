@@ -6,9 +6,10 @@
 // RESERVED_SLUGS (admin), así que ningún negocio puede tomarlo y quedar tapado
 // por esta ruta estática.
 //
-// En Android, /app es un App Link: quien YA tiene la app instalada nunca ve esta
-// página (el intent la abre en el home). Es decir, quien llega aquí es siempre
-// alguien que no la tiene — por eso el secundario de Play Store le sirve.
+// En Android (App Link) y en iPhone (universal link, ver
+// public/.well-known/apple-app-site-association), quien YA tiene la app
+// instalada nunca ve esta página: el sistema la abre en el home. Quien llega
+// aquí es alguien que no la tiene — por eso el enlace a la tienda le sirve.
 //
 // Server Component: detecta plataforma con el user-agent (lib/tiendas) y delega
 // la parte interactiva a <AppEntry>. Así el enlace a la tienda correcta viene ya
