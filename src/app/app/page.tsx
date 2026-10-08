@@ -1,20 +1,23 @@
 // Entry point universal para stickers/QR/bio: vichente.com/app.
 // El sticker imprime una URL fija; el contenido de esta página puede cambiar
-// (ej. cuando exista build de iOS) sin reimprimir nada.
+// sin reimprimir nada (así entró App Store cuando Apple aprobó la app).
 //
 // El slug 'app' está en la blocklist de public.slug_is_reserved() (DB) y en
 // RESERVED_SLUGS (admin), así que ningún negocio puede tomarlo y quedar tapado
 // por esta ruta estática.
 //
-// En Android, /app es un App Link: quien YA tiene la app instalada nunca ve esta
-// página (el intent la abre en el home). Es decir, quien llega aquí es siempre
-// alguien que no la tiene — por eso el secundario de Play Store le sirve.
+// En Android (App Link) y en iPhone (universal link, ver
+// public/.well-known/apple-app-site-association), quien YA tiene la app
+// instalada nunca ve esta página: el sistema la abre en el home. Quien llega
+// aquí es alguien que no la tiene — por eso el enlace a la tienda le sirve.
 //
-// Server Component: detecta plataforma con el user-agent y delega la parte
-// interactiva a <AppEntry>. Así el CTA correcto viene ya en el HTML, sin flash.
+// Server Component: detecta plataforma con el user-agent (lib/tiendas) y delega
+// la parte interactiva a <AppEntry>. Así el enlace a la tienda correcta viene ya
+// en el HTML, sin flash.
 
 import { headers } from "next/headers";
-import AppEntry, { type Platform } from "../../components/AppEntry";
+import AppEntry from "../../components/AppEntry";
+import { detectPlatform } from "../../lib/tiendas";
 import { logScan } from "../../lib/log-scan";
 
 export const metadata = {
@@ -35,20 +38,6 @@ export const metadata = {
 export const viewport = {
   themeColor: "#0B1220",
 };
-
-// Sniffing de user-agent en el server: sin flash de CTA equivocado y sin JS.
-// Es best-effort (webviews raras, UAs falseados) — por eso lo único que cambia
-// según la plataforma es el enlace secundario; el CTA principal (abrir la web
-// app) funciona en cualquier dispositivo, así que un fallo de detección no deja
-// a nadie sin salida.
-function detectPlatform(userAgent: string): Platform {
-  const ua = userAgent.toLowerCase();
-  if (/android/.test(ua)) return "android";
-  // iPadOS 13+ se anuncia como "macintosh"; no lo distinguimos a propósito: cae
-  // en "other" y ahí igual ve la nota de iPhone + la web app.
-  if (/iphone|ipad|ipod/.test(ua)) return "ios";
-  return "other";
-}
 
 // Grano fino sobre el degradado. Sin esto los fondos oscuros grandes muestran
 // banding en pantallas de gama baja (justo las que va a traer el sticker).

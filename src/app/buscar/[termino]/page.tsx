@@ -14,6 +14,7 @@ import { headers } from "next/headers";
 import SearchResultsLanding from "../../../components/SearchResultsLanding";
 import { buscarNegocios, conteoLegible, terminoDesdeRuta } from "../../../lib/buscar";
 import { logScan } from "../../../lib/log-scan";
+import { detectPlatform, storeUrlFor } from "../../../lib/tiendas";
 
 const DESCRIPCION_BASE =
   "Vichente, el directorio de negocios de Nombre de Dios, Vicente Guerrero y Villa Unión.";
@@ -80,8 +81,7 @@ export default async function BuscarPage({
       termino={termino}
       negocios={negocios}
       webAppUrl={webAppUrl}
-      playStoreUrl="https://play.google.com/store/apps/details?id=com.dvrancorp.vichente"
-      isAndroid={/android/i.test(userAgent)}
+      storeUrl={storeUrlFor(detectPlatform(userAgent))}
     />
   );
 }

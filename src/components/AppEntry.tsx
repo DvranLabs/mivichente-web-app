@@ -13,6 +13,7 @@
 // escanea bien de noche, que es cuando la gente mira los stickers en la calle.
 
 import { useEffect, useRef, useState } from "react";
+import { APP_STORE_URL, PLAY_STORE_URL, type Platform } from "../lib/tiendas";
 
 const ORANGE = "#F07A2C";
 const ORANGE_HI = "#FF9D4D";
@@ -20,7 +21,6 @@ const TEXT = "#F2F5FA";
 const MUTED = "#8C97AD";
 
 const WEB_APP_URL = "https://app.vichente.com";
-const PLAY_STORE_URL = "https://play.google.com/store/apps/details?id=com.dvrancorp.vichente";
 
 // Lo que la gente realmente ocupa en el pueblo. Doble función: enseñan el rango
 // de la app (comida, servicios, salud, refacciones) sin explicarlo.
@@ -28,8 +28,6 @@ const SEARCH_TERMS = ["molletes", "jardinero", "tacos", "ferretería", "farmacia
 const CHIPS = ["Musicos", "Camiones", "Doctores", "Mandaditos"];
 
 const ROTATE_MS = 2200;
-
-export type Platform = "android" | "ios" | "other";
 
 // El deep link `#/search?q=` lo resuelve GoRoute('/search') en el Flutter
 // (lee state.uri.queryParameters['q']). Sin query, entra al home.
@@ -50,6 +48,24 @@ const AndroidIcon = () => (
     <path d="M6.5 9.5v6a1 1 0 001 1h.5v3a1.5 1.5 0 003 0v-3h2v3a1.5 1.5 0 003 0v-3h.5a1 1 0 001-1v-6h-11zM5.5 9.5a1 1 0 00-1 1V17a1.5 1.5 0 003 0v-6.5a1 1 0 00-1-1h-1zM18.5 9.5a1 1 0 00-1 1V17a1.5 1.5 0 003 0v-6.5a1 1 0 00-1-1h-1zM16.9 5.4l1.05-1.82a.35.35 0 10-.61-.35l-1.07 1.85a6.4 6.4 0 00-4.77 0L10.43 3.23a.35.35 0 10-.61.35L10.87 5.4A6.02 6.02 0 007.5 10.5h9a6.02 6.02 0 00-3.6-5.1zM9.9 8.3a.6.6 0 11.6-.6.6.6 0 01-.6.6zm4.2 0a.6.6 0 11.6-.6.6.6 0 01-.6.6z" />
   </svg>
 );
+
+const AppleIcon = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+    <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z" />
+  </svg>
+);
+
+const STORE_LINK_STYLE = {
+  display: "inline-flex",
+  alignItems: "center",
+  gap: "7px",
+  color: MUTED,
+  fontSize: "14px",
+  fontWeight: 500,
+  textDecoration: "none",
+  borderBottom: "1px solid rgba(255,255,255,0.18)",
+  paddingBottom: "3px",
+} as const;
 
 // Todas las animaciones viven aquí (los estilos inline no pueden keyframes ni
 // media queries). prefers-reduced-motion las apaga: el contenido queda en su
@@ -418,30 +434,25 @@ export default function AppEntry({ platform }: { platform: Platform }) {
             />
           </a>
 
-          {/* Secundario. En Android quien llega aquí NO tiene la app (si la tuviera,
-              el App Link ya la habría abierto), así que el Play Store sí le sirve. */}
-          {platform !== "ios" && (
-            <div style={{ marginTop: "16px", display: "flex", justifyContent: "center" }}>
-              <a
-                href={PLAY_STORE_URL}
-                className="va-link"
-                style={{
-                  display: "inline-flex",
-                  alignItems: "center",
-                  gap: "7px",
-                  color: MUTED,
-                  fontSize: "14px",
-                  fontWeight: 500,
-                  textDecoration: "none",
-                  borderBottom: "1px solid rgba(255,255,255,0.18)",
-                  paddingBottom: "3px",
-                }}
-              >
+          {/* Secundario: la tienda del teléfono. Quien llega aquí NO tiene la
+              app (si la tuviera, el App Link o el universal link ya la habría
+              abierto), así que la tienda sí le sirve. En computadora o en iPad
+              con iPadOS 13+ (que se anuncia como Mac) no sabemos qué teléfono
+              trae la persona, así que van las dos. */}
+          <div style={{ marginTop: "16px", display: "flex", justifyContent: "center", flexWrap: "wrap", gap: "12px 22px" }}>
+            {platform !== "ios" && (
+              <a href={PLAY_STORE_URL} className="va-link" style={STORE_LINK_STYLE}>
                 <AndroidIcon />
                 Descargar app Android
               </a>
-            </div>
-          )}
+            )}
+            {platform !== "android" && (
+              <a href={APP_STORE_URL} className="va-link" style={STORE_LINK_STYLE}>
+                <AppleIcon />
+                Descargar app iPhone
+              </a>
+            )}
+          </div>
         </div>
       </div>
     </>

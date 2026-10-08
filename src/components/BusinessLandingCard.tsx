@@ -25,9 +25,9 @@ interface Business {
 interface BusinessLandingCardProps {
   business: Business;
   webAppUrl: string;
-  playStoreUrl: string;
+  // Tienda del teléfono que abrió la página; null en computadora o UA raro.
+  storeUrl: string | null;
   telUrl: string | null;
-  isAndroid: boolean;
   categoryUrl: string | null;
 }
 
@@ -107,7 +107,7 @@ const Skyline = () => (
   />
 );
 
-export default function BusinessLandingCard({ business, webAppUrl, playStoreUrl, telUrl, isAndroid, categoryUrl }: BusinessLandingCardProps) {
+export default function BusinessLandingCard({ business, webAppUrl, storeUrl, telUrl, categoryUrl }: BusinessLandingCardProps) {
   // El WhatsApp puede vivir en otro número que el de llamadas: `whatsapp_phone`
   // manda si existe, si no se cae a `phone` (y sólo si ese sí tiene WhatsApp).
   const whatsappNumber = business.whatsapp_phone ?? (business.phone_is_whatsapp ? business.phone : null);
@@ -309,9 +309,9 @@ export default function BusinessLandingCard({ business, webAppUrl, playStoreUrl,
               >
                 {business.categories ? `Ver otros negocios de ${business.categories.name} →` : "Explorar más negocios →"}
               </a>
-              {isAndroid && (
+              {storeUrl && (
                 <a
-                  href={playStoreUrl}
+                  href={storeUrl}
                   style={{ color: "#9ca3af", fontSize: "13px", fontWeight: 600, textDecoration: "none" }}
                 >
                   Descubre la nueva app de tu pueblo →
