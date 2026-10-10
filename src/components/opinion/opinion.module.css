@@ -1,0 +1,195 @@
+/* Opinión con descuento. Valores del mockup aprobado:
+   mvp-design/opiniones/opiniones-vichente.html (7 pantallas, 2026-10-10). */
+
+.page {
+  --primary: #ff6a1f;
+  --primary-dark: #c7400f;
+  --bg: #fdfcfa;
+  --ink900: #1f1a14;
+  --ink700: #3a3024;
+  --ink500: #6b5e48;
+  --ink300: #9a8e76;
+  --ink200: #d6cfc1;
+  --ink100: #f0e4cb;
+  --success-bg: #d9f0df;
+  --success-fg: #1f6b36;
+  --danger-bg: #f6e1dc;
+  --danger-fg: #8a2e1b;
+
+  /* Su propio contenedor de scroll, como el menú de mesa: `overflow-x: hidden`
+     en html/body (globals.css) rompe `position: sticky`, y la barra de abajo
+     tiene que quedar pegada al borde del teléfono. */
+  height: 100vh;
+  height: 100dvh;
+  overflow-y: auto;
+  overflow-x: hidden;
+  display: flex;
+  flex-direction: column;
+  max-width: 480px;
+  margin: 0 auto;
+  background: var(--bg);
+  color: var(--ink900);
+  font-family: var(--font-nunito), system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+.top {
+  flex-shrink: 0;
+  background: linear-gradient(135deg, #3a2614, #6b4423);
+  color: #fff;
+  padding: 28px 20px 18px;
+}
+.k { font-size: 20px; font-weight: 800; }
+.sub { font-size: 13px; opacity: 0.85; margin-top: 2px; }
+
+.body { padding: 18px 20px 24px; flex: 1; }
+.h { font-size: 20px; font-weight: 800; line-height: 1.25; }
+.lead { margin-top: 6px; font-size: 14px; color: var(--ink700); line-height: 1.45; }
+
+.label { display: block; margin-top: 18px; font-size: 15px; font-weight: 800; }
+.label small { font-weight: 600; color: var(--ink500); font-size: 13px; }
+
+.rating { display: flex; gap: 8px; margin-top: 8px; }
+.rating button {
+  flex: 1;
+  height: 46px;
+  border-radius: 12px;
+  border: 1.5px solid var(--ink200);
+  background: #fff;
+  font: inherit;
+  font-size: 17px;
+  font-weight: 800;
+  color: var(--ink700);
+  cursor: pointer;
+}
+.rating button[aria-checked="true"] {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: #fff;
+}
+.scale { display: flex; justify-content: space-between; font-size: 12px; color: var(--ink500); margin-top: 4px; }
+
+.area {
+  display: block;
+  width: 100%;
+  margin-top: 8px;
+  min-height: 64px;
+  border-radius: 12px;
+  border: 1.5px solid var(--ink200);
+  background: #fff;
+  padding: 10px 12px;
+  font: inherit;
+  /* 16px o más: con menos, Safari de iOS hace zoom al enfocar. */
+  font-size: 16px;
+  color: var(--ink900);
+  line-height: 1.4;
+  resize: vertical;
+}
+.area::placeholder { color: var(--ink300); }
+.area:focus { outline: none; border-color: var(--primary); }
+
+.privacy { margin-top: 14px; font-size: 12px; color: var(--ink500); line-height: 1.45; }
+
+.bottom {
+  position: sticky;
+  bottom: 0;
+  flex-shrink: 0;
+  margin-top: auto;
+  padding: 12px 20px 22px;
+  background: var(--bg);
+  border-top: 1px solid var(--ink100);
+}
+
+.btn {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 50px;
+  border: 0;
+  border-radius: 14px;
+  font: inherit;
+  font-size: 15px;
+  font-weight: 800;
+  text-decoration: none;
+  cursor: pointer;
+}
+.btn + .btn { margin-top: 8px; }
+.primary { background: var(--primary); color: #fff; }
+.primary:disabled { background: var(--ink100); color: var(--ink300); cursor: default; }
+.ghost { border: 1.5px solid var(--ink200); background: #fff; color: var(--ink700); }
+.dark { background: var(--ink900); color: #fff; }
+.dark:disabled { opacity: 0.6; cursor: default; }
+.hint { text-align: center; font-size: 12px; color: var(--ink500); margin-top: 8px; }
+.error { text-align: center; font-size: 13px; font-weight: 700; color: var(--danger-fg); margin-bottom: 10px; }
+
+/* Tarjeta del descuento */
+.coupon {
+  margin-top: 14px;
+  border-radius: 18px;
+  padding: 18px;
+  text-align: center;
+  border: 2px dashed transparent;
+}
+.body > .coupon:first-child { margin-top: 0; }
+.state {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 4px 10px;
+  border-radius: 999px;
+}
+.big { font-size: 46px; font-weight: 800; line-height: 1; margin-top: 10px; overflow-wrap: anywhere; }
+/* Un beneficio en palabras ("Un café gratis") no cabe al tamaño del "10%". */
+.bigLargo { font-size: 28px; line-height: 1.15; }
+.what { font-size: 15px; font-weight: 700; margin-top: 6px; }
+.when { font-size: 13px; margin-top: 8px; }
+.valid { background: var(--success-bg); border-color: #8fcb9f; }
+.valid .state { background: #fff; color: var(--success-fg); }
+.valid .big, .valid .what { color: var(--success-fg); }
+.valid .when { color: var(--ink700); }
+.used { background: var(--ink100); border-color: var(--ink200); }
+.used .state { background: #fff; color: var(--ink700); }
+.used .big { color: var(--ink500); text-decoration: line-through; }
+.used .what, .used .when { color: var(--ink700); }
+.expired { background: var(--danger-bg); border-color: #e3b5a9; }
+.expired .state { background: #fff; color: var(--danger-fg); }
+.expired .big { color: var(--danger-fg); opacity: 0.5; }
+.expired .what, .expired .when { color: var(--danger-fg); }
+/* Reserva su alto antes de que el reloj arranque en el cliente. */
+.clock { margin-top: 10px; min-height: 18px; font-size: 13px; font-weight: 800; color: var(--success-fg); }
+
+.steps { margin-top: 14px; font-size: 13px; color: var(--ink700); line-height: 1.5; }
+.steps b { color: var(--ink900); }
+.linkRow {
+  display: block;
+  margin-top: 10px;
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--primary-dark);
+  text-align: center;
+  text-decoration: none;
+}
+
+.divider { margin: 18px 0 12px; border-top: 1px solid var(--ink100); }
+.nextH { font-size: 15px; font-weight: 800; }
+.nextS { font-size: 13px; color: var(--ink500); margin-top: 2px; line-height: 1.4; }
+
+/* Hoja de confirmación */
+.scrim { position: fixed; inset: 0; background: rgba(31, 26, 20, 0.5); z-index: 10; }
+.sheet {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  max-width: 480px;
+  margin: 0 auto;
+  z-index: 11;
+  background: #fff;
+  border-radius: 24px 24px 0 0;
+  padding: 10px 20px 22px;
+}
+.grabber { width: 40px; height: 4px; border-radius: 4px; background: var(--ink200); margin: 0 auto 14px; }
+.sheet .h { font-size: 19px; }
+.sheet .lead { margin-bottom: 16px; }
