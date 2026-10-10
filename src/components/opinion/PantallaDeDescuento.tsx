@@ -45,7 +45,7 @@ export default function PantallaDeDescuento({
   // «Válido» que ya se usó en otro lado.
   useEffect(() => {
     async function releer() {
-      const fresco = await leerDescuento(token);
+      const fresco = await leerDescuento(token).catch(() => null);
       if (fresco) setCupon(fresco);
     }
     const alVolver = () => {
@@ -65,7 +65,9 @@ export default function PantallaDeDescuento({
   async function usar() {
     setUsando(true);
     setError(null);
-    const despues = await usarDescuento(token);
+    // Si la llamada lanza (sin señal, o un deploy nuevo con la pestaña
+    // abierta), la hoja no se puede quedar trabada en caja.
+    const despues = await usarDescuento(token).catch(() => null);
     setUsando(false);
     if (!despues) {
       setError("No se pudo usar el descuento. Revisa la señal e intenta otra vez.");

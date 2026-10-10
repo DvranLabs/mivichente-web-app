@@ -12,6 +12,17 @@ const nextConfig: NextConfig = {
       bodySizeLimit: "4mb",
     },
   },
+  // El token del descuento va en la URL y es el secreto: quien lo tiene lo usa.
+  // Como header y no solo como <meta>, porque Next puede mandar la metadata en
+  // streaming y llegar tarde al primer link que se toque.
+  async headers() {
+    return [
+      {
+        source: "/:slug/descuento/:token",
+        headers: [{ key: "Referrer-Policy", value: "no-referrer" }],
+      },
+    ];
+  },
   images: {
     // Debe ir a la par de HOSTS_PERMITIDOS en src/components/negocios/fotos.ts:
     // ahí se filtran las fotos cuyo host no esté aquí, porque un host no

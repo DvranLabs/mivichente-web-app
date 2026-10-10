@@ -11,6 +11,8 @@
           { "/": "/_next/*", "exclude": true, "comment": "assets de Next" },
           { "/": "/api/*", "exclude": true },
           { "/": "/*.*", "exclude": true, "comment": "archivos (favicon, robots, imagenes); los slugs no llevan punto" },
+          { "/": "/*/opinion", "exclude": true, "comment": "QR de opiniones: solo vive en la web, la app no tiene la ruta" },
+          { "/": "/*/descuento/*", "exclude": true, "comment": "link del descuento por opinion: solo vive en la web" },
           { "/": "/negocio/*", "comment": "detalle por id" },
           { "/": "/*", "comment": "slug de negocio en root (ej. /nutri-sofitnes)" }
         ]

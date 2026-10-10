@@ -70,12 +70,19 @@ export async function enviarOpinion(
 
   // La opinión ya quedó guardada. Si leer el descuento falla, el token basta:
   // la pantalla se pinta sin la fecha y el link sigue sirviendo.
-  return { ok: true, token: res.data, cupon: await leerDescuento(res.data) };
+  const cupon = await leerDescuento(res.data).catch(() => null);
+  return { ok: true, token: res.data, cupon };
 }
 
+/**
+ * El descuento del token, o null si el token no existe. Si la DB o la red
+ * fallan, lanza: en caja, un error pasajero no puede verse como "este
+ * descuento no existe".
+ */
 export async function leerDescuento(token: string): Promise<Cupon | null> {
   const res = await rpc<Cupon[]>("get_coupon", { p_token: token });
-  return res.ok ? (res.data[0] ?? null) : null;
+  if (!res.ok) throw new Error("No se pudo leer el descuento");
+  return res.data[0] ?? null;
 }
 
 /**

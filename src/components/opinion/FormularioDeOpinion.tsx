@@ -90,7 +90,11 @@ export default function FormularioDeOpinion({ negocio }: { negocio: NegocioDeOpi
     if (rating === null || enviando) return;
     setEnviando(true);
     setError(null);
-    const res = await enviarOpinion(negocio.slug, deviceId(), rating, liked, improve);
+    // La acción ya traduce los errores de la DB. Lo que lanza es la llamada
+    // misma: sin señal, o una pestaña abierta desde antes de un deploy.
+    const res = await enviarOpinion(negocio.slug, deviceId(), rating, liked, improve).catch(
+      () => ({ ok: false, error: "red" }) as const,
+    );
     setEnviando(false);
 
     if (res.ok) {
