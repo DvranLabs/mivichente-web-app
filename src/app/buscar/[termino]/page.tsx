@@ -68,9 +68,8 @@ export default async function BuscarPage({
 
   const userAgent = (await headers()).get("user-agent") ?? "";
   const { src } = await searchParams;
-  // `channel` explícito: qr_scan_channel_from_src sólo mapea el valor exacto
-  // 'share', así que sin esto 'share-busqueda' caería en el bucket 'otro'.
-  if (src) await logScan(src, userAgent, { channel: "share" });
+  // `share-busqueda` cae en el canal `share`: qr_scan_channel_from_src mapea `share%`.
+  if (src) await logScan(src, userAgent);
 
   // La web app resuelve /search por ?q= (ver app_router.dart), así que aquí se
   // manda el término con espacios, no el segmento con guiones.
