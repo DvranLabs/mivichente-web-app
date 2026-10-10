@@ -11,6 +11,9 @@
 //   share-busqueda    link compartido desde una búsqueda en la app
 //   menu-qr           QR del menú pegado en la mesa de un restaurante
 //   landing-banner    banner de la propia landing que manda a /app
+//   opinion-qr        QR del acrílico de opiniones con descuento
+//   opinion-pide      botón «Pide en …» del cierre de opinión/descuento (/ordenar)
+//   opinion-app       botón «Conoce Vichente» del cierre de opinión/descuento (/app)
 //
 // `src` es el valor crudo tal cual venía en la URL. Para agrupar se usa
 // `channel`, que la DB deriva sola de `src` (`qr_scan_channel_from_src`). El
