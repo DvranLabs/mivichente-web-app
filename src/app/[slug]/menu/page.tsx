@@ -60,8 +60,9 @@ export default async function MenuPage({ params, searchParams }: Props) {
     // Un link compartido a secas no debe contar como scan, o la señal "0 scans
     // en 3 semanas → hay papel en la mesa, no impresiones" deja de significar.
     const userAgent = (await headers()).get("user-agent") ?? "";
+    // Sin `channel`: la DB lo deriva de `src`. Forzarlo aquí metía en `menu-qr`
+    // cualquier link al menú, como el post de Facebook de Snacky.
     await logScan(src, userAgent, {
-      channel: "menu-qr",
       business_id: business.id,
       slug_at_scan: slug,
     });

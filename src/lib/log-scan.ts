@@ -7,20 +7,23 @@
 //   sticker-<n>       sticker físico pegado en un negocio
 //   post-ig-<nombre>  publicación de Instagram
 //   post-fb-<nombre>  publicación de Facebook
-//   share             link compartido desde la app
+//   share             link compartido desde la ficha de un negocio en la app
+//   share-busqueda    link compartido desde una búsqueda en la app
 //   menu-qr           QR del menú pegado en la mesa de un restaurante
+//   landing-banner    banner de la propia landing que manda a /app
 //
 // `src` es el valor crudo tal cual venía en la URL. Para agrupar se usa
-// `channel`, que la DB deriva sola de `src` si el cliente no lo manda — así una
-// errata impresa cae en el bucket 'otro' en vez de crear uno nuevo que nadie
-// nota. Se lee con: select channel, count(*) from qr_scans group by channel
+// `channel`, que la DB deriva sola de `src` (`qr_scan_channel_from_src`). El
+// cliente no lo manda, a propósito: así una errata impresa cae en el bucket
+// 'otro' en vez de esconderse en uno válido. Los crawlers que bajan la página
+// para armar la vista previa de un link (WhatsApp, Facebook, buscadores) caen en
+// el canal 'bot' según su user-agent, así que no cuentan como scans de personas.
+// Se lee con: select channel, count(*) from qr_scans group by channel
 
 const SUPABASE_URL = process.env.SUPABASE_URL!;
 const SUPABASE_ANON_KEY = process.env.SUPABASE_ANON_KEY!;
 
 export interface DatosDeScan {
-  /** Canal explícito. Si se omite, la DB lo deriva de `src`. */
-  channel?: string;
   /** Negocio dueño del QR. Sale de la ruta, no del parámetro impreso. */
   business_id?: string;
   /** Slug tal como venía impreso: el negocio se renombra, el papel no. */
