@@ -59,17 +59,22 @@ export function Tarjeta({
 /**
  * Los dos botones de cierre. Ninguno invita a dejar otra opinión: eso empujaría
  * opiniones hechas solo por el descuento (decisión del usuario, 2026-10-10).
+ *
+ * Llevan `src` para contar en `qr_scans` cuánta gente sigue la invitación del
+ * final: la decisión del piloto pide registrarlo, aunque no decide si funcionó.
+ * Ninguno empieza con `opinion-qr`, o la DB los contaría como scans del QR del
+ * acrílico.
  */
 export function Cierre({ slug, negocio }: { slug: string; negocio: string }) {
   return (
     <div className={styles.bottom}>
-      <a className={`${styles.btn} ${styles.primary}`} href={`/${slug}/ordenar`}>
+      <a className={`${styles.btn} ${styles.primary}`} href={`/${slug}/ordenar?src=opinion-pide`}>
         Pide en {negocio} desde Vichente
       </a>
       {/* <a> y no <Link>, como en BannerApp: la navegación client-side no
           dispara el App Link de Android que resuelve /app. */}
       {/* eslint-disable-next-line @next/next/no-html-link-for-pages */}
-      <a className={`${styles.btn} ${styles.ghost}`} href="/app">
+      <a className={`${styles.btn} ${styles.ghost}`} href="/app?src=opinion-app">
         Conoce Vichente
       </a>
     </div>
