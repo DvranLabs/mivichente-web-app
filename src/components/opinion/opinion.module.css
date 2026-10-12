@@ -38,7 +38,21 @@
   background: linear-gradient(135deg, #3a2614, #6b4423);
   color: #fff;
   padding: 28px 20px 18px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
 }
+.logo {
+  flex: none;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  object-fit: cover;
+  background: #fff;
+  border: 2px solid rgba(255, 255, 255, 0.9);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.18);
+}
+.titulo { min-width: 0; }
 .topCaja { background: linear-gradient(135deg, #1f6b36, #2e8a4a); }
 .k { font-size: 20px; font-weight: 800; }
 .sub { font-size: 13px; opacity: 0.85; margin-top: 2px; }
@@ -109,15 +123,15 @@
   cursor: pointer;
 }
 .btn + .btn { margin-top: 8px; }
-.textLink {
-  display: block;
-  margin-top: 12px;
-  text-align: center;
-  font-size: 14px;
-  font-weight: 800;
-  color: var(--primary-dark);
-  text-decoration: none;
+.btn.conoce {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 48px;
+  color: var(--ink900);
 }
+.flecha { margin-left: 2px; font-size: 18px; color: var(--ink300); }
 .primary { background: var(--primary); color: #fff; }
 .primary:disabled { background: var(--ink100); color: var(--ink300); cursor: default; }
 .ghost { border: 1.5px solid var(--ink200); background: #fff; color: var(--ink700); }

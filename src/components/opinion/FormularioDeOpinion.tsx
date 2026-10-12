@@ -30,6 +30,8 @@ export interface NegocioDeOpinion {
   name: string;
   /** null = el negocio no está recibiendo opiniones (interruptor apagado). */
   benefit: string | null;
+  /** Primera foto del perfil (ver `logoDelNegocio`); null = sin foto. */
+  logo: string | null;
 }
 
 /** El mismo tope que la DB (`text_too_long`). */
@@ -118,12 +120,12 @@ export default function FormularioDeOpinion({ negocio }: { negocio: NegocioDeOpi
   const beneficio = negocio.benefit ?? "";
 
   if (vista.tipo === "revisando") {
-    return <Pantalla negocio={negocio.name} sub="">{null}</Pantalla>;
+    return <Pantalla negocio={negocio.name} logo={negocio.logo} sub="">{null}</Pantalla>;
   }
 
   if (vista.tipo === "noRecibe") {
     return (
-      <Pantalla negocio={negocio.name} sub="Opiniones">
+      <Pantalla negocio={negocio.name} logo={negocio.logo} sub="Opiniones">
         <div className={styles.body}>
           <p className={styles.h}>Por ahora no estamos recibiendo opiniones</p>
           <div className={styles.lead}>Gracias por querer dejarnos la tuya.</div>
@@ -137,7 +139,7 @@ export default function FormularioDeOpinion({ negocio }: { negocio: NegocioDeOpi
     // El navegador perdió el token pero la DB reconoce el celular. No hay forma
     // de recuperar el descuento desde aquí (ver `claveDelToken`).
     return (
-      <Pantalla negocio={negocio.name} sub="Gracias por tu opinión">
+      <Pantalla negocio={negocio.name} logo={negocio.logo} sub="Gracias por tu opinión">
         <div className={styles.body}>
           <p className={styles.h}>Ya dejaste tu opinión desde este celular</p>
           <div className={styles.lead}>Gracias por ayudarnos a mejorar.</div>
@@ -150,7 +152,7 @@ export default function FormularioDeOpinion({ negocio }: { negocio: NegocioDeOpi
   if (vista.tipo === "listo") {
     const { cupon } = vista;
     return (
-      <Pantalla negocio={negocio.name} sub="Gracias por tu opinión">
+      <Pantalla negocio={negocio.name} logo={negocio.logo} sub="Gracias por tu opinión">
         <div className={styles.body}>
           <Pasos estados={["done", "now", "todo"]} />
           <div className={styles.aviso}>
@@ -179,7 +181,7 @@ export default function FormularioDeOpinion({ negocio }: { negocio: NegocioDeOpi
   }
 
   return (
-    <Pantalla negocio={negocio.name} sub={`${beneficio} en tu próxima compra por tu opinión`}>
+    <Pantalla negocio={negocio.name} logo={negocio.logo} sub={`${beneficio} en tu próxima compra por tu opinión`}>
       <form
         className={styles.body}
         id="opinion"
