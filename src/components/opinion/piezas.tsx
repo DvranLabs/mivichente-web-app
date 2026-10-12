@@ -29,6 +29,7 @@ export function Pantalla({
   );
 }
 
+// `todo` no tiene clase propia: es el gris de `.paso`.
 type EstadoDePaso = "now" | "done" | "todo";
 
 const PASOS: { icono: IconoDePaso; nombre: string }[] = [
@@ -47,7 +48,7 @@ export function Pasos({ estados }: { estados: [EstadoDePaso, EstadoDePaso, Estad
       {PASOS.map((paso, i) => (
         <li
           key={paso.nombre}
-          className={`${styles.paso} ${styles[`paso_${estados[i]}`]}`}
+          className={`${styles.paso} ${styles[`paso_${estados[i]}`] ?? ""}`}
           aria-current={estados[i] === "now" ? "step" : undefined}
         >
           <span className={styles.pasoIcono}>

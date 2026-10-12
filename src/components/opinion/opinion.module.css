@@ -44,7 +44,7 @@
 .sub { font-size: 13px; opacity: 0.85; margin-top: 2px; }
 
 .body { padding: 18px 20px 24px; flex: 1; }
-.h { font-size: 20px; font-weight: 800; line-height: 1.25; }
+.h { font-size: 20px; font-weight: 800; line-height: 1.25; overflow-wrap: anywhere; }
 .lead { margin-top: 6px; font-size: 14px; color: var(--ink700); line-height: 1.45; }
 
 .label { display: block; margin-top: 18px; font-size: 15px; font-weight: 800; }
