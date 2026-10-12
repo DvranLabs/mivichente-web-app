@@ -94,22 +94,19 @@ export function Tarjeta({
 }
 
 /**
- * Los dos links de cierre, en segundo plano: la pantalla ya tiene su propio
- * mensaje y estos no deben competir con él. No van en la pantalla de caja.
- * Ninguno invita a dejar otra opinión: eso empujaría opiniones hechas solo por
- * el descuento (decisión del usuario, 2026-10-10).
+ * El link de cierre, en segundo plano: la pantalla ya tiene su propio mensaje y
+ * este no debe competir con él. No va en la pantalla de caja. No invita a dejar
+ * otra opinión: eso empujaría opiniones hechas solo por el descuento (decisión
+ * del usuario, 2026-10-10). «Pide en {negocio}» se quitó el 2026-10-12: quien
+ * acaba de comprar no lo necesita.
  *
- * Llevan `src` para contar en `qr_scans` cuánta gente sigue la invitación del
- * final: la decisión del piloto pide registrarlo, aunque no decide si funcionó.
- * Ninguno empieza con `opinion-qr`, o la DB los contaría como scans del QR del
+ * Lleva `src` para contar en `qr_scans` cuánta gente sigue la invitación del
+ * final. No empieza con `opinion-qr`, o la DB lo contaría como scan del QR del
  * acrílico.
  */
-export function Cierre({ slug, negocio }: { slug: string; negocio: string }) {
+export function Cierre() {
   return (
     <div className={styles.bottom}>
-      <a className={`${styles.btn} ${styles.ghost}`} href={`/${slug}/ordenar?src=opinion-pide`}>
-        Pide en {negocio} desde Vichente
-      </a>
       {/* <a> y no <Link>, como en BannerApp: la navegación client-side no
           dispara el App Link de Android que resuelve /app. */}
       {/* eslint-disable-next-line @next/next/no-html-link-for-pages */}

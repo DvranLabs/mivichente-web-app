@@ -26,7 +26,8 @@ export async function GET(request: Request, { params }: Context) {
 
   // Igual que el menú de mesa: solo cuenta si trae `?src=`. El link a secas se
   // comparte suelto, y contarlo mezclaría cualquier visita con los clics que se
-  // quieren medir (hoy, «Pide en …» del cierre de la página de opinión).
+  // quieren medir (hasta el 2026-10-12, «Pide en …» del cierre de la página de
+  // opinión; hoy ningún link propio lo usa con `src`).
   const src = new URL(request.url).searchParams.get("src");
   if (src) {
     await logScan(src, request.headers.get("user-agent") ?? "", {
