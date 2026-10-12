@@ -9,6 +9,7 @@ import type { Metadata } from "next";
 import { notFound, redirect } from "next/navigation";
 import { leerDescuento } from "../../../actions/opinion";
 import PantallaDeDescuento from "../../../../components/opinion/PantallaDeDescuento";
+import { logoDelNegocio } from "../../../../lib/logo-del-negocio";
 
 export const dynamic = "force-dynamic";
 
@@ -33,5 +34,7 @@ export default async function DescuentoPage({ params }: Props) {
     redirect(`/${cupon.business_slug}/descuento/${token}`);
   }
 
-  return <PantallaDeDescuento token={token} inicial={cupon} />;
+  // El RPC del descuento no trae foto; el logo se pide aparte por slug.
+  const logo = await logoDelNegocio(cupon.business_slug);
+  return <PantallaDeDescuento token={token} inicial={cupon} logo={logo} />;
 }

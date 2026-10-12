@@ -21,9 +21,11 @@ function desfase(cupon: Cupon): number {
 export default function PantallaDeDescuento({
   token,
   inicial,
+  logo,
 }: {
   token: string;
   inicial: Cupon;
+  logo: string | null;
 }) {
   const [cupon, setCupon] = useState(inicial);
   // null hasta montar: la hora del servidor y la del cliente no coinciden al
@@ -91,7 +93,7 @@ export default function PantallaDeDescuento({
     // lo acaba de usar quien cobra o si ya estaba usado de antes, y la hora es
     // lo que deja ver en caja cuál de las dos fue.
     return (
-      <Pantalla negocio={negocio} sub="Gracias por volver">
+      <Pantalla negocio={negocio} logo={logo} sub="Gracias por volver">
         <div className={styles.body}>
           <Pasos estados={["done", "done", "done"]} />
           <Tarjeta
@@ -108,7 +110,7 @@ export default function PantallaDeDescuento({
 
   if (estado === "expired") {
     return (
-      <Pantalla negocio={negocio} sub="Tu descuento">
+      <Pantalla negocio={negocio} logo={logo} sub="Tu descuento">
         <div className={styles.body}>
           <Tarjeta
             estado="expired"
@@ -123,7 +125,7 @@ export default function PantallaDeDescuento({
   }
 
   return (
-    <Pantalla negocio={negocio} sub="Tu descuento está listo" caja>
+    <Pantalla negocio={negocio} logo={logo} sub="Tu descuento está listo" caja>
       <div className={styles.body}>
         <Pasos estados={["done", "done", "now"]} />
         <Tarjeta

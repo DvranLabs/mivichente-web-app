@@ -8,11 +8,14 @@ import styles from "./opinion.module.css";
 
 export function Pantalla({
   negocio,
+  logo = null,
   sub,
   caja = false,
   children,
 }: {
   negocio: string;
+  /** Sin logo el encabezado lleva solo el nombre. */
+  logo?: string | null;
   sub: string;
   /** Encabezado verde: la pantalla que se le enseña a quien cobra. */
   caja?: boolean;
@@ -21,8 +24,16 @@ export function Pantalla({
   return (
     <div className={`${styles.page} ${nunito.variable}`}>
       <header className={`${styles.top} ${caja ? styles.topCaja : ""}`}>
-        <div className={styles.k}>{negocio}</div>
-        <div className={styles.sub}>{sub}</div>
+        {logo && (
+          // <img> y no next/image, como en el menú: un host que no esté en
+          // next.config no debe tirar la pantalla. Decorativo: el nombre va al lado.
+          // eslint-disable-next-line @next/next/no-img-element
+          <img className={styles.logo} src={logo} alt="" decoding="async" />
+        )}
+        <div className={styles.titulo}>
+          <div className={styles.k}>{negocio}</div>
+          <div className={styles.sub}>{sub}</div>
+        </div>
       </header>
       {children}
     </div>
@@ -94,8 +105,8 @@ export function Tarjeta({
 }
 
 /**
- * El link de cierre, en segundo plano: la pantalla ya tiene su propio mensaje y
- * este no debe competir con él. No va en la pantalla de caja. No invita a dejar
+ * El botón de cierre, secundario (blanco con borde): la pantalla ya tiene su
+ * propio mensaje y este no debe competir con él. No va en la pantalla de caja. No invita a dejar
  * otra opinión: eso empujaría opiniones hechas solo por el descuento (decisión
  * del usuario, 2026-10-10). «Pide en {negocio}» se quitó el 2026-10-12: quien
  * acaba de comprar no lo necesita.
@@ -110,8 +121,11 @@ export function Cierre() {
       {/* <a> y no <Link>, como en BannerApp: la navegación client-side no
           dispara el App Link de Android que resuelve /app. */}
       {/* eslint-disable-next-line @next/next/no-html-link-for-pages */}
-      <a className={styles.textLink} href="/app?src=opinion-app">
-        Conoce Vichente
+      <a className={`${styles.btn} ${styles.ghost} ${styles.conoce}`} href="/app?src=opinion-app">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src="/vichente-isotipo-96.png" alt="" width={28} height={28} />
+        Conoce la app de Vichente
+        <span className={styles.flecha} aria-hidden="true">›</span>
       </a>
     </div>
   );
