@@ -128,7 +128,7 @@ export default function FormularioDeOpinion({ negocio }: { negocio: NegocioDeOpi
           <p className={styles.h}>Por ahora no estamos recibiendo opiniones</p>
           <div className={styles.lead}>Gracias por querer dejarnos la tuya.</div>
         </div>
-        <Cierre slug={negocio.slug} negocio={negocio.name} />
+        <Cierre />
       </Pantalla>
     );
   }
@@ -142,7 +142,7 @@ export default function FormularioDeOpinion({ negocio }: { negocio: NegocioDeOpi
           <p className={styles.h}>Ya dejaste tu opinión desde este celular</p>
           <div className={styles.lead}>Gracias por ayudarnos a mejorar.</div>
         </div>
-        <Cierre slug={negocio.slug} negocio={negocio.name} />
+        <Cierre />
       </Pantalla>
     );
   }
@@ -173,7 +173,7 @@ export default function FormularioDeOpinion({ negocio }: { negocio: NegocioDeOpi
             </p>
           </div>
         </div>
-        <Cierre slug={negocio.slug} negocio={negocio.name} />
+        <Cierre />
       </Pantalla>
     );
   }

@@ -1,7 +1,7 @@
 "use client";
 
 // El descuento cuando el cliente vuelve (pantallas 4-7 del mockup v2): válido
-// con la hora en vivo y «Usar ahora», usado con la hora en que se usó, o vencido.
+// con la hora en vivo y «Aplicar descuento», usado con la hora en que se usó, o vencido.
 //
 // Lo que distingue esto de una captura de pantalla es el reloj que avanza y el
 // botón que responde. El reloj se ancla a la hora de la DB y no a la del
@@ -85,7 +85,6 @@ export default function PantallaDeDescuento({
       ? "expired"
       : cupon.status;
   const negocio = cupon.business_name;
-  const slug = cupon.business_slug;
 
   if (estado === "used") {
     // La hora en que se usó va grande: `redeem_coupon` responde "used" igual si
@@ -102,7 +101,7 @@ export default function PantallaDeDescuento({
             cuando={cupon.redeemed_at ? fechaYHora(cupon.redeemed_at) : null}
           />
         </div>
-        <Cierre slug={slug} negocio={negocio} />
+        <Cierre />
       </Pantalla>
     );
   }
@@ -118,7 +117,7 @@ export default function PantallaDeDescuento({
             cuando={`Venció el ${fechaLarga(cupon.valid_until)}`}
           />
         </div>
-        <Cierre slug={slug} negocio={negocio} />
+        <Cierre />
       </Pantalla>
     );
   }
@@ -153,9 +152,9 @@ export default function PantallaDeDescuento({
             setConfirmando(true);
           }}
         >
-          Usar ahora
+          Aplicar descuento
         </button>
-        <div className={styles.hint}>Lo toca quien cobra</div>
+        <div className={styles.hint}>Solo para el personal de {negocio}</div>
       </div>
 
       {confirmando && (
