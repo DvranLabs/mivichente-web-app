@@ -38,7 +38,7 @@ export function claveDelToken(businessId: string): string {
   return `descuento-opinion:${businessId}`;
 }
 
-/** La URL que se comparte. Sin `src`: abrirla no es un scan del QR. */
+/** A dónde lleva reescanear el QR con el token guardado. Sin `src`: no es un scan. */
 export function rutaDelDescuento(slug: string, token: string): string {
   return `/${slug}/descuento/${encodeURIComponent(token)}`;
 }

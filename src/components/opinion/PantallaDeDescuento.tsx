@@ -1,7 +1,7 @@
 "use client";
 
-// El descuento cuando el cliente vuelve (pantallas 4-7 del mockup): válido con
-// la hora en vivo y «Usar ahora», usado con la hora en que se usó, o vencido.
+// El descuento cuando el cliente vuelve (pantallas 4-7 del mockup v2): válido
+// con la hora en vivo y «Usar ahora», usado con la hora en que se usó, o vencido.
 //
 // Lo que distingue esto de una captura de pantalla es el reloj que avanza y el
 // botón que responde. El reloj se ancla a la hora de la DB y no a la del
@@ -10,7 +10,8 @@
 import { useEffect, useState } from "react";
 import { leerDescuento, usarDescuento } from "../../app/actions/opinion";
 import { fechaLarga, fechaYHora, relojDeHoy, type Cupon } from "../../lib/descuento";
-import { Cierre, Pantalla, Tarjeta } from "./piezas";
+import { CelularACaja } from "./dibujos";
+import { Cierre, Pantalla, Pasos, Tarjeta } from "./piezas";
 import styles from "./opinion.module.css";
 
 function desfase(cupon: Cupon): number {
@@ -91,15 +92,15 @@ export default function PantallaDeDescuento({
     // lo acaba de usar quien cobra o si ya estaba usado de antes, y la hora es
     // lo que deja ver en caja cuál de las dos fue.
     return (
-      <Pantalla negocio={negocio} sub="Tu descuento">
+      <Pantalla negocio={negocio} sub="Gracias por volver">
         <div className={styles.body}>
+          <Pasos estados={["done", "done", "done"]} />
           <Tarjeta
             estado="used"
             beneficio={cupon.benefit}
-            que={`Aplicado en ${negocio}`}
+            que={`Usado en ${negocio}`}
             cuando={cupon.redeemed_at ? fechaYHora(cupon.redeemed_at) : null}
           />
-          <div className={styles.steps}>Gracias por volver a {negocio}.</div>
         </div>
         <Cierre slug={slug} negocio={negocio} />
       </Pantalla>
@@ -123,20 +124,24 @@ export default function PantallaDeDescuento({
   }
 
   return (
-    <Pantalla negocio={negocio} sub="Tu descuento">
+    <Pantalla negocio={negocio} sub="Tu descuento está listo" caja>
       <div className={styles.body}>
+        <Pasos estados={["done", "done", "now"]} />
         <Tarjeta
           estado="valid"
           beneficio={cupon.benefit}
-          que={`en esta compra en ${negocio}`}
-          cuando={`Válido hasta el ${fechaLarga(cupon.valid_until)}`}
+          que="en esta compra"
+          cuando={`Hasta el ${fechaLarga(cupon.valid_until)}`}
         >
           <div className={styles.clock} aria-live="off">
             {ahora !== null ? relojDeHoy(ahora) : ""}
           </div>
         </Tarjeta>
-        <div className={styles.steps}>
-          <b>Para quien cobra:</b> toca «Usar ahora» y aplica el {cupon.benefit} a esta cuenta.
+        <div className={styles.dibujo}>
+          <CelularACaja />
+          <p>
+            <b>Enséñale esta pantalla</b> a quien te cobra.
+          </p>
         </div>
       </div>
       <div className={styles.bottom}>
@@ -150,7 +155,7 @@ export default function PantallaDeDescuento({
         >
           Usar ahora
         </button>
-        <div className={styles.hint}>Solo se puede usar una vez</div>
+        <div className={styles.hint}>Lo toca quien cobra</div>
       </div>
 
       {confirmando && (
@@ -158,10 +163,10 @@ export default function PantallaDeDescuento({
           <div className={styles.scrim} onClick={() => !usando && setConfirmando(false)} />
           <div className={styles.sheet} role="dialog" aria-modal="true" aria-labelledby="confirmar">
             <div className={styles.grabber} />
-            <p className={styles.h} id="confirmar">¿Ya se está cobrando?</p>
-            <div className={styles.lead}>
-              Al confirmar, el descuento queda usado y ya no se puede volver a usar.
-            </div>
+            <p className={styles.h} id="confirmar">
+              ¿Aplicar el {cupon.benefit} a esta cuenta?
+            </p>
+            <div className={styles.lead}>Solo se puede usar una vez.</div>
             {error && <div className={styles.error}>{error}</div>}
             <button
               type="button"
@@ -169,7 +174,7 @@ export default function PantallaDeDescuento({
               disabled={usando}
               onClick={usar}
             >
-              {usando ? "Aplicando…" : `Sí, aplicar el ${cupon.benefit}`}
+              {usando ? "Aplicando…" : "Sí, aplicar"}
             </button>
             <button
               type="button"

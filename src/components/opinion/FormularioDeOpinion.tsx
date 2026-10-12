@@ -1,7 +1,9 @@
 "use client";
 
 // Lo que abre el QR del acrílico: el formulario (pantallas 1-2 del mockup) y,
-// al enviar, el descuento recién creado con el cierre (pantalla 3).
+// al enviar, el aviso de que el descuento quedó guardado (pantalla 3). El aviso
+// no es el cupón: el cupón solo se ve al volver a escanear, en la siguiente
+// visita (decisión del 2026-10-12).
 //
 // Antes de pintar nada revisa si este navegador ya tiene un descuento de este
 // negocio. Si lo tiene, reescanear el QR lleva a ese descuento en el estado que
@@ -18,7 +20,8 @@ import {
   type Cupon,
 } from "../../lib/descuento";
 import { getOrCreateDeviceId } from "../../lib/device-id";
-import { Cierre, Pantalla, Tarjeta } from "./piezas";
+import { Estrella, LetreroConQr, Palomita } from "./dibujos";
+import { Cierre, Pantalla, Pasos } from "./piezas";
 import styles from "./opinion.module.css";
 
 export interface NegocioDeOpinion {
@@ -35,7 +38,7 @@ const LARGO_MAXIMO = 1000;
 type Vista =
   | { tipo: "revisando" }
   | { tipo: "formulario" }
-  | { tipo: "listo"; token: string; cupon: Cupon | null }
+  | { tipo: "listo"; cupon: Cupon | null }
   | { tipo: "yaOpino" }
   | { tipo: "noRecibe" };
 
@@ -51,8 +54,9 @@ function guardarToken(businessId: string, token: string) {
   try {
     localStorage.setItem(claveDelToken(businessId), token);
   } catch {
-    // Sin localStorage (modo privado estricto) el descuento sigue vivo en su
-    // link; por eso la pantalla ofrece mandárselo por WhatsApp.
+    // Sin localStorage (modo privado estricto) el descuento se pierde al
+    // cerrar la pestaña. Es el riesgo aceptado el 2026-10-12: no hay otra
+    // forma de volver a él.
   }
 }
 
@@ -99,7 +103,7 @@ export default function FormularioDeOpinion({ negocio }: { negocio: NegocioDeOpi
 
     if (res.ok) {
       guardarToken(negocio.id, res.token);
-      setVista({ tipo: "listo", token: res.token, cupon: res.cupon });
+      setVista({ tipo: "listo", cupon: res.cupon });
       return;
     }
     if (res.error === "already_submitted") return setVista({ tipo: "yaOpino" });
@@ -135,11 +139,8 @@ export default function FormularioDeOpinion({ negocio }: { negocio: NegocioDeOpi
     return (
       <Pantalla negocio={negocio.name} sub="Gracias por tu opinión">
         <div className={styles.body}>
-          <p className={styles.h}>Ya dejaste tu opinión</p>
-          <div className={styles.lead}>
-            Desde este celular ya se dejó una opinión en {negocio.name}, y hay un descuento por
-            celular. Si te mandaste el link del descuento, ábrelo desde ahí.
-          </div>
+          <p className={styles.h}>Ya dejaste tu opinión desde este celular</p>
+          <div className={styles.lead}>Gracias por ayudarnos a mejorar.</div>
         </div>
         <Cierre slug={negocio.slug} negocio={negocio.name} />
       </Pantalla>
@@ -147,38 +148,29 @@ export default function FormularioDeOpinion({ negocio }: { negocio: NegocioDeOpi
   }
 
   if (vista.tipo === "listo") {
-    const { token, cupon } = vista;
-    const enlace = `${window.location.origin}${rutaDelDescuento(negocio.slug, token)}`;
-    const mensaje = `Mi descuento de ${cupon?.benefit ?? beneficio} en ${negocio.name} para mi próxima visita: ${enlace}`;
+    const { cupon } = vista;
     return (
       <Pantalla negocio={negocio.name} sub="Gracias por tu opinión">
         <div className={styles.body}>
-          <p className={styles.h}>Tu descuento está listo</p>
-          {/* Sin «Usar ahora» aquí: el descuento es para la próxima compra, y
-              así no se usa en la misma visita por accidente. */}
-          <Tarjeta
-            estado="valid"
-            beneficio={cupon?.benefit ?? beneficio}
-            que={`en tu próxima compra en ${negocio.name}`}
-            cuando={cupon ? `Válido hasta el ${fechaLarga(cupon.valid_until)}` : null}
-          />
-          <div className={styles.steps}>
-            <b>¿Cómo lo uso?</b> En tu próxima visita, abre este mismo link o vuelve a escanear el
-            QR, y enséñale la pantalla a quien te cobre.
+          <Pasos estados={["done", "now", "todo"]} />
+          <div className={styles.aviso}>
+            <div className={styles.avisoIcono}>
+              <Palomita tamano={32} color="#fff" />
+            </div>
+            <p className={styles.h}>
+              ¡Listo! Tu {cupon?.benefit ?? beneficio} te espera en tu próxima visita
+            </p>
+            {cupon && (
+              <div className={styles.lead}>
+                Quedó guardado en este celular hasta el {fechaLarga(cupon.valid_until)}.
+              </div>
+            )}
           </div>
-          <a
-            className={styles.linkRow}
-            href={`https://wa.me/?text=${encodeURIComponent(mensaje)}`}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Mandarme el link por WhatsApp
-          </a>
-
-          <div className={styles.divider} />
-          <div className={styles.nextH}>¿Se te antoja algo para después?</div>
-          <div className={styles.nextS}>
-            Pide a {negocio.name} desde tu celular y te lo preparan.
+          <div className={styles.dibujo}>
+            <LetreroConQr />
+            <p>
+              <b>Cuando regreses</b>, escanea este mismo letrero para ver tu descuento.
+            </p>
           </div>
         </div>
         <Cierre slug={negocio.slug} negocio={negocio.name} />
@@ -196,10 +188,10 @@ export default function FormularioDeOpinion({ negocio }: { negocio: NegocioDeOpi
           enviar();
         }}
       >
-        <p className={styles.h}>¿Cómo te fue hoy?</p>
-        <div className={styles.lead}>Dinos lo que pienses, bueno o malo. El descuento es el mismo.</div>
+        <Pasos estados={["now", "todo", "todo"]} />
+        <p className={styles.h} id="calificacion">¿Cómo te fue hoy?</p>
+        <div className={styles.lead}>Tu opinión sincera nos ayuda a mejorar.</div>
 
-        <div className={styles.label} id="calificacion">Calificación</div>
         <div className={styles.rating} role="radiogroup" aria-labelledby="calificacion">
           {[1, 2, 3, 4, 5].map((n) => (
             <button
@@ -207,9 +199,10 @@ export default function FormularioDeOpinion({ negocio }: { negocio: NegocioDeOpi
               type="button"
               role="radio"
               aria-checked={rating === n}
+              aria-label={`${n} de 5`}
               onClick={() => setRating(n)}
             >
-              {n}
+              <Estrella llena={rating !== null && n <= rating} />
             </button>
           ))}
         </div>
@@ -219,7 +212,7 @@ export default function FormularioDeOpinion({ negocio }: { negocio: NegocioDeOpi
         </div>
 
         <label className={styles.label} htmlFor="liked">
-          ¿Qué fue lo que más te gustó? <small>· opcional</small>
+          ¿Qué te gustó? <small>· opcional</small>
         </label>
         <textarea
           id="liked"
@@ -242,10 +235,7 @@ export default function FormularioDeOpinion({ negocio }: { negocio: NegocioDeOpi
           onChange={(e) => setImprove(e.target.value)}
         />
 
-        <div className={styles.privacy}>
-          Tu opinión le llega solo a {negocio.name} y no se publica. No te pedimos nombre ni
-          teléfono.
-        </div>
+        <div className={styles.privacy}>Solo la lee {negocio.name}. No se publica.</div>
       </form>
       <div className={styles.bottom}>
         {error && <div className={styles.error}>{error}</div>}
@@ -257,7 +247,7 @@ export default function FormularioDeOpinion({ negocio }: { negocio: NegocioDeOpi
         >
           {enviando ? "Enviando…" : `Obtener mi ${beneficio}`}
         </button>
-        {rating === null && <div className={styles.hint}>Elige una calificación para continuar</div>}
+        {rating === null && <div className={styles.hint}>Toca las estrellas para calificar</div>}
       </div>
     </Pantalla>
   );
