@@ -7,7 +7,7 @@
 const SUPABASE_URL = process.env.SUPABASE_URL!;
 const SUPABASE_ANON_KEY = process.env.SUPABASE_ANON_KEY!;
 
-import { giroDeCategoria, type Giro } from "../../components/negocios/data";
+import { giroDeNegocio, type Giro } from "../../components/negocios/data";
 
 export interface NegocioEncontrado {
   id: string;
@@ -16,12 +16,12 @@ export interface NegocioEncontrado {
   municipio: string;
   photo_url: string | null;
   offerings: string[];
-  /** Deducido de su categoría: al negocio que ya existe no le preguntamos su giro. */
+  /** Deducido de su categoría principal: al negocio que ya existe no le preguntamos su giro. */
   giro: Giro;
 }
 
 interface FilaNegocio extends Omit<NegocioEncontrado, "giro"> {
-  categories: { name: string } | null;
+  is_food: boolean | null;
 }
 
 export async function buscarNegocio(termino: string): Promise<NegocioEncontrado[]> {
@@ -32,14 +32,13 @@ export async function buscarNegocio(termino: string): Promise<NegocioEncontrado[
   const seguro = q.replace(/[%,()*]/g, " ").trim();
   if (!seguro) return [];
 
-  // El hint !businesses_category_id_fkey NO es opcional: hay dos relaciones
-  // businesses↔categories (la FK directa category_id y la many-to-many
-  // business_categories). Sin desambiguar, PostgREST responde 300 y la búsqueda
-  // devuelve vacío en silencio — parece "no existe tu negocio" cuando sí existe.
+  // `is_food` es un campo computado (función sobre la fila), no un embed: no
+  // pasa por la doble relación businesses↔categories que obligaba al hint
+  // !businesses_category_id_fkey, y es el mismo criterio que usan app y admin.
   const url =
     `${SUPABASE_URL}/rest/v1/businesses` +
     `?name=ilike.*${encodeURIComponent(seguro)}*` +
-    `&select=id,slug,name,municipio,photo_url,offerings,categories!businesses_category_id_fkey(name)&limit=5`;
+    `&select=id,slug,name,municipio,photo_url,offerings,is_food&limit=5`;
 
   const res = await fetch(url, {
     headers: {
@@ -55,8 +54,8 @@ export async function buscarNegocio(termino: string): Promise<NegocioEncontrado[
   }
 
   const filas: FilaNegocio[] = await res.json();
-  return filas.map(({ categories, ...n }) => ({
+  return filas.map(({ is_food, ...n }) => ({
     ...n,
-    giro: giroDeCategoria(categories?.name),
+    giro: giroDeNegocio(is_food),
   }));
 }
