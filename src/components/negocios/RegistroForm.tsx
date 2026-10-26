@@ -46,6 +46,16 @@ export default function RegistroForm() {
   // enviar ahí mandaría el archivo original, que el server rechaza por tamaño.
   const [fotoOcupada, setFotoOcupada] = useState(false);
 
+  // Este componente se monta con la página, antes de que el dueño toque «Es el
+  // mío», así que el valor inicial de `giro` casi siempre es null. El `key` del
+  // <form> no lo reinicia: el estado vive aquí, no en el form. Por eso el giro
+  // se vuelve a deducir cada vez que cambia el negocio elegido.
+  const [negocioPrevio, setNegocioPrevio] = useState(negocio);
+  if (negocio !== negocioPrevio) {
+    setNegocioPrevio(negocio);
+    setGiro(negocio?.giro ?? null);
+  }
+
   const error = state.status === "error" ? state : null;
   const errorEn = (campo: CampoError) => (error?.campo === campo ? error.message : null);
 
