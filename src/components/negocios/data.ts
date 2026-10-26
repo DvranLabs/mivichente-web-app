@@ -30,19 +30,13 @@ export function esMunicipioCubierto(municipio: string): boolean {
 // entiende qué escribir; uno que lee "boneless, alitas" lo entiende solo.
 export type Giro = "comida" | "comercial";
 
-// Las categorías de la base son 28 y muy granulares. Aquí solo se agrupan para
-// decidir qué ejemplos enseñar — no es una taxonomía nueva.
-const CATEGORIAS_COMIDA = [
-  "Comida Mexicana",
-  "Antojitos",
-  "Taqueria",
-  "Bares",
-  "Snacks",
-  "Hamburguesas",
-];
-
-export function giroDeCategoria(categoria: string | null | undefined): Giro {
-  return categoria && CATEGORIAS_COMIDA.includes(categoria) ? "comida" : "comercial";
+// El giro de un negocio que ya existe sale de `is_food`, el campo computado de
+// la base que miran también la app y el admin (categoría principal de tipo
+// 'food'). Antes aquí había una lista a mano de 6 nombres de categoría, escrita
+// cuando la base tenía 28; con 79 dejaba fuera a Pizzeria, Mariscos y otras 13
+// de comida, y a esos dueños les enseñaba ejemplos de ferretería.
+export function giroDeNegocio(isFood: boolean | null | undefined): Giro {
+  return isFood ? "comida" : "comercial";
 }
 
 export interface GiroConfig {
