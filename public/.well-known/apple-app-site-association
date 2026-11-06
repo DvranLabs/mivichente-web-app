@@ -14,9 +14,9 @@
           { "/": "/*/opinion", "exclude": true, "comment": "QR de opiniones: solo vive en la web, la app no tiene la ruta" },
           { "/": "/*/descuento/*", "exclude": true, "comment": "link del descuento por opinion: solo vive en la web" },
           { "/": "/t/*", "exclude": true, "comment": "tarjeta del cliente (digital o impresa): solo vive en la web; cuando la app muestre tarjetas, quitar esta linea hace que la misma tarjeta impresa abra la app sin reimprimir" },
-          { "/": "/buscar/*", "comment": "busqueda compartida; va antes de las exclusiones de /*/menu y /*/sellos, que si no se llevarian /buscar/menu y /buscar/sellos" },
+          { "/": "/buscar/*", "comment": "busqueda compartida; va antes de las exclusiones de /*/menu y /*/tarjeta, que si no se llevarian /buscar/menu y /buscar/tarjeta" },
           { "/": "/*/menu", "exclude": true, "comment": "QR de mesa: siempre abre el menu de la web, aunque haya app (la ficha oculta platillos y el scan no llegaria a qr_scans)" },
-          { "/": "/*/sellos", "exclude": true, "comment": "QR del mostrador de la tarjeta de sellos: solo vive en la web, la app no tiene la ruta" },
+          { "/": "/*/tarjeta", "exclude": true, "comment": "QR del mostrador de la tarjeta de cliente: solo vive en la web, la app no tiene la ruta" },
           { "/": "/negocio/*", "comment": "detalle por id" },
           { "/": "/*", "comment": "slug de negocio en root (ej. /nutri-sofitnes)" }
         ]
