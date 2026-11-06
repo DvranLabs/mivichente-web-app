@@ -1,7 +1,10 @@
-// Lo que abre el QR del mostrador de la tarjeta de sellos. La URL está impresa y
+// Lo que abre el QR del mostrador de la tarjeta de cliente. La URL va impresa y
 // no cambia (la arma el admin en `o3w5njyf0`):
 //
-//   https://vichente.com/<slug>/sellos?src=sellos-qr
+//   https://vichente.com/<slug>/tarjeta?src=tarjeta-qr
+//
+// Hasta el 2026-11-06 era `/<slug>/sellos?src=sellos-qr`. Se cambió antes de
+// imprimir ningún QR (mikitasks `m7r8es7op`), así que la vieja no redirige.
 //
 // El servidor resuelve el negocio y registra el scan. A qué tarjeta llevar lo
 // decide el cliente, porque el token vive en `localStorage`; la tarjeta en sí
@@ -49,11 +52,11 @@ async function getNegocio(slug: string): Promise<FilaNegocio | null> {
 }
 
 export const metadata: Metadata = {
-  title: "Tu tarjeta de sellos — Vichente App",
+  title: "Tu tarjeta — Vichente App",
   robots: { index: false, follow: false },
 };
 
-export default async function SellosPage({ params, searchParams }: Props) {
+export default async function TarjetaDelMostradorPage({ params, searchParams }: Props) {
   const { slug } = await params;
   const { src } = await searchParams;
   const [negocio, logo] = await Promise.all([getNegocio(slug), logoDelNegocio(slug)]);
@@ -64,14 +67,14 @@ export default async function SellosPage({ params, searchParams }: Props) {
     // registre en el destino.
     const slugActual = await resolveSlugFromHistory(slug);
     if (slugActual) {
-      redirect(`/${slugActual}/sellos${src ? `?src=${encodeURIComponent(src)}` : ""}`);
+      redirect(`/${slugActual}/tarjeta${src ? `?src=${encodeURIComponent(src)}` : ""}`);
     }
     notFound();
   }
 
   if (src) {
     // Solo cuenta como scan si trae `?src=`, que es lo que lleva el QR impreso.
-    // El canal (`sellos-qr`) lo deriva la DB.
+    // El canal (`tarjeta-qr`) lo deriva la DB.
     const userAgent = (await headers()).get("user-agent") ?? "";
     await logScan(src, userAgent, { business_id: negocio.id, slug_at_scan: slug });
   }
