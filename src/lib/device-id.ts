@@ -1,13 +1,24 @@
 // Identificador anónimo persistente por navegador, mismo propósito que
 // DeviceIdRepository en el Flutter: cruzar actividad del mismo dispositivo y
 // poder excluir el uso propio al leer números. Sin auth, sin PII.
+//
+// Con el almacenamiento bloqueado (Safari privado, cookies apagadas),
+// `localStorage` lanza. Ahí se usa un id que dura lo que la pestaña: la tarjeta
+// de sellos y la opinión siguen funcionando, aunque el celular no se recuerde.
+const KEY = "device_id";
+let enMemoria: string | null = null;
+
 export function getOrCreateDeviceId(): string {
-  const key = "device_id";
-  const existing = localStorage.getItem(key);
-  if (existing) return existing;
-  const generated = crypto.randomUUID();
-  localStorage.setItem(key, generated);
-  return generated;
+  try {
+    const existing = localStorage.getItem(KEY);
+    if (existing) return existing;
+    const generated = crypto.randomUUID();
+    localStorage.setItem(KEY, generated);
+    return generated;
+  } catch {
+    enMemoria ??= crypto.randomUUID();
+    return enMemoria;
+  }
 }
 
 /**
@@ -20,6 +31,11 @@ export function getOrCreateDeviceId(): string {
  */
 export function rotarDeviceId(): string {
   const generated = crypto.randomUUID();
-  localStorage.setItem("device_id", generated);
+  enMemoria = generated;
+  try {
+    localStorage.setItem(KEY, generated);
+  } catch {
+    // ver arriba
+  }
   return generated;
 }

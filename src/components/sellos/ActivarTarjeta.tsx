@@ -127,7 +127,13 @@ export default function ActivarTarjeta({
     }
 
     setActivando(false);
-    if (r.error === "card_already_linked" || r.error === "not_a_card") {
+    if (r.error === "card_already_linked") {
+      // Casi siempre es este mismo toque que ya había entrado y cuya respuesta
+      // se perdió: la tarjeta sí sirve. Decirle «pide otra en caja» lo haría
+      // partirse en otro cliente. El servidor vuelve a leer y decide, igual que
+      // si el cliente recargara.
+      router.refresh();
+    } else if (r.error === "not_a_card") {
       setFase({ tipo: "no-sirve" });
     } else if (r.error === "card_not_available") {
       setFase({ tipo: "apagado" });

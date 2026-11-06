@@ -39,22 +39,22 @@ export const metadata: Metadata = {
  * El id del negocio, para guardar el token en el celular con la misma clave que
  * usa el QR del mostrador. `get_card_entry` no lo regresa. Anon solo ve
  * negocios activos: con uno inactivo regresa null y no se guarda nada.
+ *
+ * Si la consulta falla, lanza en vez de regresar null: sin el id, la activación
+ * no encuentra la tarjeta que el celular ya tiene y crearía otro cliente. Sin
+ * caché por lo mismo: un `[]` cacheado de cuando el negocio estaba inactivo
+ * haría lo mismo durante una hora.
  */
 async function idDelNegocio(slug: string): Promise<string | null> {
-  try {
-    const res = await fetch(
-      `${SUPABASE_URL}/rest/v1/businesses?slug=eq.${encodeURIComponent(slug)}&select=id&limit=1`,
-      {
-        headers: { apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${SUPABASE_ANON_KEY}` },
-        // El id no cambia; el slug sí, pero entonces la clave sigue siendo la misma.
-        next: { revalidate: 3600 },
-      },
-    );
-    if (!res.ok) return null;
-    return ((await res.json()) as { id: string }[])[0]?.id ?? null;
-  } catch {
-    return null;
-  }
+  const res = await fetch(
+    `${SUPABASE_URL}/rest/v1/businesses?slug=eq.${encodeURIComponent(slug)}&select=id&limit=1`,
+    {
+      headers: { apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${SUPABASE_ANON_KEY}` },
+      cache: "no-store",
+    },
+  );
+  if (!res.ok) throw new Error("No se pudo leer el negocio");
+  return ((await res.json()) as { id: string }[])[0]?.id ?? null;
 }
 
 export default async function TarjetaPage({ params }: Props) {
@@ -79,6 +79,10 @@ export default async function TarjetaPage({ params }: Props) {
     if (!entrada.active_mechanic) {
       return <ProgramaApagado negocio={entrada.business_name} slug={slug} logo={logo} />;
     }
+    // Con mecánica activa el negocio está activo, así que anon lo ve: un id
+    // null aquí no es un negocio oculto sino una lectura que salió mal. Activar
+    // sin el id crearía otro cliente, así que mejor error.tsx y reintentar.
+    if (!negocioId) throw new Error("No se encontró el negocio de la tarjeta");
     return (
       <ActivarTarjeta
         token={token}
