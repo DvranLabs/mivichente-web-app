@@ -106,8 +106,11 @@ export default function TarjetaDelCliente({
       const c = cambioDesde(leerLoVisto(claveVisto), t);
       guardar(claveVisto, JSON.stringify(loVistoDe(t)));
       setTarjeta(t);
+      // Cada cambio reemplaza al anterior. Si los tramos del último sello se
+      // quedaran marcados, su animación (que termina en naranja) seguiría
+      // pintándolos después de un canje que regresó la barra a cero.
+      setCambio(c.selloNuevo ? c : null);
       if (c.selloNuevo) {
-        setCambio(c);
         setVersion((v) => v + 1);
         setAviso("¡Sello nuevo!");
       }
@@ -123,7 +126,10 @@ export default function TarjetaDelCliente({
   useEffect(() => {
     if (negocioId && !leer(claveDelToken(negocioId))) guardar(claveDelToken(negocioId), token);
     aplicar(inicial);
-  }, [negocioId, token, inicial, aplicar]);
+    // En F3 el aviso es «Tarjeta activada», aunque además haya sellos que este
+    // celular no había visto: la barra sí los anima.
+    if (avisoInicial) setAviso(avisoInicial);
+  }, [negocioId, token, inicial, aplicar, avisoInicial]);
 
   useEffect(() => {
     if (!aviso) return;

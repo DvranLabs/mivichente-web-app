@@ -181,7 +181,10 @@
   align-items: center;
 }
 
+/* Ancho completo de su columna: con pocos sellos el tramo se alarga en vez de
+   dejar huecos, y con muchos queda cuadrado. */
 .seg {
+  width: 100%;
   aspect-ratio: 1;
   max-height: 28px;
   border-radius: 6px;
