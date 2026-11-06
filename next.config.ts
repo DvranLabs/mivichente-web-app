@@ -12,13 +12,18 @@ const nextConfig: NextConfig = {
       bodySizeLimit: "4mb",
     },
   },
-  // El token del descuento va en la URL y es el secreto: quien lo tiene lo usa.
-  // Como header y no solo como <meta>, porque Next puede mandar la metadata en
-  // streaming y llegar tarde al primer link que se toque.
+  // El token del descuento y el de la tarjeta de sellos van en la URL y son el
+  // secreto: quien lo tiene lo usa. Como header y no solo como <meta>, porque
+  // Next puede mandar la metadata en streaming y llegar tarde al primer link
+  // que se toque.
   async headers() {
     return [
       {
         source: "/:slug/descuento/:token",
+        headers: [{ key: "Referrer-Policy", value: "no-referrer" }],
+      },
+      {
+        source: "/t/:token",
         headers: [{ key: "Referrer-Policy", value: "no-referrer" }],
       },
     ];
