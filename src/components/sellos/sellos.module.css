@@ -1,0 +1,516 @@
+/* Tarjeta de sellos del cliente. Valores del mockup aprobado:
+   mvp-design/tarjeta-de-sellos/tarjeta-de-sellos-vichente-v4.html (2026-11-06).
+
+   Todas las pantallas usan la misma rejilla de seis zonas, en el mismo orden y
+   a la misma altura: encabezado, aviso, mensaje, progreso, objeto y acción. Una
+   pantalla puede dejar una zona vacía, pero nunca la mueve. Así el QR queda con
+   el mismo centro en C1, C2, C2b, C3, C4 y F3. */
+
+.page {
+  --accent: #ff6a1f;
+  --ink: #1f1a14;
+  --muted: #6b6157;
+  --empty: #eae3da;
+  --line: #e8e2da;
+  --bg: #ffffff;
+
+  position: relative;
+  overflow: hidden;
+  box-sizing: border-box;
+  min-height: 100vh;
+  min-height: 100dvh;
+  max-width: 480px;
+  margin: 0 auto;
+  padding: 40px 24px calc(20px + env(safe-area-inset-bottom));
+  display: grid;
+  row-gap: 12px;
+  grid-template-columns: 100%;
+  /* El mensaje puede crecer con un nombre de negocio largo: mejor empujar el
+     objeto que encimar el título sobre la barra. */
+  grid-template-rows: 32px 28px minmax(96px, auto) 28px minmax(220px, 1fr) 96px;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-nunito-sellos), system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+.page *,
+.page *::before,
+.page *::after {
+  box-sizing: border-box;
+}
+
+.page > * {
+  position: relative;
+  z-index: 1;
+  min-width: 0;
+  grid-column: 1;
+}
+
+/* ── Zonas ─────────────────────────────────────────────────────────────── */
+
+.head {
+  grid-row: 1;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.aviso {
+  grid-row: 2;
+  display: flex;
+  align-items: center;
+}
+
+.msg {
+  grid-row: 3;
+}
+
+.prog {
+  grid-row: 4;
+}
+
+.obj {
+  grid-row: 5;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 0;
+}
+
+/* Sin barra, el objeto también usa su fila; sin botón principal, baja al fondo. */
+.fromMsg {
+  grid-row: 4 / 6;
+}
+.toEnd {
+  grid-row: 5 / 7;
+}
+.fromMsg.toEnd {
+  grid-row: 4 / 7;
+}
+
+.act {
+  grid-row: 6;
+  display: grid;
+  grid-template-rows: 52px 40px;
+  row-gap: 4px;
+}
+
+/* ── Encabezado ────────────────────────────────────────────────────────── */
+
+.logo {
+  width: 32px;
+  height: 32px;
+  flex: none;
+  border-radius: 50%;
+  object-fit: cover;
+  background: #fff;
+  box-shadow: 0 0 0 1px var(--line);
+}
+
+.biz {
+  font-size: 16px;
+  font-weight: 800;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ── Aviso ─────────────────────────────────────────────────────────────── */
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  height: 28px;
+  padding: 0 12px;
+  border-radius: 999px;
+  background: var(--ink);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 800;
+  animation: aparece 0.25s ease-out both;
+}
+
+.pillError {
+  background: #f6e1dc;
+  color: #8a2e1b;
+}
+
+@keyframes aparece {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* ── Mensaje ───────────────────────────────────────────────────────────── */
+
+.title {
+  margin: 0;
+  font-size: 26px;
+  line-height: 1.15;
+  font-weight: 900;
+  letter-spacing: -0.01em;
+  overflow-wrap: anywhere;
+}
+
+.sub {
+  margin: 8px 0 0;
+  font-size: 15px;
+  line-height: 1.4;
+  color: var(--muted);
+}
+
+/* ── Progreso: barra por etapas ────────────────────────────────────────── */
+
+.stamps {
+  display: flex;
+  align-items: center;
+  height: 28px;
+}
+
+.segs {
+  flex: 1;
+  display: grid;
+  gap: 4px;
+  align-items: center;
+}
+
+.seg {
+  aspect-ratio: 1;
+  max-height: 28px;
+  border-radius: 6px;
+  background: var(--empty);
+}
+
+.segOn {
+  background: var(--accent);
+}
+
+.fresh {
+  animation: llena 0.7s cubic-bezier(0.2, 0.9, 0.3, 1.2) both;
+}
+
+@keyframes llena {
+  0% {
+    background: var(--empty);
+    transform: scale(0.6);
+  }
+  55% {
+    background: var(--accent);
+    transform: scale(1.12);
+  }
+  100% {
+    background: var(--accent);
+    transform: scale(1);
+  }
+}
+
+.sep {
+  width: 1px;
+  height: 24px;
+  margin: 0 10px;
+  flex: none;
+  background: var(--line);
+}
+
+.gift {
+  width: 24px;
+  height: 24px;
+  flex: none;
+  color: var(--ink);
+}
+
+.giftWon {
+  color: var(--accent);
+}
+
+.gift svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+/* ── Objeto: el QR o la tarjeta impresa ───────────────────────────────── */
+
+/* Reserva el renglón del texto: el centro del QR no cambia con su tamaño. */
+.code {
+  padding-bottom: 30px;
+}
+
+.qrg {
+  position: relative;
+}
+
+.qr {
+  width: 176px;
+  height: 176px;
+  background: #fff;
+  transition:
+    width 0.4s ease,
+    height 0.4s ease;
+}
+
+.qrBig {
+  width: 212px;
+  height: 212px;
+}
+
+.qr svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.qrcap {
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  margin: 8px 0 0;
+  height: 22px;
+  font-size: 15px;
+  font-weight: 800;
+  line-height: 22px;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.pcard {
+  width: 256px;
+  height: 146px;
+  padding: 16px;
+  display: flex;
+  justify-content: space-between;
+  border-radius: 12px;
+  border: 1px solid var(--line);
+  background: #fff;
+  box-shadow: 0 6px 18px rgba(31, 26, 20, 0.07);
+}
+
+.pcardId {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-width: 0;
+}
+
+.pcard .logo {
+  width: 30px;
+  height: 30px;
+}
+
+.pcardLogoVacio {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: #e2dad0;
+}
+
+.pcardNombre {
+  display: block;
+  font-size: 20px;
+  font-weight: 900;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.pcardTipo {
+  display: block;
+  margin-top: 2px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--muted);
+}
+
+.pcardQr {
+  width: 72px;
+  height: 72px;
+  flex: none;
+  align-self: flex-end;
+}
+
+.pcardQr svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.void {
+  box-shadow: none;
+}
+
+.void .pcardTipo {
+  color: #a59a8d;
+}
+
+/* F4 dibuja la tarjeta en gris: el QR no se enseña legible. */
+.void .pcardQr {
+  border-radius: 4px;
+  background: repeating-linear-gradient(45deg, #ddd4c9 0 6px, #fff 6px 10px);
+}
+
+/* ── Acción: primario arriba, secundario abajo, siempre a la misma altura ─ */
+
+.btn {
+  grid-row: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  border: 0;
+  border-radius: 14px;
+  background: var(--accent);
+  color: #fff;
+  font: inherit;
+  font-size: 16px;
+  font-weight: 800;
+  text-decoration: none;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.btn:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.link {
+  grid-row: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  border: 0;
+  background: none;
+  color: var(--muted);
+  font: inherit;
+  font-size: 15px;
+  font-weight: 700;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+/* ── Confeti: una sola vez, por detrás del QR ─────────────────────────── */
+
+.confetti {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.confetti i {
+  position: absolute;
+  top: -16px;
+  width: 6px;
+  height: 10px;
+  border-radius: 2px;
+  animation: cae linear both;
+}
+
+@keyframes cae {
+  from {
+    transform: translateY(0) rotate(0);
+  }
+  to {
+    transform: translateY(110vh) rotate(480deg);
+  }
+}
+
+/* ── Hoja de abajo (C1b) ───────────────────────────────────────────────── */
+
+.scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 2;
+  background: rgba(31, 26, 20, 0.45);
+}
+
+.sheet {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 3;
+  max-width: 480px;
+  margin: 0 auto;
+  padding: 12px 24px calc(20px + env(safe-area-inset-bottom));
+  display: grid;
+  row-gap: 16px;
+  border-radius: 24px 24px 0 0;
+  background: #fff;
+}
+
+.sheet .title {
+  font-size: 22px;
+}
+
+.sheet .act {
+  grid-row: auto;
+}
+
+.grab {
+  width: 36px;
+  height: 4px;
+  justify-self: center;
+  border-radius: 2px;
+  background: var(--line);
+}
+
+.steps {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  counter-reset: paso;
+  display: grid;
+  row-gap: 10px;
+}
+
+.steps li {
+  counter-increment: paso;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 15px;
+  line-height: 1.35;
+  font-weight: 700;
+}
+
+.steps li::before {
+  content: counter(paso);
+  flex: none;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: #f2eee9;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+/* ── Movimiento reducido: el aviso y la barra cambian, sin animación ──── */
+
+@media (prefers-reduced-motion: reduce) {
+  .fresh,
+  .pill {
+    animation: none;
+  }
+  .qr {
+    transition: none;
+  }
+  .confetti {
+    display: none;
+  }
+}

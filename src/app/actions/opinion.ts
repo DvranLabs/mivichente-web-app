@@ -11,34 +11,7 @@
 // la anon key, y nada más.
 
 import type { Cupon } from "../../lib/descuento";
-
-const SUPABASE_URL = process.env.SUPABASE_URL!;
-const SUPABASE_ANON_KEY = process.env.SUPABASE_ANON_KEY!;
-
-type Respuesta<T> = { ok: true; data: T } | { ok: false; mensaje: string | null };
-
-async function rpc<T>(funcion: string, args: Record<string, unknown>): Promise<Respuesta<T>> {
-  try {
-    const res = await fetch(`${SUPABASE_URL}/rest/v1/rpc/${funcion}`, {
-      method: "POST",
-      headers: {
-        apikey: SUPABASE_ANON_KEY,
-        Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(args),
-      // El estado del descuento se lee en el momento: un "Válido" cacheado es
-      // justo lo que no debe pasar en caja.
-      cache: "no-store",
-    });
-    if (res.ok) return { ok: true, data: (await res.json()) as T };
-    // PostgREST devuelve el `raise exception` de la función en `message`.
-    const error = (await res.json().catch(() => null)) as { message?: string } | null;
-    return { ok: false, mensaje: error?.message ?? null };
-  } catch {
-    return { ok: false, mensaje: null };
-  }
-}
+import { rpc } from "../../lib/rpc";
 
 export type ResultadoOpinion =
   | { ok: true; token: string; cupon: Cupon | null }
