@@ -102,15 +102,19 @@ export default function ActivarTarjeta({
     // es como no tener tarjeta, y se reintenta como F1.
     //
     // Caso conocido, aceptado a propósito (2026-11-06): si lo guardado es el
-    // token de OTRA impresa (se guardó al abrirla en un celular nuevo), la DB
+    // token de OTRA impresa, la DB
     // también responde `invalid_customer_token`, porque `link_physical_card`
     // solo busca `p_customer_token` en `business_customers.token`. Aquí cae en
     // este mismo reintento y nace un cliente nuevo con 0 sellos, aunque F2
     // prometió que los sellos se quedaban. Los sellos no se pierden: siguen en
     // el cliente de la impresa vieja, que no se revoca, y se pasan a mano en la
-    // DB si el cliente reclama por WhatsApp. Es raro (impresa, celular nuevo y
-    // segunda impresa), así que no se blinda hasta que pase. Está anotado en el
-    // scratchpad del área Vichente App en mikitasks.
+    // DB si el cliente reclama por WhatsApp. El token de una impresa queda
+    // guardado por dos caminos: al abrir una impresa ya activada en un celular
+    // nuevo, o cuando en F1 se pierde la respuesta del primer toque y el
+    // `router.refresh()` de `card_already_linked` (abajo) pinta la tarjeta, que
+    // guarda el token de la URL. Los dos piden además una segunda impresa, así
+    // que es raro y no se blinda hasta que pase. Está anotado en el scratchpad
+    // del área Vichente App en mikitasks.
     if (!r.ok && guardado && (r.error === "wrong_business" || r.error === "invalid_customer_token")) {
       if (clave) borrar(clave);
       guardado = null;
@@ -139,10 +143,16 @@ export default function ActivarTarjeta({
 
     setActivando(false);
     if (r.error === "card_already_linked") {
-      // Casi siempre es este mismo toque que ya había entrado y cuya respuesta
-      // se perdió: la tarjeta sí sirve. Decirle «pide otra en caja» lo haría
+      // En F1 es este mismo toque que ya había entrado y cuya respuesta se
+      // perdió: la tarjeta sí sirve. Decirle «pide otra en caja» lo haría
       // partirse en otro cliente. El servidor vuelve a leer y decide, igual que
       // si el cliente recargara.
+      //
+      // En F2 no puede ser el toque propio, porque con el token guardado del
+      // mismo cliente la DB es idempotente y regresa ok. Ahí significa que otro
+      // cliente la activó entre que cargó la página y el toque, y el refresh
+      // pinta la tarjeta de ese otro sin avisar. Pide una carrera de segundos,
+      // así que se acepta como los casos de arriba.
       router.refresh();
     } else if (r.error === "not_a_card") {
       setFase({ tipo: "no-sirve" });

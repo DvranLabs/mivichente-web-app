@@ -66,9 +66,10 @@ function deviceId(): string {
   try {
     return getOrCreateDeviceId();
   } catch {
-    // Sin localStorage no hay identificador estable. La regla de uno por
-    // celular se debilita en este navegador, que ya aceptaba saltarse al
-    // borrar los datos.
+    // `getOrCreateDeviceId` ya no lanza sin localStorage: regresa un id que
+    // dura lo que la pestaña. Este catch queda como red por si eso cambia. En
+    // los dos casos la regla de uno por celular se debilita en este navegador,
+    // que ya aceptaba saltarse al borrar los datos.
     return crypto.randomUUID();
   }
 }
