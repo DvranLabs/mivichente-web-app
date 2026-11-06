@@ -100,6 +100,17 @@ export default function ActivarTarjeta({
     let r = await intentar();
     // El token guardado no es de un cliente de este negocio: para este celular
     // es como no tener tarjeta, y se reintenta como F1.
+    //
+    // Caso conocido, aceptado a propósito (2026-11-06): si lo guardado es el
+    // token de OTRA impresa (se guardó al abrirla en un celular nuevo), la DB
+    // también responde `invalid_customer_token`, porque `link_physical_card`
+    // solo busca `p_customer_token` en `business_customers.token`. Aquí cae en
+    // este mismo reintento y nace un cliente nuevo con 0 sellos, aunque F2
+    // prometió que los sellos se quedaban. Los sellos no se pierden: siguen en
+    // el cliente de la impresa vieja, que no se revoca, y se pasan a mano en la
+    // DB si el cliente reclama por WhatsApp. Es raro (impresa, celular nuevo y
+    // segunda impresa), así que no se blinda hasta que pase. Está anotado en el
+    // scratchpad del área Vichente App en mikitasks.
     if (!r.ok && guardado && (r.error === "wrong_business" || r.error === "invalid_customer_token")) {
       if (clave) borrar(clave);
       guardado = null;

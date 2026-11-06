@@ -123,6 +123,15 @@ export default function TarjetaDelCliente({
   // Al abrir: guardar el token si este celular no tenía tarjeta de ese negocio
   // (una impresa activada abierta en otro celular), y comparar contra lo visto.
   // Si ya tenía una, no se toca: nunca se sobreescribe una tarjeta que exista.
+  //
+  // Caso conocido, aceptado a propósito (2026-11-06): `get_card_entry` no dice
+  // si el token es de una digital o de una impresa, así que aquí se guarda
+  // cualquiera, también la tarjeta de otra persona (el dueño que escanea con
+  // la cámara el QR de un cliente, un link reenviado). Desde ese momento ese
+  // celular trata la tarjeta ajena como suya: el QR del mostrador lleva a ella
+  // y F2 le uniría una impresa nueva, lo que revoca la impresa del dueño real.
+  // Se arregla a mano si alguien reclama por WhatsApp. Está anotado en el
+  // scratchpad del área Vichente App en mikitasks.
   useEffect(() => {
     if (negocioId && !leer(claveDelToken(negocioId))) guardar(claveDelToken(negocioId), token);
     aplicar(inicial);
