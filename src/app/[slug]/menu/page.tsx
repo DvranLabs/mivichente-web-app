@@ -33,6 +33,8 @@ export async function generateMetadata({ params }: Props) {
   return {
     title,
     description,
+    // Un demo se abre por link pero no sale en el directorio, y Google es uno más.
+    ...(business.is_demo && { robots: { index: false, follow: false } }),
     openGraph: {
       title,
       description,

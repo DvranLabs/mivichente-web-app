@@ -76,6 +76,8 @@ export interface MenuBusiness {
   slug: string;
   name: string;
   photo_url: string | null;
+  /** Un demo abre su menú igual, pero la página no se indexa. */
+  is_demo: boolean;
   business_services: MenuItem[];
 }
 
@@ -87,7 +89,7 @@ export interface MenuBusiness {
 // error, la página no encuentra negocio y da 404 en TODOS los menús de mesa —
 // los de los QR ya pegados en las mesas.
 const SELECT =
-  "id,slug,name,photo_url,business_services(name,price,description,image_url,section,order_index,updated_at," +
+  "id,slug,name,photo_url,is_demo,business_services(name,price,description,image_url,section,order_index,updated_at," +
   "business_service_variants(name,price,order_index)," +
   "business_service_option_groups(name,order_index,business_service_options(name,price_delta,order_index)))";
 
