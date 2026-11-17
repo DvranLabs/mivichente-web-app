@@ -22,6 +22,7 @@ import {
   tituloDe,
   type Cambio,
   type LoVisto,
+  type Pantalla as CualPantalla,
   type TarjetaDeSellos,
 } from "../../lib/tarjeta";
 import { borrar, guardar, leer } from "./almacen";
@@ -56,6 +57,17 @@ function firma(t: TarjetaDeSellos): string {
     t.is_full,
     t.last_redeemed_at,
   ]);
+}
+
+/**
+ * «Guardar en WhatsApp» sale en la tarjeta nueva, a medias y canjeada (C1, C2 y
+ * C4 del mockup v5). Antes salía solo en la nueva, y el primer sello, que suele
+ * llegar segundos después de sacar la tarjeta, la quitaba para siempre
+ * (decisión del usuario, 2026-11-17). No sale con el premio ganado, donde la
+ * acción es canjear, ni con el programa apagado.
+ */
+function conWhatsApp(pantalla: CualPantalla): boolean {
+  return pantalla === "nueva" || pantalla === "medias" || pantalla === "canjeada";
 }
 
 function leerLoVisto(clave: string): LoVisto | null {
@@ -115,6 +127,9 @@ export default function TarjetaDelCliente({
         setAviso("¡Sello nuevo!");
       }
       if (c.seLleno) setConfeti(true);
+      // Si la hoja de WhatsApp estaba abierta cuando cayó el último sello, se
+      // cierra: tapaba la celebración y el código que el dueño tiene que escanear.
+      if (!conWhatsApp(pantallaDe(t))) setHoja(false);
       return true;
     },
     [claveVisto],
@@ -253,8 +268,7 @@ export default function TarjetaDelCliente({
         leyenda={llena ? "Enséñalo en caja para recibirlo" : "Enséñalo en caja"}
         hastaElFondo
       />
-      {/* El link de WhatsApp sale solo en la tarjeta nueva (C1). */}
-      {pantalla === "nueva" && (
+      {conWhatsApp(pantalla) && (
         <Acciones>
           <button type="button" className={styles.link} onClick={() => setHoja(true)}>
             Guardar en WhatsApp
