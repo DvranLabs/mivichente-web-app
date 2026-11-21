@@ -1,6 +1,7 @@
 import { headers } from "next/headers";
 import { notFound } from "next/navigation";
 import BusinessLandingCard from "../../../components/BusinessLandingCard";
+import { isInDirectory } from "../../../lib/in-directory";
 import { logScan } from "../../../lib/log-scan";
 import { detectPlatform, storeUrlFor } from "../../../lib/tiendas";
 
@@ -43,17 +44,23 @@ async function getBusiness(id: string): Promise<Business | null> {
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const business = await getBusiness(id);
+  const [business, inDirectory] = await Promise.all([getBusiness(id), isInDirectory({ id })]);
   if (!business) return { title: "Negocio no encontrado — Vichente App" };
   const title = business.categories?.name ? `${business.name} — ${business.categories.name}` : `${business.name} — Vichente App`;
+  // Fuera del directorio (gr96hhp28), el negocio no es parte del de la región.
+  const description =
+    business.description ??
+    (inDirectory
+      ? `${business.name} — en Vichente, directorio de Nombre de Dios, Vicente Guerrero y Villa Unión`
+      : `${business.name} — en Vichente`);
   return {
     title,
     // Un demo se abre por link pero no sale en el directorio, y Google es uno más.
     ...(business.is_demo && { robots: { index: false, follow: false } }),
-    description: business.description ?? `${business.name} — en Vichente, directorio de Nombre de Dios, Vicente Guerrero y Villa Unión`,
+    description,
     openGraph: {
       title,
-      description: business.description ?? `${business.name} — en Vichente, directorio de Nombre de Dios, Vicente Guerrero y Villa Unión`,
+      description,
       images: business.photo_url ? [{ url: business.photo_url }] : [],
     },
   };
@@ -67,7 +74,7 @@ export default async function NegocioPage({
   searchParams: Promise<{ src?: string }>;
 }) {
   const { id } = await params;
-  const business = await getBusiness(id);
+  const [business, inDirectory] = await Promise.all([getBusiness(id), isInDirectory({ id })]);
   if (!business) notFound();
 
   // Atribución por canal: este link es el que se comparte (posts de IG/FB,
@@ -91,6 +98,7 @@ export default async function NegocioPage({
       telUrl={telUrl}
       storeUrl={storeUrl}
       categoryUrl={categoryUrl}
+      inDirectory={inDirectory}
     />
   );
 }

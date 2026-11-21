@@ -23,7 +23,14 @@ import styles from "./menu.module.css";
 /** Cuántos ingredientes se ven antes de plegar el resto. */
 const INGREDIENTES_VISIBLES = 6;
 
-export default function MenuDeMesa({ business }: { business: MenuBusiness }) {
+export default function MenuDeMesa({
+  business,
+  inDirectory,
+}: {
+  business: MenuBusiness;
+  /** False en un negocio fuera del directorio (gr96hhp28): sin el texto de la región. */
+  inDirectory: boolean;
+}) {
   const items = business.business_services ?? [];
   const secciones = agruparPorSeccion(items);
   const conNombre = secciones.filter((s) => s.name);
@@ -79,7 +86,7 @@ export default function MenuDeMesa({ business }: { business: MenuBusiness }) {
           <img src="/vichente-isotipo.png" alt="" />
           Vichente App
         </span>
-        <p>Directorio de negocios de Nombre de Dios, Vicente Guerrero y Villa Unión</p>
+        {inDirectory && <p>Directorio de negocios de Nombre de Dios, Vicente Guerrero y Villa Unión</p>}
         {actualizado && <p className={styles.freshness}>Menú actualizado el {actualizado}</p>}
       </footer>
     </div>

@@ -29,6 +29,9 @@ interface BusinessLandingCardProps {
   storeUrl: string | null;
   telUrl: string | null;
   categoryUrl: string | null;
+  // Falso en un negocio fuera del directorio: la ficha no lleva a la app, a
+  // otros negocios ni a la tienda.
+  inDirectory: boolean;
 }
 
 const WhatsAppIcon = () => (
@@ -107,7 +110,7 @@ const Skyline = () => (
   />
 );
 
-export default function BusinessLandingCard({ business, webAppUrl, storeUrl, telUrl, categoryUrl }: BusinessLandingCardProps) {
+export default function BusinessLandingCard({ business, webAppUrl, storeUrl, telUrl, categoryUrl, inDirectory }: BusinessLandingCardProps) {
   // El WhatsApp puede vivir en otro número que el de llamadas: `whatsapp_phone`
   // manda si existe, si no se cae a `phone` (y sólo si ese sí tiene WhatsApp).
   const whatsappNumber = business.whatsapp_phone ?? (business.phone_is_whatsapp ? business.phone : null);
@@ -272,6 +275,7 @@ export default function BusinessLandingCard({ business, webAppUrl, storeUrl, tel
                   {whatsappUrl ? "WhatsApp" : "Llamar"} {whatsappNumber ?? business.phone}
                 </ContactLink>
               )}
+              {inDirectory && (
               <a
                 href={webAppUrl}
                 style={{
@@ -292,8 +296,13 @@ export default function BusinessLandingCard({ business, webAppUrl, storeUrl, tel
                 <StorefrontIcon />
                 Ver negocio en Vichente App
               </a>
+              )}
             </div>
 
+            {/* Un negocio fuera del directorio (los de Durango, gr96hhp28) no
+                manda a la app ni a otros negocios: su ficha es solo suya. */}
+            {inDirectory && (
+            <>
             <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "12px", margin: "24px 0 16px" }}>
               <span style={{ flex: 1, height: "1px", background: "#F0EBE5" }} />
               <span style={{ width: "26px", height: "26px", borderRadius: "50%", background: ORANGE, display: "flex", alignItems: "center", justifyContent: "center" }}>
@@ -318,6 +327,8 @@ export default function BusinessLandingCard({ business, webAppUrl, storeUrl, tel
                 </a>
               )}
             </div>
+            </>
+            )}
           </div>
         </div>
 
@@ -338,9 +349,11 @@ export default function BusinessLandingCard({ business, webAppUrl, storeUrl, tel
             <img src="/vichente-isotipo.png" alt="Vichente" style={{ width: "30px", height: "30px", objectFit: "contain" }} />
             <span style={{ fontWeight: 800, fontSize: "18px", color: "#fff", textShadow: "0 1px 4px rgba(0,0,0,0.5)" }}>Vichente App</span>
           </div>
-          <p style={{ fontSize: "13px", color: "rgba(255,255,255,0.9)", lineHeight: 1.4, margin: 0, textShadow: "0 1px 4px rgba(0,0,0,0.5)" }}>
-            Directorio de negocios de Nombre de Dios, Vicente Guerrero y Villa Unión
-          </p>
+          {inDirectory && (
+            <p style={{ fontSize: "13px", color: "rgba(255,255,255,0.9)", lineHeight: 1.4, margin: 0, textShadow: "0 1px 4px rgba(0,0,0,0.5)" }}>
+              Directorio de negocios de Nombre de Dios, Vicente Guerrero y Villa Unión
+            </p>
+          )}
         </div>
       </div>
     </div>
