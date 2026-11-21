@@ -22,10 +22,12 @@ export default function PantallaDeDescuento({
   token,
   inicial,
   logo,
+  inDirectory,
 }: {
   token: string;
   inicial: Cupon;
   logo: string | null;
+  inDirectory: boolean;
 }) {
   const [cupon, setCupon] = useState(inicial);
   // null hasta montar: la hora del servidor y la del cliente no coinciden al
@@ -103,7 +105,7 @@ export default function PantallaDeDescuento({
             cuando={cupon.redeemed_at ? fechaYHora(cupon.redeemed_at) : null}
           />
         </div>
-        <Cierre />
+        <Cierre inDirectory={inDirectory} />
       </Pantalla>
     );
   }
@@ -119,7 +121,7 @@ export default function PantallaDeDescuento({
             cuando={`Venció el ${fechaLarga(cupon.valid_until)}`}
           />
         </div>
-        <Cierre />
+        <Cierre inDirectory={inDirectory} />
       </Pantalla>
     );
   }

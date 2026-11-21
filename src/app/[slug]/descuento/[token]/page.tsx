@@ -9,6 +9,7 @@ import type { Metadata } from "next";
 import { notFound, redirect } from "next/navigation";
 import { leerDescuento } from "../../../actions/opinion";
 import PantallaDeDescuento from "../../../../components/opinion/PantallaDeDescuento";
+import { isInDirectory } from "../../../../lib/in-directory";
 import { logoDelNegocio } from "../../../../lib/logo-del-negocio";
 
 export const dynamic = "force-dynamic";
@@ -35,6 +36,9 @@ export default async function DescuentoPage({ params }: Props) {
   }
 
   // El RPC del descuento no trae foto; el logo se pide aparte por slug.
-  const logo = await logoDelNegocio(cupon.business_slug);
-  return <PantallaDeDescuento token={token} inicial={cupon} logo={logo} />;
+  const [logo, inDirectory] = await Promise.all([
+    logoDelNegocio(cupon.business_slug),
+    isInDirectory({ slug: cupon.business_slug }),
+  ]);
+  return <PantallaDeDescuento token={token} inicial={cupon} logo={logo} inDirectory={inDirectory} />;
 }

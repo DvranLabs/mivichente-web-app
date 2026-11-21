@@ -35,11 +35,12 @@ export async function buscarNegocio(termino: string): Promise<NegocioEncontrado[
   // `is_food` es un campo computado (función sobre la fila), no un embed: no
   // pasa por la doble relación businesses↔categories que obligaba al hint
   // !businesses_category_id_fkey, y es el mismo criterio que usan app y admin.
-  // `is_demo=is.false`: un negocio demo se abre por link pero no sale en el
-  // directorio, y esta consulta va directo a la tabla, sin el filtro de la RPC.
+  // `is_demo=is.false` e `in_directory=is.true`: un negocio demo o uno fuera del
+  // directorio (gr96hhp28) se abre por link pero no sale en el directorio, y esta
+  // consulta va directo a la tabla, sin el filtro de la RPC.
   const url =
     `${SUPABASE_URL}/rest/v1/businesses` +
-    `?name=ilike.*${encodeURIComponent(seguro)}*&is_demo=is.false` +
+    `?name=ilike.*${encodeURIComponent(seguro)}*&is_demo=is.false&in_directory=is.true` +
     `&select=id,slug,name,municipio,photo_url,offerings,is_food&limit=5`;
 
   const res = await fetch(url, {

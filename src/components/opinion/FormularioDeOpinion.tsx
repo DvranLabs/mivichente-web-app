@@ -32,6 +32,8 @@ export interface NegocioDeOpinion {
   benefit: string | null;
   /** Primera foto del perfil (ver `logoDelNegocio`); null = sin foto. */
   logo: string | null;
+  /** False en un negocio fuera del directorio: va sin cierre. */
+  inDirectory: boolean;
 }
 
 /** El mismo tope que la DB (`text_too_long`). */
@@ -131,7 +133,7 @@ export default function FormularioDeOpinion({ negocio }: { negocio: NegocioDeOpi
           <p className={styles.h}>Por ahora no estamos recibiendo opiniones</p>
           <div className={styles.lead}>Gracias por querer dejarnos la tuya.</div>
         </div>
-        <Cierre />
+        <Cierre inDirectory={negocio.inDirectory} />
       </Pantalla>
     );
   }
@@ -145,7 +147,7 @@ export default function FormularioDeOpinion({ negocio }: { negocio: NegocioDeOpi
           <p className={styles.h}>Ya dejaste tu opinión desde este celular</p>
           <div className={styles.lead}>Gracias por ayudarnos a mejorar.</div>
         </div>
-        <Cierre />
+        <Cierre inDirectory={negocio.inDirectory} />
       </Pantalla>
     );
   }
@@ -176,7 +178,7 @@ export default function FormularioDeOpinion({ negocio }: { negocio: NegocioDeOpi
             </p>
           </div>
         </div>
-        <Cierre />
+        <Cierre inDirectory={negocio.inDirectory} />
       </Pantalla>
     );
   }
