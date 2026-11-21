@@ -13,6 +13,7 @@ import FormularioDeOpinion, {
   type NegocioDeOpinion,
 } from "../../../components/opinion/FormularioDeOpinion";
 import { logScan } from "../../../lib/log-scan";
+import { isInDirectory } from "../../../lib/in-directory";
 import { logoDelNegocio } from "../../../lib/logo-del-negocio";
 import { resolveSlugFromHistory } from "../../../lib/menu-de-mesa";
 
@@ -60,7 +61,11 @@ export const metadata: Metadata = {
 export default async function OpinionPage({ params, searchParams }: Props) {
   const { slug } = await params;
   const { src } = await searchParams;
-  const [negocio, logo] = await Promise.all([getNegocio(slug), logoDelNegocio(slug)]);
+  const [negocio, logo, inDirectory] = await Promise.all([
+    getNegocio(slug),
+    logoDelNegocio(slug),
+    isInDirectory({ slug }),
+  ]);
 
   if (!negocio) {
     // El slug impreso pudo quedar viejo si el negocio se renombró. Se conserva
@@ -85,6 +90,7 @@ export default async function OpinionPage({ params, searchParams }: Props) {
     name: negocio.name,
     benefit: negocio.feedback_reward_active ? negocio.feedback_reward_benefit : null,
     logo,
+    inDirectory,
   };
 
   return <FormularioDeOpinion negocio={datos} />;

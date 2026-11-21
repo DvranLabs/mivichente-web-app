@@ -114,8 +114,13 @@ export function Tarjeta({
  * Lleva `src` para contar en `qr_scans` cuánta gente sigue la invitación del
  * final. No empieza con `opinion-qr`, o la DB lo contaría como scan del QR del
  * acrílico.
+ *
+ * Un negocio fuera del directorio (los de Durango, gr96hhp28) va sin cierre:
+ * su cliente no tiene directorio al que llegar (decisión del usuario,
+ * 2026-10-29).
  */
-export function Cierre() {
+export function Cierre({ inDirectory }: { inDirectory: boolean }) {
+  if (!inDirectory) return null;
   return (
     <div className={styles.bottom}>
       {/* <a> y no <Link>, como en BannerApp: la navegación client-side no

@@ -65,12 +65,13 @@ const MOSAICO_IDS = [
   "7261966e-8b48-41cd-903d-f57cce44f3cd", // Snacky
 ];
 
-// Sin demos: un negocio demo se abre por link pero no se enseña como negocio
-// real. El filtro va aquí y no solo en el relleno para que tampoco dependa de que
-// nadie marque como demo uno de los curados.
+// Sin demos ni negocios fuera del directorio (los de Durango, gr96hhp28): se
+// abren por link pero no se enseñan como negocios de la región. El filtro va
+// aquí y no solo en el relleno para que tampoco dependa de que nadie marque así
+// uno de los curados.
 async function consultarNegocios(query: string): Promise<NegocioConFoto[]> {
   const res = await fetch(
-    `${SUPABASE_URL}/rest/v1/businesses?select=id,name,municipio,photo_url&is_demo=is.false&${query}`,
+    `${SUPABASE_URL}/rest/v1/businesses?select=id,name,municipio,photo_url&is_demo=is.false&in_directory=is.true&${query}`,
     {
       headers: {
         apikey: SUPABASE_ANON_KEY,
@@ -109,11 +110,11 @@ async function getNegociosConFoto(): Promise<NegocioConFoto[]> {
 }
 
 // El número de negocios se muestra tal cual está en la base: si la cuenta falla,
-// la sección cae a un texto sin cifra en vez de inventar una. Los demos no
-// cuentan: no son negocios del directorio.
+// la sección cae a un texto sin cifra en vez de inventar una. Los demos y los
+// negocios fuera del directorio no cuentan: no son negocios del directorio.
 async function getBusinessCount(): Promise<number | null> {
   try {
-    const res = await fetch(`${SUPABASE_URL}/rest/v1/businesses?select=id&is_demo=is.false`, {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/businesses?select=id&is_demo=is.false&in_directory=is.true`, {
       headers: {
         apikey: SUPABASE_ANON_KEY,
         Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
