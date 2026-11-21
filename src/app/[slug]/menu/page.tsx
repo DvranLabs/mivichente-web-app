@@ -15,6 +15,7 @@
 import { headers } from "next/headers";
 import { notFound, redirect } from "next/navigation";
 import MenuDeMesa from "../../../components/menu/MenuDeMesa";
+import { isInDirectory } from "../../../lib/in-directory";
 import { getMenuBySlug, resolveSlugFromHistory } from "../../../lib/menu-de-mesa";
 import { logScan } from "../../../lib/log-scan";
 
@@ -45,7 +46,7 @@ export async function generateMetadata({ params }: Props) {
 
 export default async function MenuPage({ params, searchParams }: Props) {
   const { slug } = await params;
-  const business = await getMenuBySlug(slug);
+  const [business, inDirectory] = await Promise.all([getMenuBySlug(slug), isInDirectory({ slug })]);
 
   if (!business) {
     // El negocio pudo haberse renombrado después de imprimir el QR. Redirect
@@ -70,5 +71,5 @@ export default async function MenuPage({ params, searchParams }: Props) {
     });
   }
 
-  return <MenuDeMesa business={business} />;
+  return <MenuDeMesa business={business} inDirectory={inDirectory} />;
 }
