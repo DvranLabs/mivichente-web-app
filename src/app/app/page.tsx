@@ -29,7 +29,7 @@ export const metadata = {
     description:
       "El directorio de negocios de Nombre de Dios, Vicente Guerrero y Villa Unión. Busca tacos, taxi, doctor, ferretería y más.",
     url: "https://vichente.com/app",
-    images: [{ url: "/logo-grande.png", width: 1200, height: 630, alt: "Vichente App" }],
+    images: [{ url: "/og-vichente.png", width: 1200, height: 630, alt: "Vichente App" }],
   },
 };
 

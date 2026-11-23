@@ -28,9 +28,12 @@ export const metadata: Metadata = {
     description: "Descubre y conecta con los mejores negocios locales de Nombre de Dios, Vicente Guerrero y Villa Unión. Encuentra servicios, productos y comercios cerca de ti.",
     url: "https://vichente.com",
     siteName: "Vichente App",
+    // Every page without its own image inherits this one, the stamp card at
+    // /t/{token} included. The PNG is exactly 1200x630: scrapers lay out the
+    // preview from the declared size, so keep both in sync.
     images: [
       {
-        url: "/logo-grande.png",
+        url: "/og-vichente.png",
         width: 1200,
         height: 630,
         alt: "Vichente App - Descubre negocios locales",
@@ -43,7 +46,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Vichente App | Descubre negocios de la región",
     description: "Descubre y conecta con los mejores negocios locales de Nombre de Dios, Vicente Guerrero y Villa Unión. Encuentra servicios, productos y comercios cerca de ti.",
-    images: ["/logo-grande.png"],
+    images: ["/og-vichente.png"],
   },
   icons: {
     icon: [
