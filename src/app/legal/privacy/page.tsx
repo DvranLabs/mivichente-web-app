@@ -10,7 +10,7 @@ export default function PrivacyPolicyPage() {
       <div className="prose prose-lg max-w-4xl mx-auto">
         <h1>Política de Privacidad</h1>
         <p>
-          <strong>Última actualización:</strong> 1 de octubre de 2026
+          <strong>Última actualización:</strong> 26 de noviembre de 2026
         </p>
 
         <p>
@@ -48,34 +48,78 @@ export default function PrivacyPolicyPage() {
           </li>
         </ul>
 
-        <h3>Pedidos por WhatsApp</h3>
+        <h3>Pedidos</h3>
         <p>
-          Algunos negocios aceptan pedidos desde la Aplicación. Para armar tu
-          pedido escribes tu nombre, tu teléfono, las referencias de tu
-          domicilio, una nota opcional y con cuánto vas a pagar, y marcas
-          en un mapa a dónde te lo llevan. Con eso la Aplicación arma un
-          mensaje y abre WhatsApp para que tú se lo mandes al negocio.
+          Algunos negocios aceptan pedidos desde la Aplicación. Hay dos
+          formas de enviarlos, según el negocio:
         </p>
         <ul>
           <li>
-            <strong>No guardamos esos datos.</strong> Se quedan en tu
-            dispositivo mientras armas el pedido y salen únicamente en el
-            mensaje que tú decides enviar. No llegan a nuestros servidores.
+            <strong>Pedidos que tú mandas por WhatsApp:</strong> la
+            Aplicación arma un mensaje con los productos y los datos que
+            escribas, y abre WhatsApp para que tú se lo mandes al negocio.
+            En estos pedidos no guardamos tu nombre, teléfono, ubicación,
+            indicaciones, referencias ni notas en nuestros servidores:
+            permanecen en tu dispositivo mientras armas el pedido y salen
+            en el mensaje que tú decides enviar.
           </li>
           <li>
-            <strong>Quién los recibe:</strong> el negocio al que le mandas el
-            mensaje, por medio de WhatsApp. A partir de ahí, el uso que el
-            negocio y WhatsApp hagan de esa información se rige por sus
-            propias políticas.
+            <strong>Pedidos con seguimiento en Vichente:</strong> en los
+            restaurantes que ofrecen esta opción, mandas el pedido sin
+            abrir tu WhatsApp y puedes consultar su estado en la Aplicación.
+            Guardamos tu nombre, teléfono, los productos con sus opciones y
+            notas, las cantidades, los importes, el costo de envío, las
+            fechas, los estados y, si lo escribes, con cuánto vas a pagar.
+            Para entrega a domicilio también guardamos el punto que marques
+            en el mapa o las indicaciones de cómo llegar, y las referencias
+            que escribas. Si pasas a recogerlo, no guardamos ubicación ni
+            referencias de entrega. Usamos estos datos para tramitar el
+            pedido y que el restaurante lo prepare y lo entregue. En los
+            restaurantes que ofrezcan avisos de estado por WhatsApp,
+            también usaremos tu teléfono para avisarte cuando acepten,
+            rechacen o despachen tu pedido.
           </li>
           <li>
-            <strong>Lo que sí registramos del pedido:</strong> en qué paso
-            del pedido vas (ver el menú, agregar un producto, empezar el
+            <strong>Quién recibe el pedido:</strong> el negocio al que le
+            pides, por medio de WhatsApp. En los pedidos con seguimiento,
+            Vichente se lo envía desde su propio número mediante la
+            plataforma WhatsApp Business de Meta. El restaurante y
+            WhatsApp/Meta reciben el contenido del pedido y los datos de
+            contacto y entrega incluidos en él. El restaurante puede
+            compartir los datos necesarios con la persona que te lo lleva.
+            El uso que esos terceros hagan de las copias que reciben se
+            rige por sus propias políticas.
+          </li>
+          <li>
+            <strong>Actividad del pedido:</strong> también registramos en
+            qué paso vas (ver el menú, agregar un producto, empezar el
             pedido, abrir WhatsApp), cuántos productos lleva y el total,
-            junto con el identificador anónimo de dispositivo. No
-            registramos lo que escribes en el formulario ni tu ubicación.
+            junto con el identificador aleatorio de dispositivo. Estos
+            registros de actividad no incluyen lo que escribes en el
+            formulario ni tu ubicación; son distintos del pedido con
+            seguimiento que sí guardamos.
           </li>
         </ul>
+        <p>
+          <strong>Cuánto tiempo guardamos los datos del cliente:</strong> en
+          los pedidos con seguimiento borramos tu nombre, teléfono,
+          ubicación, indicaciones de cómo llegar, referencias, con cuánto
+          pagas y las notas de cada producto a los 90 días del último cambio
+          de estado. El plazo aplica tanto si el pedido se entrega o se
+          rechaza como si se queda sin respuesta o no avanza. Si nunca cambió
+          de estado, cuenta desde que se creó. La limpieza corre una vez al
+          día, por lo que puede tardar hasta un día adicional.
+        </p>
+        <p>
+          Conservamos los productos pedidos sin notas, los importes, el
+          envío, las fechas y los estados para evaluar cómo funciona el
+          servicio. También queda el identificador con el que puedes
+          consultar el pedido desde tu dispositivo. Los datos borrados
+          pueden permanecer hasta 30 días adicionales en copias de seguridad
+          anteriores, que se eliminan al cumplir ese plazo. El borrado en
+          Vichente no elimina las copias que ya recibieron el restaurante
+          o WhatsApp/Meta.
+        </p>
 
         <h3>Ubicación</h3>
         <p>
@@ -90,22 +134,28 @@ export default function PrivacyPolicyPage() {
           </li>
           <li>
             <strong>Marcar a dónde va tu pedido:</strong> con tu ubicación
-            precisa ponemos el punto de entrega en el mapa. Esa coordenada
-            viaja dentro de un enlace de Google Maps en el mensaje de
-            WhatsApp que le mandas al negocio, para que te lleven el pedido.
+            precisa ponemos el punto de entrega en el mapa. Si mandas el
+            pedido por tu WhatsApp, esa coordenada viaja en un enlace de
+            Google Maps dentro del mensaje. En los pedidos con seguimiento
+            la guardamos en Vichente y se la enviamos al restaurante por
+            WhatsApp/Meta para que te lleve el pedido, con el plazo de
+            conservación explicado arriba.
           </li>
         </ul>
         <p>
-          No guardamos tu ubicación en nuestros servidores. Darnos acceso es
-          opcional: si no lo das, puedes elegir tu municipio de una lista y
-          mover el mapa a mano. Puedes quitar el permiso en cualquier momento
-          desde la configuración de tu dispositivo.
+          Darnos acceso a la ubicación de tu dispositivo es opcional: si no
+          lo das, puedes elegir tu municipio de una lista y marcar el punto
+          de entrega a mano o escribir cómo llegar. Si mandas un pedido con
+          seguimiento a domicilio, guardamos el punto o las indicaciones
+          que hayas proporcionado aunque no hayas dado el permiso. Puedes
+          quitar el permiso en cualquier momento desde la configuración de
+          tu dispositivo.
         </p>
 
         <h3>Información Recopilada Automáticamente</h3>
         <ul>
           <li>
-            <strong>Identificador anónimo de dispositivo:</strong> Un
+            <strong>Identificador aleatorio de dispositivo:</strong> Un
             identificador aleatorio que la Aplicación genera y guarda en tu
             dispositivo. No está ligado a tu nombre, teléfono, correo ni a
             ningún otro dato personal. Lo usamos para distinguir la actividad
@@ -141,6 +191,14 @@ export default function PrivacyPolicyPage() {
             registran datos técnicos de cada conexión, como la dirección IP,
             para operar y proteger el servicio.
           </li>
+          <li>
+            <strong>Datos técnicos de los mapas:</strong> el componente de
+            Google Maps puede recopilar información del dispositivo y de
+            sus propias solicitudes, identificadores, interacciones con el
+            mapa y datos de fallos y rendimiento. Google los utiliza para
+            prestar y mejorar sus servicios, conforme a su política de
+            privacidad.
+          </li>
         </ul>
         <p>
           <strong>Favoritos y negocios recientes:</strong> Los negocios que
@@ -164,8 +222,15 @@ export default function PrivacyPolicyPage() {
             negocios faltan por agregar.
           </li>
           <li>
-            Medir cuántas personas contactan o le piden a cada negocio,
-            sin conocer el contenido de esos contactos o pedidos.
+            Medir cuántas personas contactan o le piden a cada negocio. Los
+            eventos de actividad no incluyen el contenido de los mensajes
+            ni los datos de entrega.
+          </li>
+          <li>
+            Tramitar los pedidos con seguimiento, comunicar sus estados en
+            la Aplicación y, donde se ofrezca esa opción, por WhatsApp, y
+            evaluar cómo funciona el servicio con los productos pedidos,
+            importes, fechas y estados.
           </li>
           <li>
             Detectar y filtrar reportes repetidos o abusivos provenientes de
@@ -186,14 +251,20 @@ export default function PrivacyPolicyPage() {
           <li>
             <strong>Cuando tú lo decides:</strong> Al mandar un pedido o
             escribirle a un negocio por WhatsApp, o al llamarle, la
-            información que incluyas le llega a ese negocio por medio de
-            WhatsApp o de tu teléfono.
+            información que incluyas le llega a ese negocio. En los pedidos
+            con seguimiento Vichente envía los datos al restaurante por
+            WhatsApp/Meta, como se explica en la sección de pedidos. Donde
+            se ofrezcan avisos de estado por WhatsApp, también usaremos tu
+            teléfono para enviártelos por ese medio.
           </li>
           <li>
             <strong>Con Proveedores de Servicios:</strong> Guardamos la
-            información en servidores de Supabase, y el sitio y la versión
-            web se sirven desde Vercel y Firebase Hosting. Para los mapas y la
-            ubicación usamos Google Maps; al usar esas funciones aplica la
+            información en servidores de Supabase y las copias de seguridad
+            de la base de datos en Cloudflare R2. El sitio y la versión web
+            se sirven desde Vercel y Firebase Hosting. Para enviar los
+            pedidos con seguimiento y los avisos por WhatsApp usamos la
+            plataforma de Meta. Para los mapas y la ubicación usamos Google
+            Maps; al usar esas funciones aplica la
             Política de Privacidad de Google, que puedes consultar en{' '}
             <a
               href="https://policies.google.com/privacy"
@@ -243,9 +314,20 @@ export default function PrivacyPolicyPage() {
             navegador. Así se genera un identificador nuevo.
           </li>
           <li>
-            <strong>Pedidos y ubicación:</strong> no hay nada que borrar de
-            nuestro lado, porque no los guardamos. Para borrar un pedido ya
-            enviado, hazlo en tu WhatsApp o pídeselo al negocio.
+            <strong>Pedidos y ubicación:</strong> si mandaste un pedido con
+            seguimiento, puedes pedirnos por correo que borremos los datos
+            de contacto y entrega, las indicaciones, con cuánto pagas y las
+            notas que guardamos. Indica el negocio, la fecha del pedido y el
+            teléfono que usaste para ayudarnos a localizarlo. Borrar los
+            datos de la Aplicación en tu dispositivo no borra el pedido de
+            nuestros servidores. Las copias de seguridad anteriores pueden
+            conservar los datos hasta 30 días más. Si el pedido salió
+            directamente de tu WhatsApp, no guardamos en nuestros servidores
+            los datos de contacto y entrega ni las notas del pedido. Para
+            borrar el mensaje o la copia del negocio, hazlo en WhatsApp o
+            solicítaselo al negocio. El borrado en
+            Vichente tampoco borra las copias de terceros de un pedido con
+            seguimiento.
           </li>
         </ul>
 
