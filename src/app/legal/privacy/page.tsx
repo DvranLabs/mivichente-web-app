@@ -74,9 +74,10 @@ export default function PrivacyPolicyPage() {
             en el mapa o las indicaciones de cómo llegar, y las referencias
             que escribas. Si pasas a recogerlo, no guardamos ubicación ni
             referencias de entrega. Usamos estos datos para tramitar el
-            pedido y que el restaurante lo prepare y lo entregue. Tu
-            teléfono también se usa para avisarte por WhatsApp cuando el
-            restaurante acepta, rechaza o despacha tu pedido.
+            pedido y que el restaurante lo prepare y lo entregue. En los
+            restaurantes que ofrezcan avisos de estado por WhatsApp,
+            también usaremos tu teléfono para avisarte cuando acepten,
+            rechacen o despachen tu pedido.
           </li>
           <li>
             <strong>Quién recibe el pedido:</strong> el negocio al que le
@@ -227,8 +228,9 @@ export default function PrivacyPolicyPage() {
           </li>
           <li>
             Tramitar los pedidos con seguimiento, comunicar sus estados en
-            la Aplicación y por WhatsApp, y evaluar cómo funciona el servicio
-            con los productos pedidos, importes, fechas y estados.
+            la Aplicación y, donde se ofrezca esa opción, por WhatsApp, y
+            evaluar cómo funciona el servicio con los productos pedidos,
+            importes, fechas y estados.
           </li>
           <li>
             Detectar y filtrar reportes repetidos o abusivos provenientes de
@@ -251,8 +253,9 @@ export default function PrivacyPolicyPage() {
             escribirle a un negocio por WhatsApp, o al llamarle, la
             información que incluyas le llega a ese negocio. En los pedidos
             con seguimiento Vichente envía los datos al restaurante por
-            WhatsApp/Meta, como se explica en la sección de pedidos, y usa
-            tu teléfono para los avisos de estado por ese mismo medio.
+            WhatsApp/Meta, como se explica en la sección de pedidos. Donde
+            se ofrezcan avisos de estado por WhatsApp, también usaremos tu
+            teléfono para enviártelos por ese medio.
           </li>
           <li>
             <strong>Con Proveedores de Servicios:</strong> Guardamos la
