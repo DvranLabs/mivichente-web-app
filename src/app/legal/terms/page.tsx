@@ -49,7 +49,7 @@ export default function TermsAndConditionsPage() {
             <strong>Pedidos con seguimiento en Vichente:</strong> en los
             restaurantes que ofrecen esta opción, mandas el pedido desde la
             Aplicación sin abrir tu WhatsApp. Vichente lo guarda y se lo envía
-            al restaurante por WhatsApp desde su propio número, y en la
+            al restaurante por WhatsApp desde el número de Vichente, y en la
             Aplicación puedes consultar en qué estado va. Que el pedido se
             haya mandado no significa que el restaurante ya lo leyó ni que lo
             aceptó: hasta que lo acepte, aparece como &quot;Esperando al
@@ -68,8 +68,7 @@ export default function TermsAndConditionsPage() {
         <h2>3. Estados de un Pedido con Seguimiento</h2>
         <p>
           Los estados los registra el restaurante, salvo la entrega, que
-          también puedes confirmar tú. La Aplicación te los muestra tal como
-          los recibe:
+          solo la marcas tú. La Aplicación los muestra así:
         </p>
         <ul>
           <li>
@@ -77,7 +76,7 @@ export default function TermsAndConditionsPage() {
             preparar tu pedido.
           </li>
           <li>
-            <strong>Rechazado:</strong> el restaurante no puede tomar tu
+            <strong>No lo pudo tomar:</strong> el restaurante rechazó tu
             pedido. No se te cobra nada; si quieres saber el motivo, habla
             directamente con él.
           </li>
@@ -90,9 +89,10 @@ export default function TermsAndConditionsPage() {
             si pasas por él: el restaurante lo despachó o ya lo tiene listo.
           </li>
           <li>
-            <strong>Entregado</strong> o <strong>Recogido:</strong> el
-            pedido llegó a tus manos. Puedes confirmarlo tú mismo en la
-            Aplicación.
+            <strong>Entregado</strong> o <strong>Recogido:</strong> tú
+            confirmas en la Aplicación que el pedido llegó a tus manos.
+            Mientras no lo confirmes, el pedido sigue apareciendo en el paso
+            anterior.
           </li>
         </ul>
         <p>
@@ -105,8 +105,8 @@ export default function TermsAndConditionsPage() {
           Aplicación te sugiere llamarle o escribirle. El pedido no se cancela
           solo: si el restaurante lo acepta más tarde, lo verás en la
           Aplicación. Si no pudimos hacerle llegar el pedido al restaurante,
-          la Aplicación también te lo indica, y en ese caso el restaurante no
-          sabe de él hasta que tú lo contactes.
+          la Aplicación también te lo indica: es posible que el restaurante no
+          sepa de tu pedido, así que conviene que lo contactes.
         </p>
 
         <h2>4. Qué Hace Vichente y Qué Hace el Restaurante</h2>
@@ -136,8 +136,10 @@ export default function TermsAndConditionsPage() {
           pedido que ya mandaste, ni para pedir una devolución. Para eso, y
           para cualquier problema con los productos, el cobro o la entrega
           (por ejemplo, si tu pedido no llega o llega incompleto), comunícate
-          con el restaurante. En la pantalla de seguimiento encuentras su
-          teléfono para llamarle o escribirle.
+          con el restaurante. Su teléfono está en el perfil del negocio y,
+          mientras un pedido con seguimiento está en curso, también en la
+          pantalla de seguimiento. Si pediste por tu WhatsApp, puedes seguir
+          la conversación ahí mismo.
         </p>
         <p>
           Si el problema fue de la Aplicación (por ejemplo, un pedido que no
